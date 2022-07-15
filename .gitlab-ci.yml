@@ -1,0 +1,58 @@
+include:
+    - project: "epi2melabs/ci-templates"
+      file: "snippets.yaml"
+    - project: "epi2melabs/ci-templates"
+      file: "push-github.yaml"
+    - project: "epi2melabs/ci-templates"
+      file: "push-conda.yaml"
+
+image: ${UBUNTUIMAGE}:20.04
+
+.prep-image: &prep-image |
+    export DEBIAN_FRONTEND=noninteractive
+    apt update -qq
+    apt install -y --no-install-recommends make wget python3-all-dev python3-venv 
+
+stages:
+    - test
+    - build
+    - prerelease
+    - release
+    - postrelease
+
+test:
+    stage: test
+    script:
+        - *prep-image
+        - make test
+        - make sdist
+    artifacts:
+        paths:
+            - dist/*.tar.gz
+
+deploy-checks:
+    stage: prerelease
+    script:
+        - !reference [.check, python-version]
+        - !reference [.check, changelog]
+    rules:
+        - if: '$CI_COMMIT_TAG =~ /^v[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+$/'
+
+deploy:pypi:
+    stage: release
+    script:
+        - *prep-image
+        - make pypi_build/bin/activate
+        - source pypi_build/bin/activate
+        - twine upload --non-interactive dist/*.tar.gz
+    rules:
+        - if: '$CI_COMMIT_TAG =~ /^v[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+$/'
+
+conda:
+    extends:
+        - .deploy-conda
+    before_script:
+        - *prep-image
+        - export CONDA_PKG=${CI_PROJECT_NAME}
+        - export CONDA_PKG_VERSION=${CI_COMMIT_TAG/v/}
+        - cd conda

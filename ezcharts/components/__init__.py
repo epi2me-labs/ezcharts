@@ -1,0 +1,1 @@
+"""Creation of report components."""

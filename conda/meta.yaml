@@ -1,0 +1,41 @@
+
+# this doesn't work
+# {% set data = load_setup_py_data() %}
+
+package:
+  name: {{ environ.get('CONDA_PKG') }}
+  version: {{ environ.get('CONDA_PKG_VERSION') }}
+
+source:
+    path: ../
+
+build:
+  number: 0
+  script: "{{ PYTHON }} -m pip install . --no-deps --ignore-installed -vv"
+  noarch: python
+
+requirements:
+  host:
+    - pip
+    - python
+  run:
+    - python
+    - prodict
+
+test:
+  imports:
+    - ezcharts
+
+about:
+  home: "https://github.com/epi2me-labs/ezcharts"
+  license: Mozilla Public License 2.0 
+  license_family: OTHER
+  license_file: LICENSE.md
+  summary: "eCharts plotting API"
+  doc_url: https://github.com/epi2me-labs/ezcharts
+  dev_url: https://github.com/epi2me-labs/ezcharts
+
+extra:
+  recipe-maintainers:
+    - cjw85
+
