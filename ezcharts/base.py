@@ -1,7 +1,7 @@
 """Simple eCharts API."""
 
 import json
-from typing import Literal, NewType, Union
+from typing import List, Literal, NewType, Union
 
 from ezcharts.prodict import Prodict
 
@@ -53,10 +53,10 @@ class TextStyle(MagicObject):
     borderColor: Color
     borderWidth: number
     borderType: Union[
-        Literal["solid", "dashed", "dotted"], number, list[number]]
+        Literal["solid", "dashed", "dotted"], number, List[number]]
     borderDashOffset: number
     borderRadius: number
-    padding: Union[number, list[number]]
+    padding: Union[number, List[number]]
     # TODO: should we be inheriting ShadowStyle?
     shadowColor: Color
     shadowBlur: number
@@ -67,7 +67,7 @@ class TextStyle(MagicObject):
     textBorderColor: Color
     textBorderWidth: number
     textborderType: Union[
-        Literal["solid", "dashed", "dotted"], number, list[number]]
+        Literal["solid", "dashed", "dotted"], number, List[number]]
     textBorderDashOffset: number
     textShadowColor: Color
     textShadowBlue: number
@@ -108,9 +108,9 @@ class AxisLine(MagicObject):
     show: bool
     onZero: bool
     onZeroAxisIndex: number
-    symbol: Union[str, list]
-    symbolSize: list[number]
-    symbolOffset: Union[list[number], number]
+    symbol: Union[str, List]
+    symbolSize: List[number]
+    symbolOffset: Union[List[number], number]
     lineStyle: LineStyle
 
 
@@ -221,7 +221,7 @@ class Axis(MagicObject):
     nameGap: number
     nameRotate: number
     inverse: bool
-    boundaryGap: Union[bool, list]
+    boundaryGap: Union[bool, List]
     min: Union[number, str]  # also function
     max: Union[number, str]
     scale: bool
@@ -239,7 +239,7 @@ class Axis(MagicObject):
     splitLine: SplitLine
     minorSplitLine: MinorSplitLine
     splitArea: SplitArea
-    data: Union[list, Data]
+    data: Union[List, Data]
     axisPointer: AxisPointer
     zlevel: number
     z: number
