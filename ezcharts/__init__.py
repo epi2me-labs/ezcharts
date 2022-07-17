@@ -5,6 +5,8 @@ import importlib
 
 __version__ = "0.0.1"
 
+from ezcharts.base import BasePlot  # noqa: F401
+
 
 def cli():
     """Run ezcharts entry point."""
