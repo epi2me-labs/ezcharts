@@ -7,11 +7,13 @@ include:
       file: "push-conda.yaml"
 
 image: ${UBUNTUIMAGE}:20.04
+variables:
+    PYENV_VERSION: 3.8.12
 
 .prep-image: &prep-image |
     export DEBIAN_FRONTEND=noninteractive
     apt update -qq
-    apt install -y --no-install-recommends make wget python3-all-dev python3-venv 
+    apt install -y --no-install-recommends make wget python3-all-dev python3-venv git libbz2-dev libncurses5-dev libncursesw5-dev libffi-dev libreadline-dev libssl-dev liblzma-dev libsqlite3-dev
 
 stages:
     - test
@@ -24,6 +26,8 @@ test:
     stage: test
     script:
         - *prep-image
+        - !reference [.install, pyenv]
+        - !reference [.setup, pyenv-python]
         - make test
         - make sdist
     artifacts:
