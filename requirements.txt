@@ -2,5 +2,4 @@
 # Add comments to keep track of why we are using particular versions
 numpy
 pandas
-prodict
 scipy
