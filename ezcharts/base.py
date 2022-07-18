@@ -3,6 +3,8 @@
 import json
 from typing import List, Literal, NewType, Union
 
+import pyecharts
+
 from ezcharts.prodict import Prodict
 
 
@@ -303,3 +305,36 @@ class BasePlot(MagicObject):
     useUTC: bool
     options: MagicObject
     media: MagicObject
+
+    def __init__(self, *args, parent=None, **kwargs):
+        """Initialise the class."""
+        super().__init__(*args, **kwargs)
+        self._parent = parent
+
+    def __setattr__(self, attr, value):
+        """Syncronise attributes with options in parent."""
+        super().__setattr__(attr, value)
+        if self._parent is not None:
+            self._parent.options.update(self)
+
+
+class Plot(pyecharts.charts.base.Base):
+    """Main plotting interface."""
+
+    def __init__(self, *args, **kwargs):
+        """Initialize the class."""
+        super().__init__(*args, **kwargs)
+        # we can't just subclass because fields conflict. (And this
+        # is cleaner, not like bokeh attaching things everywhere).
+        self.opt = BasePlot(parent=self)
+
+    class Encoder(json.JSONEncoder):
+        """JSON encoder of self."""
+
+        def default(self, obj):
+            """Return a boring message."""
+            return "A Plot"
+
+    def to_json(self, **kwargs):
+        """Create a json representation of options."""
+        return json.dumps(self.opt, cls=self.Encoder, **kwargs)

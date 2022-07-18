@@ -5,7 +5,7 @@ import importlib
 
 __version__ = "0.0.1"
 
-from ezcharts.base import BasePlot  # noqa: F401
+from ezcharts.base import Plot  # noqa: F401
 
 
 def cli():
