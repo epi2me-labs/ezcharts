@@ -1,36 +1,8 @@
-"""Simple eCharts API."""
+"""Dumping ground for types."""
 
-import json
 from typing import List, Literal, NewType, Union
 
-import pyecharts
-
-from ezcharts.prodict import Prodict
-
-
-class MagicObject(Prodict):
-    """Nothing to see here."""
-
-    def __getattr__(self, attr):
-        """Get attribute, setting to default value if not preexisting.
-
-        If the attribite is a known annotation, the corresponding
-        constructor will be used, else a generic MagicObject will be
-        created.
-        """
-        try:
-            return self[attr]
-        except KeyError:
-            if self.has_attr(attr):
-                construct = self.attr_type(attr)
-            else:
-                construct = MagicObject
-            setattr(self, attr, construct())
-            return super().__getattr__(attr)
-
-    def to_json(self, **kwargs):
-        """Create json represention for echarts."""
-        return json.dumps(self, **kwargs)
+from ezcharts.util import MagicObject
 
 
 # placeholder types
@@ -257,84 +229,3 @@ class YAxis(Axis):
     """Typedef for the ordinate."""
 
     position: Literal["left", "right"]
-
-
-class BasePlot(MagicObject):
-    """Basic plot."""
-
-    title: MagicObject
-    legend: MagicObject
-    grid: MagicObject
-    xAxis: XAxis
-    yAxis: YAxis
-    polar: MagicObject
-    radiusAxis: MagicObject
-    angleAxis: MagicObject
-    radar: MagicObject
-    dataZoom: MagicObject
-    visualMap: MagicObject
-    tooltip: MagicObject
-    axisPointer: MagicObject
-    toolbox: MagicObject
-    brush: MagicObject
-    geo: MagicObject
-    parallel: MagicObject
-    parallelAxis: MagicObject
-    singleAxis: MagicObject
-    timeline: MagicObject
-    graphic: MagicObject
-    calender: MagicObject
-    dataset: MagicObject
-    aria: MagicObject
-    series: MagicObject
-    darkMode: MagicObject
-    color: MagicObject
-    backgroundColor: MagicObject
-    textStyle: MagicObject
-    animation: bool
-    animationThreshold: number
-    animationDuration: number  # also function
-    animationEasing: str  # lots available
-    animationDelay: number  # also function
-    animationDurationUpdate: number  # also function
-    animationEastingUpdate: str  # lots available
-    animationDelayUpdate: number
-    stateAnimation: MagicObject
-    blendMode: Literal["source-over", "lighter"]
-    hoverLayerThreshold: int
-    useUTC: bool
-    options: MagicObject
-    media: MagicObject
-
-    def __init__(self, *args, parent=None, **kwargs):
-        """Initialise the class."""
-        super().__init__(*args, **kwargs)
-        self._parent = parent
-
-    def __setattr__(self, attr, value):
-        """Syncronise attributes with options in parent."""
-        super().__setattr__(attr, value)
-        if self._parent is not None:
-            self._parent.options.update(self)
-
-
-class Plot(pyecharts.charts.base.Base):
-    """Main plotting interface."""
-
-    def __init__(self, *args, **kwargs):
-        """Initialize the class."""
-        super().__init__(*args, **kwargs)
-        # we can't just subclass because fields conflict. (And this
-        # is cleaner, not like bokeh attaching things everywhere).
-        self.opt = BasePlot(parent=self)
-
-    class Encoder(json.JSONEncoder):
-        """JSON encoder of self."""
-
-        def default(self, obj):
-            """Return a boring message."""
-            return "A Plot"
-
-    def to_json(self, **kwargs):
-        """Create a json representation of options."""
-        return json.dumps(self.opt, cls=self.Encoder, **kwargs)
