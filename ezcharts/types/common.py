@@ -11,6 +11,8 @@ number = NewType("number", Union[int, float])
 Rich = NewType("RichText", MagicObject)
 
 
+# TODO: this came from Axis, the top level options has something
+#       similar with a few attributes missing
 class TextStyle(MagicObject):
     """Typedef for styling text."""
 

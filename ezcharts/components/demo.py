@@ -16,8 +16,9 @@ def main(args):
     p2.opt.xAxis.name = "Days of the week"
     p2.opt.xAxis.data = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
     p2.opt.yAxis.type = "value"
-    p2.opt.series.data = [150, 230, 224, 218, 135, 147, 260]
-    p2.opt.series.type = "line"
+    p2.opt.add_series({
+        "data": [150, 230, 224, 218, 135, 147, 260],
+        "type": "line"})
     print("================")
     print(p2.to_json(indent=2))
     print("================")
