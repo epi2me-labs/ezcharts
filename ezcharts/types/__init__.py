@@ -1,8 +1,9 @@
 """Definitions of charts setOption hierarchy."""
 
-from typing import Literal
+from typing import List, Literal
 
 from ezcharts.types.common import number, XAxis, YAxis
+from ezcharts.types.series import AllSeriesTypes
 from ezcharts.util import MagicObject
 
 
@@ -33,7 +34,7 @@ class SetOptions(MagicObject):
     calender: MagicObject
     dataset: MagicObject
     aria: MagicObject
-    series: MagicObject
+    series: List[AllSeriesTypes]
     darkMode: MagicObject
     color: MagicObject
     backgroundColor: MagicObject
@@ -57,9 +58,19 @@ class SetOptions(MagicObject):
         """Initialise the class."""
         super().__init__(*args, **kwargs)
         self._parent = parent
+        # using .update() here sidesteps all typing and __attr__ voodoo
+        self.update({'series': list()})
 
     def __setattr__(self, attr, value):
         """Syncronise attributes with options in parent."""
+        if attr == 'series':
+            raise TypeError(
+                "Cannot set 'series' with `.series`, use add_series instead.")
+
         super().__setattr__(attr, value)
         if self._parent is not None:
             self._parent.options.update(self)
+
+    def add_series(self, spec):
+        """Add a series to chart."""
+        self.series.append(spec)
