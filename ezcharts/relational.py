@@ -34,18 +34,52 @@ def scatterplot(
     if data.empty:
         return
 
-    # pivot data back to wide-form
-    #df = pd.pivot(data, index=['x'], columns='hue', values='y')
+    # attempt to use long-format
+    #p = Plot()
+    #opt = p.opt
+    #opt.dataset.dimensions = data.columns.tolist()
+    #opt.dataset.source = data.values.tolist()
+    #opt.xAxis = {"type": "value"}
+    #opt.yAxis = {"type": "value"}
+    #opt.add_series({
+    #    "type": "scatter",
+    #    "encode": {"x": "x", "y": "y"}})
 
+    ## pivot data back to wide-form
+    #df = pd.pivot(data, index=['x'], columns='hue', values='y').reset_index()
+    #print(df)
+    #p = Plot()
+    #opt = p.opt
+    #opt.dataset.dimensions =df.columns.tolist()
+    #opt.dataset.source = df.values.tolist()
+    #opt.xAxis = {"type": "value", "encode": "x"}
+    ##opt.yAxis = {"type": "value"}
+    #opt.add_series({
+    #    "type": "scatter",
+    #    "seriesLayoutBy": "col"})
+    ##    "encode": {"x": "x", "y": "y"}})
+
+    # try with transform functionality
     p = Plot()
     opt = p.opt
-    opt.dataset.dimensions = data.columns.tolist()
-    opt.source = data.values.tolist()
-    opt.xAxis = {"type": "value"}
-    opt.yAxis = {"type": "value"}
-    opt.series: [{
-        "type": "scatter",
-        "encode": {"x": "x", "y": "y"}}]
+    opt.xAxis = dict(name=x)
+    opt.yAxis = dict(name=y)
+    opt.dataset = [{
+        'id': 'raw',
+        'dimensions': data.columns.tolist(),
+        'source': data.values.tolist()}]
+    for series_name in data['hue'].unique():
+        opt.dataset.append({
+            'id': series_name,
+            'fromDatasetId': 'raw',
+            'transform': {
+                'type': 'filter',
+                'config': {'dimension': 'hue', '=': series_name}}})
+        opt.add_series({
+            'type': 'scatter',
+            'datasetId': series_name,
+            'encode': {'x': 'x', 'y': 'y'}})
+
     return p
 
 

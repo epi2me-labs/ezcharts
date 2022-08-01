@@ -39,6 +39,7 @@ def main(args):
     df = df.melt(id_vars=['product'], value_vars=['2015', '2016', '2017'], var_name='year', value_name='sales')
     df['year'] = df['year'].astype(int)
     p = ezc.scatterplot(data=df, x='year', y='sales', hue='product')
+    print(p.to_json(indent=2))
     p.render()
 
 
