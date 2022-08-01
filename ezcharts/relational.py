@@ -1,9 +1,8 @@
 """Relational plots."""
 
-import pandas as pd
 from seaborn.relational import _ScatterPlotter
-from ezcharts.types import Plot
 
+from ezcharts.types import Plot
 
 
 __all__ = ["relplot", "scatterplot", "lineplot"]
@@ -34,32 +33,6 @@ def scatterplot(
     if data.empty:
         return
 
-    # attempt to use long-format
-    #p = Plot()
-    #opt = p.opt
-    #opt.dataset.dimensions = data.columns.tolist()
-    #opt.dataset.source = data.values.tolist()
-    #opt.xAxis = {"type": "value"}
-    #opt.yAxis = {"type": "value"}
-    #opt.add_series({
-    #    "type": "scatter",
-    #    "encode": {"x": "x", "y": "y"}})
-
-    ## pivot data back to wide-form
-    #df = pd.pivot(data, index=['x'], columns='hue', values='y').reset_index()
-    #print(df)
-    #p = Plot()
-    #opt = p.opt
-    #opt.dataset.dimensions =df.columns.tolist()
-    #opt.dataset.source = df.values.tolist()
-    #opt.xAxis = {"type": "value", "encode": "x"}
-    ##opt.yAxis = {"type": "value"}
-    #opt.add_series({
-    #    "type": "scatter",
-    #    "seriesLayoutBy": "col"})
-    ##    "encode": {"x": "x", "y": "y"}})
-
-    # try with transform functionality
     p = Plot()
     opt = p.opt
     opt.xAxis = dict(name=x)
@@ -81,7 +54,6 @@ def scatterplot(
             'encode': {'x': 'x', 'y': 'y'}})
 
     return p
-
 
 
 def lineplot(

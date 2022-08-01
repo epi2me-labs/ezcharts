@@ -15,31 +15,29 @@ def main(args):
 
     logger.info("Making chart definition with voodoo")
 
-    p2 = Plot()
-    p2.opt.xAxis.type = "category"
-    p2.opt.xAxis.name = "Days of the week"
-    p2.opt.xAxis.data = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-    p2.opt.yAxis.type = "value"
-    p2.opt.add_series({
+    p = Plot()
+    p.opt.xAxis.type = "category"
+    p.opt.xAxis.name = "Days of the week"
+    p.opt.xAxis.data = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+    p.opt.yAxis.type = "value"
+    p.opt.add_series({
         "data": [150, 230, 224, 218, 135, 147, 260],
         "type": "line"})
-    print("================")
-    print(p2.to_json(indent=2))
-    print("================")
-    p2.render()
 
     df = pd.DataFrame({
         # as laid out in echarts docs for a dataset
-        'product': ['Matcha Latte', 'Milk Tea', 'Cheese Cocoa', 'Walnut Brownie'],
-        '2015': [43.3,83.1,86.4,72.4],
-        '2016': [85.8,73.4,65.2,53.9],
-        '2017': [93.7,55.1,82.5,39.1]
+        'product': [
+            'Matcha Latte', 'Milk Tea', 'Cheese Cocoa', 'Walnut Brownie'],
+        '2015': [43.3, 83.1, 86.4, 72.4],
+        '2016': [85.8, 73.4, 65.2, 53.9],
+        '2017': [93.7, 55.1, 82.5, 39.1]
     })
     # how we'd likely normally have it
-    df = df.melt(id_vars=['product'], value_vars=['2015', '2016', '2017'], var_name='year', value_name='sales')
-    df['year'] = df['year'].astype(int)
+    df = df.melt(
+        id_vars=['product'], value_vars=['2015', '2016', '2017'],
+        var_name='year', value_name='sales')
     p = ezc.scatterplot(data=df, x='year', y='sales', hue='product')
-    print(p.to_json(indent=2))
+    p.opt.xAxis.type = 'category'
     p.render()
 
 
