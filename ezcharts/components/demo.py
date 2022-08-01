@@ -1,8 +1,11 @@
 """ezCharts demo."""
 import argparse
 
-from ezcharts import Plot
+import pandas as pd
+
+import ezcharts as ezc
 from ezcharts import util
+from ezcharts.types import Plot
 
 
 def main(args):
@@ -11,6 +14,7 @@ def main(args):
     logger = util.get_named_logger("ezCharts Demo")
 
     logger.info("Making chart definition with voodoo")
+
     p2 = Plot()
     p2.opt.xAxis.type = "category"
     p2.opt.xAxis.name = "Days of the week"
@@ -23,6 +27,19 @@ def main(args):
     print(p2.to_json(indent=2))
     print("================")
     p2.render()
+
+    df = pd.DataFrame({
+        # as laid out in echarts docs for a dataset
+        'product': ['Matcha Latte', 'Milk Tea', 'Cheese Cocoa', 'Walnut Brownie'],
+        '2015': [43.3,83.1,86.4,72.4],
+        '2016': [85.8,73.4,65.2,53.9],
+        '2017': [93.7,55.1,82.5,39.1]
+    })
+    # how we'd likely normally have it
+    df = df.melt(id_vars=['product'], value_vars=['2015', '2016', '2017'], var_name='year', value_name='sales')
+    df['year'] = df['year'].astype(int)
+    p = ezc.scatterplot(data=df, x='year', y='sales', hue='product')
+    p.render()
 
 
 def argparser():
