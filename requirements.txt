@@ -4,4 +4,4 @@ numpy
 pandas
 pyecharts
 scipy
-seaborn
+seaborn==0.12.0b2

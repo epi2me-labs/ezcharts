@@ -11,6 +11,11 @@ from scipy import stats as sp_stats
 from ezcharts.prodict import Prodict
 
 
+sns_type_to_echarts = {
+    "categorical": "category",
+    "numeric": "value"}
+
+
 class MagicObject(Prodict):
     """Nothing to see here."""
 

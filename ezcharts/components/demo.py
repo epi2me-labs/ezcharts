@@ -37,8 +37,10 @@ def main(args):
         id_vars=['product'], value_vars=['2015', '2016', '2017'],
         var_name='year', value_name='sales')
     p = ezc.scatterplot(data=df, x='year', y='sales', hue='product')
-    p.opt.xAxis.type = 'category'
     p.render()
+
+    #p = ezc.lineplot(data=df, x='year', y='sales', hue='product')
+    #p.render()
 
 
 def argparser():
