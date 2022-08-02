@@ -43,5 +43,5 @@ def report_footer(
         container = div(className=container_classes)
         if defaults_getter:
             with container:
-                defaults_getter()    
+                defaults_getter()
         return IFooterReturn(_footer, container)
