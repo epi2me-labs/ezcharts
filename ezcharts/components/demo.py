@@ -15,15 +15,6 @@ def main(args):
 
     logger.info("Making chart definition with voodoo")
 
-    p = Plot()
-    p.opt.xAxis.type = "category"
-    p.opt.xAxis.name = "Days of the week"
-    p.opt.xAxis.data = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-    p.opt.yAxis.type = "value"
-    p.opt.add_series({
-        "data": [150, 230, 224, 218, 135, 147, 260],
-        "type": "line"})
-
     df = pd.DataFrame({
         # as laid out in echarts docs for a dataset
         'product': [

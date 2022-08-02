@@ -34,16 +34,26 @@ vendor_dir = f'{assets_dir}/vendor'
 
 
 # Good location to do prepare plots
-def example_plot():
+def example_plot(style="line"):
     """Example plot."""
-    p = Plot()
-    p.opt.xAxis.type = "category"
-    p.opt.xAxis.name = "Days of the week"
-    p.opt.xAxis.data = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-    p.opt.yAxis.type = "value"
-    p.opt.add_series({
-        "data": [150, 230, 224, 218, 135, 147, 260],
-        "type": "line"})
+    df = pd.DataFrame({
+        # as laid out in echarts docs for a dataset
+        'product': [
+            'Matcha Latte', 'Milk Tea', 'Cheese Cocoa', 'Walnut Brownie'],
+        '2015': [43.3, 83.1, 86.4, 72.4],
+        '2016': [85.8, 73.4, 65.2, 53.9],
+        '2017': [93.7, 55.1, 82.5, 39.1]
+    })
+    # how we'd likely normally have it
+    df = df.melt(
+        id_vars=['product'], value_vars=['2015', '2016', '2017'],
+        var_name='year', value_name='sales')
+    if style == "line":
+        p = ezc.lineplot(data=df, x='year', y='sales', hue='product')
+    elif style == "scatter":
+        p = ezc.scatterplot(data=df, x='year', y='sales', hue='product')
+    else:
+        raise ValueError("Unknown plot style")
     return p
 
 
@@ -74,9 +84,9 @@ with document:
         summary = report_summary('Summary', REPORT_TITLE, 'wf-template')
         with summary.badges:
             report_summary_badge("Research use only")
-            report_summary_badge("29 July, 2022", 
+            report_summary_badge("29 July, 2022",
                 bg_colour_class="bg-secondary")
-            report_summary_badge("Revision: sha149529e3", 
+            report_summary_badge("Revision: sha149529e3",
                 bg_colour_class="bg-primary")
 
         # This is the tabbed section with ezcharts!
@@ -96,10 +106,10 @@ with document:
                     # A grid of plots!?
                     with report_grid():
                         # Take an ezchart plot and render it
-                        ezchart(example_plot())
-                        ezchart(example_plot())
+                        ezchart(example_plot(style="line"))
+                        ezchart(example_plot(style="scatter"))
                 with report_tab_container('Accuracy'):
-                    ezchart(example_plot())
+                    ezchart(example_plot("line"))
                 with report_tab_container('Depth'):
                     p('Testing, testing, 1 2 3')
 
@@ -107,7 +117,7 @@ with document:
         with report_section(id="software-versions"):
             h4('Software versions')
             version_table(f'{path_dir}/test_data/versions.txt')
-        
+
         with report_section(id="workflow-parameters"):
             h4('Workflow parameters')
             params_table(f'{path_dir}/test_data/params.json')
