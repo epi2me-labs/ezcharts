@@ -5,3 +5,5 @@ pandas
 pyecharts
 scipy
 seaborn==0.12.0b2
+dominate
+libsass

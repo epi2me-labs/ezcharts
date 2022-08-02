@@ -1,0 +1,29 @@
+// EPI2ME Labs brand colours
+$brand-primary: #0079a4;
+$brand-primary-m: #0084a9a6;
+$brand-primary-l: #0084a91a;
+$brand-secondary: #0ebbb2;
+$brand-tertiary: #00485b;
+$brand-black: #333333;
+$brand-grey: #666666;
+$brand-grey-l: #6666661f;
+$brand-dark-grey: #455560;
+$brand-light-grey: #B5AEA7;
+$brand-red: #BC4B51;
+$brand-red-m: #BC4B51a6;
+$brand-green: #8CB369;
+$brand-pink: #A60067;
+
+// Override bootstrap defaults
+$primary:       $brand-primary !default;
+$secondary:     $brand-secondary !default;
+$dark:          $brand-tertiary !default;
+
+// Do some styling
+@media only screen and (max-width: 800px) {
+    body .report-grid {
+        grid-template-columns: repeat(1, 1fr) !important;
+    }
+}
+
+@import "./vendor/bootstrap-5.0.2/scss/bootstrap.scss";
