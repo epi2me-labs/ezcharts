@@ -1,0 +1,1 @@
+"""Pre-build external resources."""

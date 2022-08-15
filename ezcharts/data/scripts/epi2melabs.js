@@ -5,7 +5,6 @@ const update_charts_on_tab_change = () => {
                 const charts = document.querySelectorAll('.chart-container');
                 [...charts].forEach(chart => {
                     const chart_dom = document.getElementById(chart.id)
-                    console.log(echarts.getInstanceByDom(chart_dom));
                     echarts.getInstanceByDom(chart_dom).resize()
                 });
             }

@@ -1,0 +1,21 @@
+{
+    "help": false,
+    "out_dir": "/epi2melabs-data/nextflow/instances/2022-06-15-09-39_wf-example_emahfgXVuTnYZTLyReZ8Ee/output",
+    "wfversion": "v0.1.4",
+    "fastq": "/wf-example/test_data/fastq",
+    "references": "/wf-example/test_data/references",
+    "counts": "NO_COUNTS",
+    "demultiplex": false,
+    "prefix": null,
+    "threads": 4,
+    "report_name": "report",
+    "sanitize_fastq": false,
+    "sample": null,
+    "sample_sheet": null,
+    "disable_ping": false,
+    "depth_coverage": true,
+    "monochrome_logs": false,
+    "validate_params": true,
+    "show_hidden_params": false,
+    "schema_ignore_params": "show_hidden_params,validate_params,monochrome_logs,aws_queue,aws_image_prefix,wfversion"
+}

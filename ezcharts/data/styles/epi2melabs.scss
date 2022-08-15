@@ -26,4 +26,9 @@ $dark:          $brand-tertiary !default;
     }
 }
 
-@import "./vendor/bootstrap-5.0.2/scss/bootstrap.scss";
+@import "data/vendor/bootstrap-5.0.2/scss/bootstrap.scss";
+
+#logo {
+    width: 100%;
+    height: auto;
+}
