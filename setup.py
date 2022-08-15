@@ -1,13 +1,8 @@
 import os
 import sys
-import shutil
 import re
-import shutil
-import platform
 from glob import glob
-from setuptools import setup, find_packages, Extension
-from setuptools import Distribution, Command
-from setuptools.command.install import install
+from setuptools import setup, find_packages
 import pkg_resources
 
 
@@ -45,7 +40,6 @@ data_files = []
 extra_requires = {}
 extensions = []
 
-
 setup(
     name=__pkg_name__,
     version=__version__,
@@ -62,9 +56,10 @@ setup(
     extras_require=extra_requires,
     # don't include any testing subpackages in dist
     packages=find_packages(exclude=['*.test', '*.test.*', 'test.*', 'test']),
-    package_data={__pkg_name__:[os.path.join('data', '*')]},
+    include_package_data=True,
+    exclude_package_data={__pkg_name__: [".*", "__*", "*.pyc"]},
     zip_safe=False,
-    data_files=data_files,
+    data_files=[],
     entry_points={
         'console_scripts': [
             '{0} = {0}:cli'.format(__pkg_name__)

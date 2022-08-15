@@ -105,7 +105,7 @@ class _ontColors:
     BRAND_GREY_LIGHT = '#6666661f'
 
     BRAND_LOGO = pkg_resources.resource_filename(
-        __package__, 'data/ont_logo.txt')
+        'ezcharts', 'data/images/ONT_logo.txt')
     with open(BRAND_LOGO, 'r', encoding="UTF-8") as fh:
         BRAND_LOGO = fh.read()
 
@@ -123,7 +123,7 @@ class _ondColors:
     BRAND_RED = '#f45b69'
 
     BRAND_LOGO = pkg_resources.resource_filename(
-        __package__, 'data/ond_logo.txt')
+        'ezcharts', 'data/images/OND_logo.txt')
     with open(BRAND_LOGO, 'r', encoding="UTF-8") as fh:
         BRAND_LOGO = fh.read()
 
