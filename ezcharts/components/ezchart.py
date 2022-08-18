@@ -14,9 +14,6 @@ class EZChart(div):
             dom=document.getElementById('{{ c.chart_id }}'),
             theme='{{ t }}',
             opts={renderer: '{{ c.renderer }}'});
-        {% for js in c.js_functions.items %}
-            {{ js }}
-        {% endfor %}
         var opt_{{ c.chart_id }} = {{ j | replace('"',"'") | safe }};
         chart_{{ c.chart_id }}.setOption(opt_{{ c.chart_id }});
         {% if c.width.endswith('%') %}
