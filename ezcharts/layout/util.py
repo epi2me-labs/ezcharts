@@ -1,10 +1,20 @@
 """Useful reusable functions."""
+import json
 import os
+from typing import Dict
 
 from dominate.tags import script, style
 from dominate.util import raw, text
 from pkg_resources import resource_filename as res
 import sass
+
+
+def load_json(
+    path: str
+) -> Dict:
+    """Return json file as a dict."""
+    with open(path, 'r', encoding='utf-8') as content:
+        return json.load(content)
 
 
 def inline(

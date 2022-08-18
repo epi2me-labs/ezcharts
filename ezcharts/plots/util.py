@@ -8,7 +8,7 @@ import pandas as pd
 import pkg_resources
 from scipy import stats as sp_stats
 
-from ezcharts.prodict import Prodict
+from ezcharts.plots.prodict import Prodict
 
 
 sns_type_to_echarts = {

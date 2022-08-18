@@ -1,1 +1,1 @@
-"""Creation of report components."""
+"""Higher order application aware reusable components."""

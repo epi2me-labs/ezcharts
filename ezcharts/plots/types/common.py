@@ -2,7 +2,7 @@
 
 from typing import List, Literal, NewType, Union
 
-from ezcharts.util import MagicObject
+from ezcharts.plots.util import MagicObject
 
 
 # placeholder types

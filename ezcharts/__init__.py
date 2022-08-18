@@ -5,12 +5,12 @@ __version__ = "0.0.1"
 import argparse
 import importlib
 
-from ezcharts.axisgrid import *  # noqa: F401,F403
-from ezcharts.categorical import *  # noqa: F401,F403
-from ezcharts.distribution import *  # noqa: F401,F403
-from ezcharts.matrix import *  # noqa: F401,F403
-from ezcharts.regression import *  # noqa: F401,F403
-from ezcharts.relational import *  # noqa: F401,F403
+from ezcharts.plots.axisgrid import *  # noqa: F401,F403
+from ezcharts.plots.categorical import *  # noqa: F401,F403
+from ezcharts.plots.distribution import *  # noqa: F401,F403
+from ezcharts.plots.matrix import *  # noqa: F401,F403
+from ezcharts.plots.regression import *  # noqa: F401,F403
+from ezcharts.plots.relational import *  # noqa: F401,F403
 
 
 def cli():
@@ -28,8 +28,13 @@ def cli():
         help='additional help', dest='command')
     subparsers.required = True
 
-    # add reporting modules
-    modules = ['demo']
+    # add demo module
+    demo_module = importlib.import_module('ezcharts.demo')
+    p = subparsers.add_parser('demo', parents=[demo_module.argparser()])
+    p.set_defaults(func=demo_module.main)
+
+    # add component modules
+    modules = ['params']
     for module in modules:
         mod = importlib.import_module('ezcharts.components.{}'.format(module))
         p = subparsers.add_parser(module, parents=[mod.argparser()])

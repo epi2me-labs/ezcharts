@@ -2,8 +2,8 @@
 
 from seaborn.relational import _LinePlotter, _ScatterPlotter
 
-from ezcharts import util
-from ezcharts.types import Plot
+from ezcharts.plots import util
+from ezcharts.plots.types import Plot
 
 
 __all__ = ["relplot", "scatterplot", "lineplot"]

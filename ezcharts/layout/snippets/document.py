@@ -1,5 +1,5 @@
 """Get document and helper tags with sensible defaults."""
-from dominate.tags import body, head, meta, title
+from dominate.tags import body, head, meta
 
 SCRIPT_KWARGS = dict(__pretty=False, type='text/javascript')
 STYLE_KWARGS = dict(__pretty=False)
@@ -29,7 +29,6 @@ class DefaultHead(head):
 
     def __init__(
         self,
-        doc_title: str,
         **kwargs
     ) -> None:
         """Create tag."""
@@ -39,4 +38,3 @@ class DefaultHead(head):
             meta(
                 name="viewport",
                 content="width=device-width, initial-scale=1")
-            title(doc_title)

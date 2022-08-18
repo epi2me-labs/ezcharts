@@ -5,7 +5,7 @@ These interfaces are the main way to create charts from data in eCharts.
 
 from typing import Literal, Union
 
-from ezcharts.util import MagicObject
+from ezcharts.plots.util import MagicObject
 
 
 class LineSeries(MagicObject):
