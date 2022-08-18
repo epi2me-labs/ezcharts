@@ -1,6 +1,4 @@
 """Get default table layouts."""
-import json
-import os
 from typing import List, Optional, Union
 import uuid
 
@@ -57,48 +55,3 @@ class DataTable(div):
                 for column in columns:
                     td(str(column))
         return row
-
-
-#
-# These functions below were lifted from aplanat and probably need reworking,
-# should probably just inherit from DataTable above.
-#
-def version_table(
-    versions_path: str
-) -> DataTable:
-    """Create a table of software versions."""
-    if os.path.isdir(versions_path):
-        version_files = [
-            os.path.join(versions_path, x)
-            for x in os.listdir(versions_path)]
-    elif os.path.isfile(versions_path):
-        version_files = [versions_path]
-    else:
-        raise IOError('`versions` should be a file or directory.')
-    versions_table = DataTable(['Name', 'Version'])
-    for fname in version_files:
-        try:
-            with open(fname, 'r', encoding='utf-8') as fh:
-                with versions_table.body:
-                    for line in fh.readlines():
-                        name, version = line.strip().split(',')
-                        versions_table.add_row(
-                            title=None, columns=[name, version])
-        except FileNotFoundError:
-            pass
-    return versions_table
-
-
-def params_table(
-    params_file: str
-) -> DataTable:
-    """Create a workflow parameter report from a JSON file."""
-    if not os.path.isfile(params_file):
-        raise IOError('`params` should be a JSON file.')
-    param_table = DataTable(['Key', 'Value'])
-    with open(params_file, encoding='utf-8') as f:
-        data = json.load(f)
-        with param_table.body:
-            for k, v in data.items():
-                param_table.add_row(title=None, columns=[k, str(v)])
-    return param_table

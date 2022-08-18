@@ -6,13 +6,11 @@ import pandas as pd
 from pkg_resources import resource_filename
 
 import ezcharts as ezc
-from ezcharts import util
-from ezcharts.components.reports.simple import SimpleReport
-from ezcharts.layout.ezchart import EZChart
-from ezcharts.layout.snippets.grid import Grid
-from ezcharts.layout.snippets.section import Section
-from ezcharts.layout.snippets.tabs import Tabs
-from ezcharts.layout.utils import write_report
+from ezcharts.components.ezchart import EZChart
+from ezcharts.components.reports.labs import LabsReport
+from ezcharts.layout.snippets import Grid
+from ezcharts.layout.snippets import Tabs
+from ezcharts.plots import util
 
 
 # Setup simple globals
@@ -58,28 +56,26 @@ def main(args):
     versions = resource_filename('ezcharts', "test_data/versions.txt")
 
     # Create report
-    report = SimpleReport(
+    report = LabsReport(
         REPORT_TITLE, WORKFLOW_NAME, params, versions)
 
-    # Add a cheeky link
-    report.header.add_link('Results', '#alignment-results')
-
-    # Use the semantic style to add contents to main
-    with report.main:
+    with report.add_section(
+        "alignment-results", 'Alignment results',
+        'Results'
+    ):
         # This is the tabbed section with ezcharts!
-        with Section("alignment-results", 'Alignment results'):
-            tabs = Tabs()
-            with tabs.add_tab('Summary', True):
-                with Grid():
-                    EZChart(example_plot())
-                    EZChart(example_plot())
-            with tabs.add_tab('Accuracy', False):
-                EZChart(example_plot())
-            with tabs.add_tab('Depth', False):
-                p('Testing, testing, 1 2 3')
+        tabs = Tabs()
+        with tabs.add_tab('Summary', True):
+            with Grid():
+                EZChart(example_plot(), 'epi2melabs')
+                EZChart(example_plot(), 'epi2melabs')
+        with tabs.add_tab('Accuracy', False):
+            EZChart(example_plot(), 'epi2melabs')
+        with tabs.add_tab('Depth', False):
+            p('Testing, testing, 1 2 3')
 
     logger.info('Reticulating splines')
-    write_report(args.output, report)
+    report.write(args.output)
 
 
 def argparser():

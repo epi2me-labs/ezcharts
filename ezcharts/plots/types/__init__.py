@@ -5,9 +5,9 @@ from typing import List, Literal
 
 import pyecharts
 
-from ezcharts.types.common import number, XAxis, YAxis
-from ezcharts.types.series import AllSeriesTypes
-from ezcharts.util import MagicObject
+from ezcharts.plots.types.common import number, XAxis, YAxis
+from ezcharts.plots.types.series import AllSeriesTypes
+from ezcharts.plots.util import MagicObject
 
 
 class Plot(pyecharts.charts.base.Base):

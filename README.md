@@ -6,6 +6,10 @@ ezCharts
 ezCharts is a Python library for creating and rendering charts through [eCharts](https://echarts.apache.org/).
 Plots can be contructed through an API similar to [seaborn](https://seaborn.pydata.org/).
 
+Additionally, ezCharts ships with a layout system built around [dominate](https://github.com/Knio/dominate/),
+providing a framework for creating static HTML reports via a declarative syntax.
+
+
 Installation
 ------------
 
@@ -24,10 +28,23 @@ or via pip:
 Usage
 -----
 
+**Plots**
+
 The base library in ezCharts does not try to hide eCharts API in order that everything
 follows the eCharts [documention](https://echarts.apache.org/en/option.html#title). An
 API is provided that mirrors the [seaborn](https://seaborn.pydata.org/) API to allow
 creation of common plot types without knowledge of eCharts.
+
+**Layout**
+
+The layout functionality of ezCharts uses bootstrap scripting and styling be default,
+but permits any level of customisation. Snippets provide simple re-usable bits of HTML
+that are pre-styled, such as Tabs or tables.
+
+**Components**
+
+Components provide higher order application-specific layouts that may also include
+charts and light data processing capabilities, such as read_length graphs.
 
 
 Contributing
