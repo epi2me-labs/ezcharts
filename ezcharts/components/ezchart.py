@@ -1,5 +1,6 @@
 """Get ezchart containers."""
 import json
+from uuid import uuid4
 
 from dominate.tags import div, script
 from dominate.util import raw
@@ -10,18 +11,18 @@ class EZChart(div):
     """Wraps an ezchart plot in a div."""
 
     CHART_INIT = """
-        var chart_{{ c.chart_id }} = echarts.init(
-            dom=document.getElementById('{{ c.chart_id }}'),
+        var chart_{{ id }} = echarts.init(
+            dom=document.getElementById('{{ id }}'),
             theme='{{ t }}',
             opts={renderer: '{{ c.renderer }}'});
-        var opt_{{ c.chart_id }} = {{ j | replace('"',"'") | safe }};
-        chart_{{ c.chart_id }}.setOption(opt_{{ c.chart_id }});
-        {% if c.width.endswith('%') %}
+        var opt_{{ id }} = {{ j | replace('"',"'") | safe }};
+        chart_{{ id }}.setOption(opt_{{ id }});
+        {% if w.endswith('%') %}
             window.addEventListener('resize', function(){
-                chart_{{ c.chart_id }}.resize();
+                chart_{{ id }}.resize();
             })
         {% endif %}
-        chart_{{ c.chart_id }}.resize()
+        chart_{{ id }}.resize()
     """
 
     def __init__(
@@ -30,14 +31,16 @@ class EZChart(div):
         theme: str
     ) -> None:
         """Create a div and script tag for initialising the plot."""
-        plot.width = "100%"
+        width = "100%"
+        chart_id = str(uuid4()).replace("-", "")
         super().__init__(
-            tagname='div', id=plot.chart_id, className="chart-container",
+            tagname='div', id=chart_id, className="chart-container",
             style="width:100%; height:500px;")
         rtemplate = Environment(
             loader=BaseLoader()).from_string(self.CHART_INIT)
         rendered = rtemplate.render(
-            c=plot, j=plot.to_json(), t=theme)
+            c=plot, j=plot.to_json(), t=theme,
+            w=width, id=chart_id)
         with self:
             script(rendered)
 

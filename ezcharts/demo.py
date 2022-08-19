@@ -10,7 +10,7 @@ from ezcharts.components.ezchart import EZChart
 from ezcharts.components.reports.labs import LabsReport
 from ezcharts.layout.snippets import Grid
 from ezcharts.layout.snippets import Tabs
-from ezcharts.plots import util
+from ezcharts.plots import Plot, util
 
 
 # Setup simple globals
@@ -26,7 +26,7 @@ def main(args):
     # Good location to prepare plots
     logger.info('Building plots')
 
-    def example_plot(style="line"):
+    def example_plot(style="line") -> Plot:
         """Create example plot."""
         df = pd.DataFrame({
             # as laid out in echarts docs for a dataset
@@ -46,6 +46,7 @@ def main(args):
             plot = ezc.scatterplot(data=df, x='year', y='sales', hue='product')
         else:
             raise ValueError("Unknown plot style")
+        plot.title = {"text": f"Example {style} chart"}
         return plot
 
     # Then, time to construct a report
@@ -67,8 +68,8 @@ def main(args):
         tabs = Tabs()
         with tabs.add_tab('Summary', True):
             with Grid():
-                EZChart(example_plot(), 'epi2melabs')
-                EZChart(example_plot(), 'epi2melabs')
+                EZChart(example_plot("line"), 'epi2melabs')
+                EZChart(example_plot("scatter"), 'epi2melabs')
         with tabs.add_tab('Accuracy', False):
             EZChart(example_plot(), 'epi2melabs')
         with tabs.add_tab('Depth', False):
@@ -81,10 +82,10 @@ def main(args):
 def argparser():
     """Argument parser for entrypoint."""
     parser = argparse.ArgumentParser(
-        "aplanat demo",
+        "ezcharts demo",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         add_help=False)
     parser.add_argument(
-        "--output", default="aplanat_demo_report.html",
+        "--output", default="ezcharts_demo_report.html",
         help="Output HTML file.")
     return parser

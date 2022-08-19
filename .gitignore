@@ -1,8 +1,6 @@
 venv
-demo.html
 pypi_build
 docs/_build/
-docs/aplanat.rst
 docs/modules.rst
 *.pyd
 *.pyc
@@ -10,15 +8,15 @@ docs/modules.rst
 *#
 *~
 *.swp
+*.swo
+*.swn
+*.swm
 .#*
 *.egg-info
 build
 dist
-deb_dist
 tmp/
-*.gz
 *__pycache__*
-*.fna
 .vscode
 **/.DS_store
 .idea/**
