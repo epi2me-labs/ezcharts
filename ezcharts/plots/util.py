@@ -1,6 +1,5 @@
 """Utility functions for aiding plotting."""
 
-import json
 import logging
 
 import numpy as np
@@ -8,37 +7,10 @@ import pandas as pd
 import pkg_resources
 from scipy import stats as sp_stats
 
-from ezcharts.plots.prodict import Prodict
-
 
 sns_type_to_echarts = {
     "categorical": "category",
     "numeric": "value"}
-
-
-class MagicObject(Prodict):
-    """Nothing to see here."""
-
-    def __getattr__(self, attr):
-        """Get attribute, setting to default value if not preexisting.
-
-        If the attribite is a known annotation, the corresponding
-        constructor will be used, else a generic MagicObject will be
-        created.
-        """
-        try:
-            return self[attr]
-        except KeyError:
-            if self.has_attr(attr):
-                construct = self.attr_type(attr)
-            else:
-                construct = MagicObject
-            setattr(self, attr, construct())
-            return super().__getattr__(attr)
-
-    def to_json(self, **kwargs):
-        """Create json represention for echarts."""
-        return json.dumps(self, **kwargs)
 
 
 def get_named_logger(name):

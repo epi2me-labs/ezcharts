@@ -2,8 +2,7 @@
 
 from seaborn.relational import _LinePlotter, _ScatterPlotter
 
-from ezcharts.plots import util
-from ezcharts.plots.types import Plot
+from ezcharts.plots import Plot, util
 
 
 __all__ = ["relplot", "scatterplot", "lineplot"]
@@ -25,32 +24,31 @@ def relplot(
 class ScatterPlotter(_ScatterPlotter):
     """Making scatter plots."""
 
-    def plot(self, plt, kws):
+    def plot(self, plt: Plot, kws):
         """Plot the plot."""
         data = self.plot_data.dropna()
         if data.empty:
             return
 
-        opt = plt.opt
-        opt.xAxis = {
+        plt.xAxis = {
             "name": self.variables.get("x", None),
             "type": util.sns_type_to_echarts[str(self.var_types['x'])]}
-        opt.yAxis = dict(
+        plt.yAxis = dict(
             name=self.variables.get("y", None),
             type=util.sns_type_to_echarts[str(self.var_types['y'])])
-        opt.dataset = [{
+        plt.dataset = [{
             'id': 'raw',
             'dimensions': data.columns.tolist(),
             'source': data.values.tolist()}]
         # TODO: size and style are also grouping "semantic" variables
         for series_name in data['hue'].unique():
-            opt.dataset.append({
+            plt.dataset.append({
                 'id': series_name,
                 'fromDatasetId': 'raw',
                 'transform': {
                     'type': 'filter',
                     'config': {'dimension': 'hue', '=': series_name}}})
-            opt.add_series({
+            plt.add_series({
                 'type': 'scatter',
                 'datasetId': series_name,
                 'encode': {'x': 'x', 'y': 'y'}})
@@ -84,7 +82,7 @@ def scatterplot(
 class LinePlotter(_LinePlotter):
     """Making line plots."""
 
-    def plot(self, plt, kws):
+    def plot(self, plt: Plot, kws):
         """Plot the plot."""
         # TODO: handle all the fancy stuff
 
@@ -92,30 +90,25 @@ class LinePlotter(_LinePlotter):
         if data.empty:
             return
 
-        opt = plt.opt
-        opt.xAxis = dict(
+        plt.xAxis = dict(
             name=self.variables.get("x", None),
             type=util.sns_type_to_echarts[str(self.var_types['x'])])
-        opt.yAxis = dict(
+        plt.yAxis = dict(
             name=self.variables.get("y", None),
             type=util.sns_type_to_echarts[str(self.var_types['y'])])
-        opt.dataset = [{
-            'id': 'raw',
-            'dimensions': data.columns.tolist(),
-            'source': data.values.tolist()}]
-        opt.dataset = [{
+        plt.dataset = [{
             'id': 'raw',
             'dimensions': data.columns.tolist(),
             'source': data.values.tolist()}]
         # TODO: size and style are also grouping "semantic" variables
         for series_name in data['hue'].unique():
-            opt.dataset.append({
+            plt.dataset.append({
                 'id': series_name,
                 'fromDatasetId': 'raw',
                 'transform': {
                     'type': 'filter',
                     'config': {'dimension': 'hue', '=': series_name}}})
-            opt.add_series({
+            plt.add_series({
                 'type': 'line',
                 'datasetId': series_name,
                 'encode': {'x': 'x', 'y': 'y'}})

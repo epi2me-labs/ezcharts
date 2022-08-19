@@ -1,9 +1,10 @@
 # ezcharts requirements. 
 # Add comments to keep track of why we are using particular versions
+dominate
+jinja2
+libsass
 numpy
 pandas
-pyecharts
+pydantic
 scipy
 seaborn==0.12.0b2
-dominate
-libsass
