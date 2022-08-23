@@ -5,6 +5,7 @@ from typing import Dict
 
 from dominate.tags import script, style
 from dominate.util import raw, text
+from jinja2 import BaseLoader, Environment
 from pkg_resources import resource_filename as res
 import sass
 
@@ -58,3 +59,20 @@ def write_report(path, document):
     with open(path, 'w', encoding='utf-8') as out:
         out.write('<!DOCTYPE html>')
         out.write(document.render())
+
+
+def render_template(template, **kwargs):
+    """Render a jinja2 template."""
+    rtemplate = Environment(
+        loader=BaseLoader()).from_string(template)
+    return rtemplate.render(**kwargs)
+
+
+def cls(*classes: str) -> str:
+    """Collect element classes from a list."""
+    return ' '.join(classes)
+
+
+def css(*styles: str) -> str:
+    """Collect inline element styles from a list."""
+    return ' '.join(s.strip(';') + ';' for s in styles)

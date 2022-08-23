@@ -10,6 +10,7 @@ from ezcharts.components.ezchart import EZChart
 from ezcharts.components.reports.labs import LabsReport
 from ezcharts.layout.snippets import Grid
 from ezcharts.layout.snippets import Tabs
+from ezcharts.layout.snippets.stats import StatsSection
 from ezcharts.plots import Plot, util
 
 
@@ -60,6 +61,12 @@ def main(args):
     report = LabsReport(
         REPORT_TITLE, WORKFLOW_NAME, params, versions)
 
+    with report.main_content:
+        stats = StatsSection(columns=3)
+        stats.add_stats_item('1213986', 'Read count')
+        stats.add_stats_item('98.67%', 'Median accuracy')
+        stats.add_stats_item('10213 bp', 'Some other stat')
+
     with report.add_section(
         "alignment-results", 'Alignment results',
         'Results'
@@ -74,6 +81,11 @@ def main(args):
             EZChart(example_plot(), 'epi2melabs')
         with tabs.add_tab('Depth', False):
             p('Testing, testing, 1 2 3')
+
+        # Dropdowns are nested one more level
+        with tabs.add_dropdown_menu('Example'):
+            with tabs.add_dropdown_tab('First', False):
+                EZChart(example_plot(), 'epi2melabs')
 
     logger.info('Reticulating splines')
     report.write(args.output)

@@ -9,7 +9,7 @@ from ezcharts.components.params import ParamsTable
 from ezcharts.components.reports import Report
 from ezcharts.components.theme import (
     EPI2MELabsLogo, LAB_body_resources, LAB_head_resources)
-from ezcharts.components.versions import version_table
+from ezcharts.components.versions import VersionsTable
 from ezcharts.layout.resource import Resource
 from ezcharts.layout.snippets.banner import Banner
 from ezcharts.layout.snippets.section import Section
@@ -119,7 +119,7 @@ class LabsReport(Report):
         with self.main:
             self.intro_content = section(id="intro-content", role="region")
             with self.intro_content:
-                self.banner = Banner('Summary', report_title, workflow_name)
+                self.banner = Banner(report_title, workflow_name)
                 self.banner.add_badge("Research use only")
                 if not created_date:
                     created_date = datetime.today().strftime('%Y-%m-%d')
@@ -130,7 +130,7 @@ class LabsReport(Report):
             self.meta_content = section(id="meta-content", role="region")
             with self.meta_content:
                 with Section("software-versions", 'Software versions'):
-                    version_table(workflow_versions_path)
+                    VersionsTable(workflow_versions_path)
 
                 with Section("workflow-parameters", 'Workflow parameters'):
                     ParamsTable(workflow_params_path)

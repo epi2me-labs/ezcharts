@@ -1,16 +1,32 @@
 """Get default table layouts."""
 from typing import List, Optional, Union
-import uuid
 
-from dominate.tags import div, script, table, tbody, td, th, thead, tr
+from dominate.tags import script, table, tbody, td, th, thead, tr
 from jinja2 import BaseLoader, Environment
 
+from ezcharts.layout.base import BaseSnippet, IClasses, IStyles
+from ezcharts.layout.util import cls
 
-class DataTable(div):
+
+class ITableClasses(IClasses):
+    """Table html classes."""
+
+    container: str = cls("table-responsive")
+    table: str = cls("table", "table-striped", "table-hover")
+
+
+class ITableStyles(IStyles):
+    """Table inline css styles."""
+
+    ...
+
+
+class DataTable(BaseSnippet):
     """A styled datatable wrapped in a div."""
 
+    TAG = 'div'
     DATATABLE_INIT = """
-        new simpleDatatables.DataTable('#{{ id }}', {
+        new simpleDatatables.DataTable('#{{ id }}_inner', {
             searchable: true,
             columns: [
                 { select: 2, sort: 'desc' },
@@ -21,16 +37,17 @@ class DataTable(div):
     def __init__(
         self,
         headers: List[str],
-        container_classes: str = "table-responsive",
-        table_classes: str = "table table-striped table-hover"
+        styles: ITableStyles = ITableStyles(),
+        classes: ITableClasses = ITableClasses(),
     ) -> None:
-        """Create tag."""
+        """Create table."""
         super().__init__(
-            tagname='div', className=container_classes)
-        uid = 'table' + '_' + str(uuid.uuid4()).replace('-', '_')
+            styles=styles,
+            classes=classes,
+            className=classes.container)
 
         with self:
-            with table(id=uid, className=table_classes):
+            with table(id=self.uid + '_inner', className=self.classes.table):
                 self.head = thead()
                 with self.head:
                     with tr():
@@ -39,7 +56,7 @@ class DataTable(div):
                 self.body = tbody()
             rtemplate = Environment(loader=BaseLoader()).from_string(
                 self.DATATABLE_INIT)
-            rendered = rtemplate.render(id=uid)
+            rendered = rtemplate.render(id=self.uid)
             script(rendered)
 
     def add_row(
