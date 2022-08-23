@@ -4,7 +4,8 @@ from uuid import uuid4
 
 from dominate.tags import div, script
 from dominate.util import raw
-from jinja2 import BaseLoader, Environment
+
+from ezcharts.layout.util import render_template
 
 
 class EZChart(div):
@@ -36,13 +37,11 @@ class EZChart(div):
         super().__init__(
             tagname='div', id=chart_id, className="chart-container",
             style="width:100%; height:500px;")
-        rtemplate = Environment(
-            loader=BaseLoader()).from_string(self.CHART_INIT)
-        rendered = rtemplate.render(
-            c=plot, j=plot.to_json(), t=theme,
-            w=width, id=chart_id)
         with self:
-            script(rendered)
+            script(render_template(
+                self.CHART_INIT,
+                c=plot, j=plot.to_json(), t=theme,
+                w=width, id=chart_id))
 
 
 class EZChartTheme(script):
@@ -61,6 +60,6 @@ class EZChartTheme(script):
         """Load theme."""
         super().__init__(tagname='script')
         with self:
-            rtemplate = Environment(
-                loader=BaseLoader()).from_string(self.THEME_INIT)
-            raw(rtemplate.render(n=theme, t=json.dumps(theme)))
+            raw(render_template(
+                self.THEME_INIT,
+                n=theme, t=json.dumps(theme)))

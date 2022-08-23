@@ -1,23 +1,62 @@
 """Get default grid layout."""
-from dominate.tags import html_tag
+from dominate.tags import style
+
+from ezcharts.layout.base import BaseSnippet, IClasses, IStyles
+from ezcharts.layout.util import css, render_template
 
 
-class Grid(html_tag):
+class IGridClasses(IClasses):
+    """Section html classes."""
+
+    container: str = ""
+
+
+class IGridStyles(IStyles):
+    """Section inline css styles."""
+
+    container: str = css(
+        "display: grid",
+        "grid-template-rows: repeat(1, 1fr)",
+        "grid-template-columns: repeat(2, 1fr)",
+        "grid-column-gap: 10px",
+        "grid-row-gap: 20px")
+
+
+class Grid(BaseSnippet):
     """A styled div tag for creating css-grids."""
+
+    TAG = 'div'
+    GRID_TEMPLATE = """
+        #{{grid_id}} {
+            {{ styles }}
+            {% if c %}
+            grid-template-columns: repeat({{ c }}, 1fr)
+            {% endif %}
+        };
+
+        // Responsive css grids
+        @media only screen and (max-width: 800px) {
+            #{{grid_id}} {
+                grid-template-columns: repeat(1, 1fr) !important;
+            }
+        }
+    """
 
     def __init__(
         self,
-        columns: int = 2,
-        column_gap: int = 10,
-        row_gap: int = 20
+        columns: int = None,
+        styles: IGridStyles = IGridStyles(),
+        classes: IGridClasses = IGridClasses()
     ) -> None:
-        """Create tag."""
-        styles = ' '.join([
-            "display: grid;",
-            f"grid-template-columns: repeat({columns}, 1fr);",
-            "grid-template-rows: repeat(1, 1fr);",
-            f"grid-column-gap:{column_gap}px;",
-            f"grid-row-gap: {row_gap}px;"
-        ])
+        """Create css grid."""
         super().__init__(
-            tagname='div', className="report-grid", style=styles)
+            styles=styles,
+            classes=classes,
+            className=classes.container)
+
+        with self:
+            style(render_template(
+                self.GRID_TEMPLATE,
+                grid_id=self.uid,
+                styles=self.styles.container,
+                c=columns))
