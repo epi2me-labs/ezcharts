@@ -41,13 +41,13 @@ class Mixin:
             type=util.sns_type_to_echarts[str(self.var_types['y'])])
         plt.add_dataset({
             'id': 'raw',
-            'dimensions': data.columns.tolist(),
-            'source': data.values.tolist()})
+            'dimensions': data.columns,
+            'source': data.values})
         # TODO: size and style are also grouping "semantic" variables
         for series_index, series_name in enumerate(
                 data['hue'].unique(), start=1):
             plt.add_dataset({
-                'id': series_name,
+                'id': str(series_name),
                 'fromDatasetId': 'raw',
                 'transform': [{
                     'type': 'filter',
