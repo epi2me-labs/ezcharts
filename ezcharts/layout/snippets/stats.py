@@ -1,9 +1,9 @@
 """Get default stats layouts."""
-from typing import Type
+from typing import List, Optional, Tuple, Type
 
 from dominate.tags import div, h3, html_tag, p
 
-from ezcharts.layout.base import BaseSnippet, IClasses, IStyles
+from ezcharts.layout.base import IClasses, Snippet
 from ezcharts.layout.snippets import Grid
 from ezcharts.layout.util import cls
 
@@ -19,31 +19,29 @@ class IStatsClasses(IClasses):
     item_value: str = cls("fs-2", "mb-0")
 
 
-class IStatsStyles(IStyles):
-    """Stats inline css styles."""
-
-    ...
-
-
-class StatsSection(BaseSnippet):
+class Stats(Snippet):
     """A styled section tag."""
 
     TAG = 'div'
 
     def __init__(
         self,
-        columns=None,
-        styles: IStatsStyles = IStatsStyles(),
+        columns: Optional[int] = 2,
+        items: List[Tuple[str, str]] = [],
         classes: IStatsClasses = IStatsClasses(),
     ) -> None:
         """Create table."""
         super().__init__(
-            styles=styles,
+            styles=None,
             classes=classes,
             className=classes.container)
 
         with self:
             self.items = Grid(columns)
+
+        with self.items:
+            for item in items:
+                self.add_stats_item(item[0], item[1])
 
     def add_stats_item(
         self,

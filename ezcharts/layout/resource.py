@@ -1,6 +1,6 @@
 """Re-usable external resources."""
 from dataclasses import dataclass
-from typing import Callable, Type
+from typing import Callable, Optional, Type
 
 from dominate.tags import dom_tag, script, style
 from pkg_resources import resource_filename as res
@@ -26,12 +26,14 @@ class Resource:
 
     path: str
     loader: Callable
-    tag: Type[dom_tag]
+    tag: Optional[Type[dom_tag]] = None
 
     def __call__(self):
         """Render the resource."""
         loaded = self.loader(self.path)
-        return self.tag(loaded)
+        if self.tag:
+            return self.tag(loaded)
+        return loaded
 
 
 echarts_js = Resource(

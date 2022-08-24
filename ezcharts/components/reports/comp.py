@@ -27,7 +27,6 @@ class ComponentReport(Report):
 
     def __init__(
         self,
-        report_title: str,
         component_title: str,
         component_element: html_tag,
         logo: Type[html_tag] = EPI2MELabsLogo,
@@ -36,7 +35,7 @@ class ComponentReport(Report):
     ) -> None:
         """Create tag."""
         super().__init__(
-            report_title=report_title,
+            report_title=component_title,
             head_resources=head_resources,
             body_resources=body_resources)
 

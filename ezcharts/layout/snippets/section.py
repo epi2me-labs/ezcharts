@@ -3,8 +3,8 @@ from typing import Optional, Type
 
 from dominate.tags import h2, html_tag
 
-from ezcharts.layout.base import BaseSnippet, IClasses, IStyles
-from ezcharts.layout.util import cls
+from ezcharts.layout.base import IClasses, IStyles, Snippet
+from ezcharts.layout.util import cls, css
 
 
 class ISectionClasses(IClasses):
@@ -17,12 +17,12 @@ class ISectionClasses(IClasses):
 
 
 class ISectionStyles(IStyles):
-    """Section inline css styles."""
+    """Section html classes."""
 
-    ...
+    overflow: str = css("overflow-x: auto")
 
 
-class Section(BaseSnippet):
+class Section(Snippet):
     """A styled section snippet."""
 
     TAG = "section"
@@ -33,13 +33,16 @@ class Section(BaseSnippet):
         section_title: Optional[str] = None,
         section_title_tag: Type[html_tag] = h2,
         styles: ISectionStyles = ISectionStyles(),
-        classes: ISectionClasses = ISectionClasses()
+        classes: ISectionClasses = ISectionClasses(),
+        overflow: bool = False
     ) -> None:
         """Create styled section."""
         super().__init__(
             styles=styles,
             classes=classes,
-            className=classes.container)
+            className=classes.container,
+            style=styles.overflow if overflow else None,
+            id=section_id)
 
         if section_title and section_title_tag:
             with self:

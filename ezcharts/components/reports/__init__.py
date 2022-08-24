@@ -1,16 +1,19 @@
 """Re-usable report components."""
 from typing import List, Type
 
-from dominate.tags import body, footer, head, header, html, main, title
+from dominate.tags import body, footer, head, header, main, title
 
+from ezcharts.layout.base import Snippet
 from ezcharts.layout.resource import (
     base_body_resources, base_head_resources, Resource)
 from ezcharts.layout.snippets.document import DefaultBody, DefaultHead
 from ezcharts.layout.util import write_report
 
 
-class Report(html):
+class Report(Snippet):
     """A basic report."""
+
+    TAG: str = 'html'
 
     def __init__(
         self,
@@ -21,7 +24,10 @@ class Report(html):
         body_resources: List[Resource] = base_body_resources
     ) -> None:
         """Create tag."""
-        super().__init__(tagname='html')
+        super().__init__(
+            styles=None,
+            classes=None)
+
         with self:
             # Adds the generic meta tags for us!
             self.head = head_tag()
