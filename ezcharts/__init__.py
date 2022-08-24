@@ -1,6 +1,6 @@
 """Simple eCharts API."""
 
-__version__ = "0.0.1"
+__version__ = "0.1.0"
 
 import argparse
 import importlib
@@ -28,16 +28,15 @@ def cli():
         help='additional help', dest='command')
     subparsers.required = True
 
-    # add demo module
-    demo_module = importlib.import_module('ezcharts.demo')
-    p = subparsers.add_parser('demo', parents=[demo_module.argparser()])
-    p.set_defaults(func=demo_module.main)
+    # all component demos, plus some others
+    components = ['params']
+    others = ['ezcharts.demo', 'ezcharts.plots']
 
-    # add component modules
-    modules = ['params']
-    for module in modules:
-        mod = importlib.import_module('ezcharts.components.{}'.format(module))
-        p = subparsers.add_parser(module, parents=[mod.argparser()])
+    demos = [f'ezcharts.components.{comp}' for comp in components] + others
+    for module in demos:
+        mod = importlib.import_module(module)
+        p = subparsers.add_parser(
+            module.split(".")[-1], parents=[mod.argparser()])
         p.set_defaults(func=mod.main)
 
     args = parser.parse_args()

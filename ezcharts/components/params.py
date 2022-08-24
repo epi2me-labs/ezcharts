@@ -30,7 +30,7 @@ class ParamsTable(DataTable):
 
 
 def main(args):
-    """Entry point to create a report from nextclade."""
+    """Entry point to demonstrate a parameter table."""
     comp_title = 'Parameter Table'
     param_table = ParamsTable(args.params)
     report = ComponentReport(comp_title, comp_title, param_table)
