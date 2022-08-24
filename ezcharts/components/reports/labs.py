@@ -149,8 +149,8 @@ class LabsReport(Report):
 
         with self.header:
             self.nav = LabsNavigation(logo=logo, groups=['main', 'meta'])
-            self.nav.add_link('meta', 'Versions', '#software-versions')
-            self.nav.add_link('meta', 'Parameters', '#workflow-parameters')
+            self.nav.add_link('meta', 'Versions', '#versions')
+            self.nav.add_link('meta', 'Parameters', '#parameters')
 
         with self.main:
             self.intro_content = section(id="intro-content", role="region")
