@@ -21,8 +21,8 @@ def relplot(
     raise NotImplementedError
 
 
-class ScatterPlotter(_ScatterPlotter):
-    """Making scatter plots."""
+class Mixin:
+    """Mixin class to define how to plot lines and points."""
 
     def plot(self, plt: Plot, kws):
         """Plot the plot."""
@@ -30,31 +30,46 @@ class ScatterPlotter(_ScatterPlotter):
         if data.empty:
             return
 
-        plt.xAxis = {
-            "name": self.variables.get("x", None),
-            "type": util.sns_type_to_echarts[str(self.var_types['x'])]}
+        x_name = self.variables.get("x", None)
+        y_name = self.variables.get("y", None)
+
+        plt.xAxis = dict(
+            name=x_name,
+            type=util.sns_type_to_echarts[str(self.var_types['x'])])
         plt.yAxis = dict(
-            name=self.variables.get("y", None),
+            name=y_name,
             type=util.sns_type_to_echarts[str(self.var_types['y'])])
-        plt.dataset = [{
+        plt.add_dataset({
             'id': 'raw',
             'dimensions': data.columns.tolist(),
-            'source': data.values.tolist()}]
+            'source': data.values.tolist()})
         # TODO: size and style are also grouping "semantic" variables
-        for series_name in data['hue'].unique():
-            plt.dataset.append({
+        for series_index, series_name in enumerate(
+                data['hue'].unique(), start=1):
+            plt.add_dataset({
                 'id': series_name,
                 'fromDatasetId': 'raw',
-                'transform': {
+                'transform': [{
                     'type': 'filter',
-                    'config': {'dimension': 'hue', '=': series_name}}})
+                    'config': {'dimension': 'hue', '=': series_name}}]})
             plt.add_series({
-                'type': 'scatter',
-                'datasetId': series_name,
-                'encode': {'x': 'x', 'y': 'y'}})
+                'type': self.series_type,
+                # would be nicer to use datasetId here, but not documented
+                # so not in our API
+                'datasetIndex': series_index,
+                'encode': {
+                    'x': x_name, 'y': y_name,
+                    'itemName': x_name, 'tooltip': [y_name]}})
+            plt.tooltip = {"trigger": "axis"}
 
         # TODO: add legend
-        return
+        return plt
+
+
+class ScatterPlotter(Mixin, _ScatterPlotter):
+    """Making scatter plots."""
+
+    series_type = 'scatter'
 
 
 def scatterplot(
@@ -79,42 +94,10 @@ def scatterplot(
     return plt
 
 
-class LinePlotter(_LinePlotter):
+class LinePlotter(Mixin, _LinePlotter):
     """Making line plots."""
 
-    def plot(self, plt: Plot, kws):
-        """Plot the plot."""
-        # TODO: handle all the fancy stuff
-
-        data = self.plot_data.dropna()
-        if data.empty:
-            return
-
-        plt.xAxis = dict(
-            name=self.variables.get("x", None),
-            type=util.sns_type_to_echarts[str(self.var_types['x'])])
-        plt.yAxis = dict(
-            name=self.variables.get("y", None),
-            type=util.sns_type_to_echarts[str(self.var_types['y'])])
-        plt.dataset = [{
-            'id': 'raw',
-            'dimensions': data.columns.tolist(),
-            'source': data.values.tolist()}]
-        # TODO: size and style are also grouping "semantic" variables
-        for series_name in data['hue'].unique():
-            plt.dataset.append({
-                'id': series_name,
-                'fromDatasetId': 'raw',
-                'transform': {
-                    'type': 'filter',
-                    'config': {'dimension': 'hue', '=': series_name}}})
-            plt.add_series({
-                'type': 'line',
-                'datasetId': series_name,
-                'encode': {'x': 'x', 'y': 'y'}})
-
-        # TODO: add legend
-        return
+    series_type = 'line'
 
 
 def lineplot(

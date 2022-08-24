@@ -63,3 +63,6 @@ class EZChartTheme(script):
             raw(render_template(
                 self.THEME_INIT,
                 n=theme, t=json.dumps(theme)))
+
+
+# No module demo here as method is directly on plot class.
