@@ -45,7 +45,7 @@ class Plot(EChartsOption):
         except AttributeError:
             title = 'ezChart Plot'
         chart = EZChart(self, 'epi2melabs')
-        report = ComponentReport(title, title, chart)
+        report = ComponentReport(title, chart)
         report.write(output)
 
 

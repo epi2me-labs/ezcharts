@@ -1,7 +1,7 @@
 """Get default summary bar layouts."""
 from dominate.tags import div, h1, p
 
-from ezcharts.layout.base import BaseSnippet, IClasses, IStyles
+from ezcharts.layout.base import IClasses, IStyles, Snippet
 from ezcharts.layout.util import cls, css
 
 
@@ -21,7 +21,7 @@ class IBadgeStyles(IStyles):
         "font-size: 13px;")
 
 
-class Badge(BaseSnippet):
+class Badge(Snippet):
     """A styled span."""
 
     TAG = 'span'
@@ -33,7 +33,7 @@ class Badge(BaseSnippet):
         styles: IBadgeStyles = IBadgeStyles(),
         classes: IBadgeClasses = IBadgeClasses(),
     ) -> None:
-        """Create styled banner."""
+        """Create styled badge."""
         bg = bg_class or classes.container_bg
         super().__init__(
             title,
@@ -59,7 +59,7 @@ class IBannerStyles(IStyles):
     inner: str = css("border-color: rgba(255, 255, 255, 0.1) !important;")
 
 
-class Banner(BaseSnippet):
+class Banner(Snippet):
     """A styled div tag containing a heading and badges."""
 
     TAG = 'div'
@@ -69,7 +69,8 @@ class Banner(BaseSnippet):
         report_title: str,
         workflow_name: str,
         styles: IBannerStyles = IBannerStyles(),
-        classes: IBannerClasses = IBannerClasses()
+        classes: IBannerClasses = IBannerClasses(),
+        default_content: bool = True
     ) -> None:
         """Create styled banner."""
         super().__init__(
@@ -80,6 +81,8 @@ class Banner(BaseSnippet):
 
         with self:
             with div(className=classes.inner, style=styles.inner):
+                if not default_content:
+                    return
                 h1(report_title)
                 p(
                     f"Results generated through the {workflow_name} nextflow "

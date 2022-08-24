@@ -2,7 +2,7 @@
 from dominate.tags import button, div, li, style, ul
 from dominate.util import raw
 
-from ezcharts.layout.base import BaseSnippet, IClasses, IStyles
+from ezcharts.layout.base import IClasses, IStyles, Snippet
 from ezcharts.layout.util import cls, css, render_template
 
 
@@ -30,7 +30,7 @@ class ITabsStyles(IStyles):
         "color: #0079a4!important")
 
 
-class Tabs(BaseSnippet):
+class Tabs(Snippet):
     """A styled div tag for creating tabbed layouts."""
 
     TAG = 'div'

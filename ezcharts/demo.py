@@ -7,10 +7,12 @@ from pkg_resources import resource_filename
 
 import ezcharts as ezc
 from ezcharts.components.ezchart import EZChart
+from ezcharts.components.nextclade import NextClade, NXTComponent
 from ezcharts.components.reports.labs import LabsReport
+from ezcharts.components.theme import LAB_head_resources
 from ezcharts.layout.snippets import Grid
+from ezcharts.layout.snippets import Stats
 from ezcharts.layout.snippets import Tabs
-from ezcharts.layout.snippets.stats import StatsSection
 from ezcharts.plots import Plot, util
 
 
@@ -56,28 +58,45 @@ def main(args):
     # Example data
     params = resource_filename('ezcharts', "test_data/params.json")
     versions = resource_filename('ezcharts', "test_data/versions.txt")
+    nxt_json = resource_filename('ezcharts', "test_data/nextclade.json")
 
     # Create report
+    # Note we need to add nextclade as a resource
     report = LabsReport(
-        REPORT_TITLE, WORKFLOW_NAME, params, versions)
+        REPORT_TITLE, WORKFLOW_NAME, params, versions,
+        head_resources=[*LAB_head_resources, NXTComponent])
 
+    # Add a header badge via an already included banner snippet.
+    # N.b. Snippets are little reusable portions of html, styles
+    # and or scripts in python class format. They often expose
+    # methods for adding content to them in a simple way. E.g.
+    report.banner.add_badge('Test badge', bg_class="bg-primary")
+
+    # Add something directly to main_content.
     with report.main_content:
-        stats = StatsSection(columns=3)
-        stats.add_stats_item('1213986', 'Read count')
-        stats.add_stats_item('98.67%', 'Median accuracy')
-        stats.add_stats_item('10213 bp', 'Some other stat')
+        # Stats is another snippet, but we could also just
+        # add any html tags here.
+        Stats(
+            columns=3,
+            items=[
+                ('1213986', 'Read count'),
+                ('98.67%', 'Median accuracy'),
+                ('10213 bp', 'Some other stat')
+            ])
 
-    with report.add_section(
-        "alignment-results", 'Alignment results',
-        'Results'
-    ):
+    # This also adds to main_content, but provides a nice
+    # container snippet as a starting context.
+    with report.add_section('Alignment results', 'Results'):
         # This is the tabbed section with ezcharts!
         tabs = Tabs()
         with tabs.add_tab('Summary', True):
+            # Grids are snippets that provide responsive
+            # layouts via css grid
             with Grid():
                 EZChart(example_plot("line"), 'epi2melabs')
                 EZChart(example_plot("scatter"), 'epi2melabs')
         with tabs.add_tab('Accuracy', False):
+            p("This is a mixed tab!")
             EZChart(example_plot(), 'epi2melabs')
         with tabs.add_tab('Depth', False):
             p('Testing, testing, 1 2 3')
@@ -86,6 +105,9 @@ def main(args):
         with tabs.add_dropdown_menu('Example'):
             with tabs.add_dropdown_tab('First', False):
                 EZChart(example_plot(), 'epi2melabs')
+
+    with report.add_section('Nextclade results', 'Nextclade', True):
+        NextClade(nxt_json)
 
     logger.info('Reticulating splines')
     report.write(args.output)
