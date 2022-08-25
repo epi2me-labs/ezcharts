@@ -52,7 +52,7 @@ class LabsAddendum(Snippet):
                     f"epi2me-labs/{workflow_name}. The workflow "
                     "can be run using"
                 ):
-                    code("nextflow epi2me-labs/wf-human-snp --help")
+                    code(f"nextflow epi2me-labs/{workflow_name} --help")
                 p(
                     "Oxford Nanopore Technologies products are not "
                     "intended for use for health assessment or to "
@@ -193,3 +193,11 @@ class LabsReport(Report):
         self.nav.add_link('main', link, f'#{href}')
         with self.main_content:
             return Section(href, title, overflow=overflow)
+
+    def add_badge(
+        self,
+        title: str,
+        bg_class=None
+    ) -> None:
+        """Add a badge to the banner."""
+        self.banner.add_badge(title, bg_class=bg_class)

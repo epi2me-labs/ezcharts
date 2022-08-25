@@ -78,7 +78,7 @@ class Tabs(Snippet):
                 button(
                     title,
                     className=f"{self.classes.tab_button} {_active}",
-                    id=f"tabs-{lowered}-tab",
+                    id=f"{self.uid}-tabs-{lowered}-tab",
                     type="button",
                     role="tab",
                     **self._get_button_data_aria(lowered))
@@ -113,7 +113,7 @@ class Tabs(Snippet):
                 role="tab",
                 className="dropdown-item",
                 type="button",
-                id=f"#tabs-{lowered}-tab",
+                id=f"#{self.uid}-tabs-{lowered}-tab",
                 **self._get_button_data_aria(lowered))
 
         with self.contents:
@@ -124,7 +124,7 @@ class Tabs(Snippet):
         """Get tab content container."""
         return div(
             className=classes,
-            id=f"tabs-{title}",
+            id=f"{self.uid}-tabs-{title}",
             role="tabpanel",
             **self._get_content_data_aria(title))
 
@@ -132,12 +132,12 @@ class Tabs(Snippet):
         """Get ARIA data for tab buttons."""
         return {
             "data-bs-toggle": "tab",
-            "data-bs-target": f"#tabs-{title}",
-            "aria-controls": f"tabs-{title}",
+            "data-bs-target": f"#{self.uid}-tabs-{title}",
+            "aria-controls": f"{self.uid}-tabs-{title}",
         }
 
     def _get_content_data_aria(self, title: str):
         """Get ARIA data for tab content containers."""
         return {
-            "aria-labelledby": f"tabs-{title}-tab"
+            "aria-labelledby": f"{self.uid}-tabs-{title}-tab"
         }

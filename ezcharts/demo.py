@@ -66,16 +66,16 @@ def main(args):
         REPORT_TITLE, WORKFLOW_NAME, params, versions,
         head_resources=[*LAB_head_resources, NXTComponent])
 
-    # Add a header badge via an already included banner snippet.
-    # N.b. Snippets are little reusable portions of html, styles
-    # and or scripts in python class format. They often expose
-    # methods for adding content to them in a simple way. E.g.
-    report.banner.add_badge('Test badge', bg_class="bg-primary")
+    # Add a header badge via a method on the report element.
+    report.add_badge('Test badge', bg_class="bg-primary")
 
     # Add something directly to main_content.
     with report.main_content:
-        # Stats is another snippet, but we could also just
-        # add any html tags here.
+        # Stats is a snippet, but we could also just add any html
+        # tags here. Snippets are little reusable portions of html,
+        # styles and or scripts in python class format. They often
+        # expose methods for adding content to them in a simple way.
+        # E.g.
         Stats(
             columns=3,
             items=[
