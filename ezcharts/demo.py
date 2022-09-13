@@ -13,6 +13,7 @@ from ezcharts.components.theme import LAB_head_resources
 from ezcharts.layout.snippets import Grid
 from ezcharts.layout.snippets import Stats
 from ezcharts.layout.snippets import Tabs
+from ezcharts.layout.snippets.cards import Cards, ICard
 from ezcharts.plots import Plot, util
 
 
@@ -83,6 +84,24 @@ def main(args):
                 ('98.67%', 'Median accuracy'),
                 ('10213 bp', 'Some other stat')
             ])
+
+    # This also adds to main_content, but provides a nice
+    # container snippet as a starting context.
+    with report.add_section('Controls', 'Controls'):
+        # This is an example of how to use bootstrap cards
+        Cards(
+            columns=2,
+            items=[
+                ICard(
+                    head="Positive",
+                    body="The positive passed",
+                    footer="All postive controls within threshold",
+                    classes="bg-success text-white"),
+                ICard(
+                    head="No Template Control",
+                    body="The NTC failed",
+                    footer="NTC outside set thresholds.",
+                    classes="bg-danger text-white")])
 
     # This also adds to main_content, but provides a nice
     # container snippet as a starting context.
