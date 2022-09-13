@@ -14,6 +14,7 @@ from ezcharts.layout.snippets import Grid
 from ezcharts.layout.snippets import Stats
 from ezcharts.layout.snippets import Tabs
 from ezcharts.layout.snippets.cards import Cards, ICard
+from ezcharts.layout.snippets.progress import Progress
 from ezcharts.plots import Plot, util
 
 
@@ -70,6 +71,14 @@ def main(args):
     # Add a header badge via a method on the report element.
     report.add_badge('Test badge', bg_class="bg-primary")
 
+    # Make a progress bar for the median accuracy box
+    median_accuracy = Progress(
+            value_min=0,
+            value_max=100,
+            value_now=98.9,
+            bar_cls="progress-bar-striped",
+            height=50)
+
     # Add something directly to main_content.
     with report.main_content:
         # Stats is a snippet, but we could also just add any html
@@ -81,7 +90,7 @@ def main(args):
             columns=3,
             items=[
                 ('1213986', 'Read count'),
-                ('98.67%', 'Median accuracy'),
+                (median_accuracy, 'Median accuracy'),
                 ('10213 bp', 'Some other stat')
             ])
 

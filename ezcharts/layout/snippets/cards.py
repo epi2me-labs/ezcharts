@@ -20,7 +20,7 @@ class ICard(NamedTuple):
 class ICardClasses(IClasses):
     """Cards html classes."""
 
-    container: str = cls("container", "px-0", "mb-5")
+    container: str = cls("container", "px-0")
     card: str = cls("card", "px-0", "mb-4")
     card_body: str = cls("card-body")
     card_heading: str = cls("card-header")
