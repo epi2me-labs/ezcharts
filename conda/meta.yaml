@@ -1,4 +1,3 @@
-
 # this doesn't work
 # {% set data = load_setup_py_data() %}
 
@@ -19,8 +18,14 @@ requirements:
     - pip
     - python
   run:
-    - python
-    - prodict
+    - dominate
+    - jinja2
+    - libsass
+    - numpy
+    - pandas
+    - pydantic
+    - scipy
+    - seaborn==0.12.0
 
 test:
   imports:
