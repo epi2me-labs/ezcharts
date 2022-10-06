@@ -71,7 +71,7 @@ def argparser():
     )
     parser.add_argument(
         "--plot_spec",
-        default=resource_filename('ezcharts', "test_data/plot-spec.json"),
+        default=resource_filename('ezcharts', "test/plot-spec.json"),
         help=(
             "A JSON file defining an eCharts plot",
             "key/values."

@@ -58,9 +58,9 @@ def main(args):
     logger.info('Building report')
 
     # Example data
-    params = resource_filename('ezcharts', "test_data/params.json")
-    versions = resource_filename('ezcharts', "test_data/versions.txt")
-    nxt_json = resource_filename('ezcharts', "test_data/nextclade.json")
+    params = resource_filename('ezcharts', "data/test/params.json")
+    versions = resource_filename('ezcharts', "data/test/versions.txt")
+    nxt_json = resource_filename('ezcharts', "data/test/nextclade.json")
 
     # Create report
     # Note we need to add nextclade as a resource

@@ -6,7 +6,7 @@ from typing import Dict
 from dominate.tags import script, style
 from dominate.util import raw, text
 from jinja2 import BaseLoader, Environment
-from pkg_resources import resource_filename as res
+from pkg_resources import resource_filename
 import sass
 
 
@@ -28,7 +28,7 @@ def inline(
 
 def resolve_import(path):
     """Find resource and return as list."""
-    resolved = res('ezcharts', path)
+    resolved = resource_filename('ezcharts', path)
     # Temporary measure
     if os.path.exists(resolved) and not os.path.isdir(resolved):
         return [[resolved]]
