@@ -3,3 +3,4 @@ include LICENSE.md
 include requirements.txt
 recursive-include ezcharts/test_data *
 recursive-include ezcharts/data *
+recursive-include ezcharts/plots/data *

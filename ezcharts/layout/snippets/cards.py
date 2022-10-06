@@ -50,7 +50,6 @@ class Cards(Snippet):
 
         with self.items:
             for item in items:
-                print(items)
                 self.add_card(item.head, item.body, item.footer, item.classes)
 
     def add_card(

@@ -7,6 +7,7 @@ from pkg_resources import resource_filename
 from ezcharts.components.ezchart import EZChart
 from ezcharts.components.reports.comp import ComponentReport
 from ezcharts.plots._model import EChartsOption
+from ezcharts.plots.util import JSCode
 
 
 # NOTE: the add_x methods below allow for type checking that pydantic V1 would
@@ -18,8 +19,13 @@ class Plot(EChartsOption):
     """Main plotting interface."""
 
     def to_json(self, **kwargs):
-        """Create a json representation of options."""
-        return self.json(exclude_unset=True)
+        """
+        Create a json representation of options.
+
+        Here we clean up the serialised json in the event that it includes
+        any javascript code.
+        """
+        return JSCode._clean(self.json(exclude_unset=True))
 
     def add_series(self, spec):
         """Add a series to chart."""
@@ -35,16 +41,17 @@ class Plot(EChartsOption):
         if orig is not None:
             self.dataset = orig + self.dataset
 
-    def render_html(self, output):
+    def render_html(self, output, **kwargs):
         """Render plot to a file.
 
         :params output: output file.
+        :param kwargs: passed to `EZChart`.
         """
         try:
             title = self.title.text
         except AttributeError:
             title = 'ezChart Plot'
-        chart = EZChart(self, 'epi2melabs')
+        chart = EZChart(self, 'epi2melabs', **kwargs)
         report = ComponentReport(title, chart)
         report.write(output)
 

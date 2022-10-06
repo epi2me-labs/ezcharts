@@ -16,7 +16,7 @@ from ezcharts.layout.snippets import Tabs
 from ezcharts.layout.snippets.cards import Cards, ICard
 from ezcharts.layout.snippets.progress import Progress
 from ezcharts.plots import Plot, util
-
+from ezcharts.plots.ideogram import ideogram
 
 # Setup simple globals
 WORKFLOW_NAME = 'wf-template'
@@ -136,6 +136,11 @@ def main(args):
 
     with report.add_section('Nextclade results', 'Nextclade', True):
         NextClade(nxt_json)
+
+    with report.add_section('Human Genome', 'Genome'):
+        EZChart(
+            ideogram(blocks='cytobands'),
+            'epi2melabs', height="800px")
 
     logger.info('Reticulating splines')
     report.write(args.output)

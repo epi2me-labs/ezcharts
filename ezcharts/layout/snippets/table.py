@@ -2,6 +2,7 @@
 from typing import List, Optional, Union
 
 from dominate.tags import script, table, tbody, td, th, thead, tr
+from dominate.util import raw
 
 from ezcharts.layout.base import IClasses, Snippet
 from ezcharts.layout.util import cls, render_template
@@ -63,5 +64,5 @@ class DataTable(Snippet):
                 if title:
                     th(title, scope="row1")
                 for column in columns:
-                    td(str(column))
+                    td(raw(str(column)))
         return row

@@ -1,4 +1,4 @@
-# ezcharts requirements. 
+# ezcharts requirements.
 # Add comments to keep track of why we are using particular versions
 dominate
 jinja2

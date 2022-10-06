@@ -16,7 +16,9 @@ class EZChart(Snippet):
     def __init__(
         self,
         plot,
-        theme: str
+        theme: str,
+        width: str = '100%',
+        height: str = '500px'
     ) -> None:
         """Create a div and script tag for initialising the plot."""
         width = "100%"
@@ -24,10 +26,11 @@ class EZChart(Snippet):
             styles=None,
             classes=None,
             className="chart-container",
-            style="width:100%; height:500px;")
+            style=f"width:{width}; height:{height};")
 
         with self:
-            script(render_template(
+
+            script(raw(render_template(
                 """
                 var chart_{{ id }} = echarts.init(
                     dom=document.getElementById('{{ id }}'),
@@ -43,7 +46,7 @@ class EZChart(Snippet):
                 chart_{{ id }}.resize()
                 """,
                 c=plot, j=plot.to_json(), t=theme,
-                w=width, id=self.uid))
+                w=width, id=self.uid)))
 
 
 class EZChartTheme(script):

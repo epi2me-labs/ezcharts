@@ -13,6 +13,37 @@ sns_type_to_echarts = {
     "numeric": "value"}
 
 
+class JSCode():
+    """A class for javascript code snippets."""
+
+    DELIMITER = "~~~0^0~~~"
+
+    def __init__(self, jscode):
+        """Initialise object."""
+        self.jscode = jscode
+
+    def to_json(self):
+        """Output json with some stuff so we can strip them out."""
+        return f"{self.DELIMITER}{self.jscode}{self.DELIMITER}"
+
+    @classmethod
+    def _clean(cls, jscode):
+        """
+        Clean up escape characters in the code.
+
+        This method is intended for use after JSON serialisation.
+        """
+        dirty = [
+            '"%s' % cls.DELIMITER,
+            '%s"' % cls.DELIMITER,
+            "\\n"]
+
+        for find in dirty:
+            jscode = jscode.replace(find, '')
+
+        return jscode
+
+
 def get_named_logger(name):
     """Create a logger with a name.
 
@@ -63,6 +94,18 @@ class _colors:
     fandango = "#A53F96"
     green = "#17BB75"
     verdigris = "#54B8B1"
+
+    white = "#FFFFFF"
+    black = "#000000"
+    grey10 = "#1A1A1A"
+    grey20 = "#333333"
+    grey30 = "#4D4D4D"
+    grey40 = "#666666"
+    grey50 = "#808080"
+    grey60 = "#999999"
+    grey70 = "#B3B3B3"
+    grey80 = "#CCCCCC"
+    grey90 = "#E6E6E6"
 
 
 class _ontColors:

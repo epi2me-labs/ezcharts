@@ -53,11 +53,33 @@ proc = subprocess.run(f"""
         --input {tmpfile} --input-file-type jsonschema""".split(),
     capture_output=True)
 
-# Dataset can be a list (and that's how we use it often
-find="dataset: Optional[Dataset] = Field("
-replace="dataset: Optional[Union[List[Dataset], Dataset]] = Field("
-model = proc.stdout.decode().replace(find, replace)
+# make some changes to the models
+model = proc.stdout.decode()
+
+laundry_list = dict(
+    dataset=dict(
+        find="dataset: Optional[Dataset] = Field(",
+        replace="dataset: Optional[Union[List[Dataset], Dataset]] = Field("),
+    grid=dict(
+        find="grid: Optional[Grid] = Field(",
+        replace="grid: Optional[Union[List[Grid], Grid]] = Field("),
+    xaxis=dict(
+        find="xAxis: Optional[XAxis] = Field(",
+        replace="xAxis: Optional[Union[List[XAxis], XAxis]] = Field("),
+    yaxis=dict(
+        find="yAxis: Optional[YAxis] = Field(",
+        replace="yAxis: Optional[Union[List[YAxis], YAxis]] = Field("),
+    renderitem=dict(
+        find="renderItem: Optional[RenderItem] = Field(",
+        replace="renderItem: Optional[JSCode] = Field("),
+    imports=dict(
+        find="from __future__ import annotations",
+        replace="""from __future__ import annotations\n
+        from ezcharts.plots.util import JSCode"""))
+
+for k, v in laundry_list.items():
+    model = model.replace(v['find'], v['replace'])
+
 with open("ezcharts/plots/_model.py", 'w') as fh:
     fh.write("# flake8: noqa\n")
     fh.write(model)
-
