@@ -6,8 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [v0.2.2]
 ### Added
-- Ideoplots - function to draw ideoplots from user provided data
-- JSCode class for javascript code snippets
+- Ideogram - function to draw ideograms from user provided data.
+- JSCode class for javascript code snippets.
+### Fixed
+- Cleaned up inclusion of data resources.
 
 ## [v0.2.1]
 ### Fixed
