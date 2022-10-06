@@ -4,12 +4,11 @@ import argparse
 
 from dominate.tags import script
 from dominate.util import raw
-from pkg_resources import resource_filename as res
 
 from ezcharts.components.reports.comp import ComponentReport
 from ezcharts.components.theme import LAB_head_resources
 from ezcharts.layout.base import Snippet
-from ezcharts.layout.resource import EZ, Resource, SCRIPTS
+from ezcharts.layout.resource import ScriptResource
 from ezcharts.layout.util import inline, render_template
 
 
@@ -41,10 +40,9 @@ class NextClade(Snippet):
                 data=data)))
 
 
-NXTComponent = Resource(
-    path=res(EZ, f'{SCRIPTS}/nextclade.html'),
-    loader=inline
-)
+NXTComponent = ScriptResource(
+    path='nextclade.html',
+    loader=inline)
 
 
 def main(args):

@@ -1,1 +1,0 @@
-"""Contains package data."""

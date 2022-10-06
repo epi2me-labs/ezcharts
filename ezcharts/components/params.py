@@ -46,7 +46,7 @@ def argparser():
     )
     parser.add_argument(
         "--params",
-        default=resource_filename('ezcharts', "test_data/params.json"),
+        default=resource_filename('ezcharts', "test/params.json"),
         help=(
             "A JSON file containing the workflow parameter "
             "key/values."

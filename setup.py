@@ -56,10 +56,9 @@ setup(
     extras_require=extra_requires,
     # don't include any testing subpackages in dist
     packages=find_packages(exclude=['*.test', '*.test.*', 'test.*', 'test']),
+    #package_data={__pkg_name__:[os.path.join('data', '*')]},
     include_package_data=True,
-    exclude_package_data={__pkg_name__: [".*", "__*", "*.pyc"]},
     zip_safe=False,
-    data_files=[],
     entry_points={
         'console_scripts': [
             '{0} = {0}:cli'.format(__pkg_name__)

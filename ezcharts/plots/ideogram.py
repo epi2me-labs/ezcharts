@@ -67,7 +67,7 @@ def load_ucsc_bands(genome="hg38", types=None):
     # TODO: clean up package data
     src = resource_filename(
         "ezcharts",
-        f"plots/data/ideoplots/reference/{genome}/cytoBand.txt.gz")
+        f"data/reference/{genome}/cytoBand.txt.gz")
     if types is None:
         types = [
             'acen', 'gneg',
@@ -102,7 +102,7 @@ def load_chr_sizes(genome="hg38"):
     # TODO: clean up package data
     src = resource_filename(
         "ezcharts",
-        f"plots/data/ideoplots/reference/{genome}/{genome}.chrom.sizes.gz")
+        f"data/reference/{genome}/{genome}.chrom.sizes.gz")
     sizes = pd.read_csv(src, sep="\t", header=None, names=['chr', 'size'])
     sizes['chr'] = sizes['chr'].str.replace('chr', '')
     return sizes
