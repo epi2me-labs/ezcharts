@@ -18,6 +18,19 @@ from ezcharts.plots.util import JSCode
 class Plot(EChartsOption):
     """Main plotting interface."""
 
+    def __init__(self, *args, **kwargs):
+        """Initialize a plot with defaults."""
+        super().__init__(*args, **kwargs)
+        self.toolbox = {
+            "show": True,
+            "feature": {
+                "dataZoom": {"show": True},
+                "dataView": {"readOnly": True},
+                "restore": {},
+                "saveAsImage": {}
+            }
+        }
+
     def to_json(self, **kwargs):
         """
         Create a json representation of options.
@@ -71,7 +84,7 @@ def argparser():
     )
     parser.add_argument(
         "--plot_spec",
-        default=resource_filename('ezcharts', "test/plot-spec.json"),
+        default=resource_filename('ezcharts', "data/test/plot-spec.json"),
         help=(
             "A JSON file defining an eCharts plot",
             "key/values."
@@ -79,7 +92,7 @@ def argparser():
     )
     parser.add_argument(
         "--output",
-        default="ezchart_plot_report.html",
+        default="ezcharts_plot_report.html",
         help="Output HTML file."
     )
     return parser
