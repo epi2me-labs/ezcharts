@@ -48,13 +48,14 @@ class DataTable(Snippet):
                 """
                 new simpleDatatables.DataTable('#{{ id }}_inner', {
                     searchable: true,
-                    pageLength: {{ page_length }}
+                    pageLength: {{ page_length }},
+                    paging: {{ paging }},
                     columns: [
                         { select: 2, sort: 'desc' },
                     ]
                 })
                 """,
-                id=self.uid))
+                id=self.uid, paging=str(paging).lower(), page_length=page_length))
 
     def add_row(
         self,
