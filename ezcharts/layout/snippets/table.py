@@ -55,7 +55,9 @@ class DataTable(Snippet):
                     ]
                 })
                 """,
-                id=self.uid, paging=str(paging).lower(), page_length=page_length))
+                id=self.uid,
+                paging=str(paging).lower(),
+                page_length=page_length))
 
     def add_row(
         self,
