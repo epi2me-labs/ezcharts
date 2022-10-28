@@ -23,6 +23,8 @@ class DataTable(Snippet):
     def __init__(
         self,
         headers: List[str],
+        page_length: Optional[int] = 10,
+        paging: Optional[bool] = True,
         classes: ITableClasses = ITableClasses(),
     ) -> None:
         """Create table."""
@@ -46,6 +48,7 @@ class DataTable(Snippet):
                 """
                 new simpleDatatables.DataTable('#{{ id }}_inner', {
                     searchable: true,
+                    pageLength: {{ page_length }}
                     columns: [
                         { select: 2, sort: 'desc' },
                     ]
