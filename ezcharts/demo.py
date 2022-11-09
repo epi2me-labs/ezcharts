@@ -6,6 +6,7 @@ import pandas as pd
 from pkg_resources import resource_filename
 
 import ezcharts as ezc
+from ezcharts import util
 from ezcharts.components.ezchart import EZChart
 from ezcharts.components.nextclade import NextClade, NXTComponent
 from ezcharts.components.reports.labs import LabsReport
@@ -15,7 +16,7 @@ from ezcharts.layout.snippets import Stats
 from ezcharts.layout.snippets import Tabs
 from ezcharts.layout.snippets.cards import Cards, ICard
 from ezcharts.layout.snippets.progress import Progress
-from ezcharts.plots import Plot, util
+from ezcharts.plots import Plot
 from ezcharts.plots.ideogram import ideogram
 
 # Setup simple globals
@@ -25,8 +26,7 @@ REPORT_TITLE = f'{WORKFLOW_NAME}-report'
 
 def main(args):
     """Demo for ezCharts functionality."""
-    util.set_basic_logging()
-    logger = util.get_named_logger("ezCharts Demo")
+    logger = util.get_named_logger("ezChrtDemo")
 
     # Good location to prepare plots
     logger.info('Building plots')

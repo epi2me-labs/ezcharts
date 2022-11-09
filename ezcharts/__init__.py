@@ -4,7 +4,9 @@ __version__ = "0.2.2"
 
 import argparse
 import importlib
+import logging
 
+from ezcharts import util
 from ezcharts.plots.axisgrid import *  # noqa: F401,F403
 from ezcharts.plots.categorical import *  # noqa: F401,F403
 from ezcharts.plots.distribution import *  # noqa: F401,F403
@@ -17,6 +19,7 @@ def cli():
     """Run ezcharts entry point."""
     parser = argparse.ArgumentParser(
         'ezcharts',
+        parents=[util._log_level()],
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     parser.add_argument(
@@ -40,4 +43,10 @@ def cli():
         p.set_defaults(func=mod.main)
 
     args = parser.parse_args()
+    logging.basicConfig(
+        format='[%(asctime)s - %(name)s] %(message)s',
+        datefmt='%H:%M:%S', level=logging.INFO)
+    logger = logging.getLogger(__package__)
+    logger.setLevel(args.log_level)
+
     args.func(args)
