@@ -1,12 +1,11 @@
 """Utility functions for aiding plotting."""
 
-import logging
-
 import numpy as np
 import pandas as pd
 import pkg_resources
 from scipy import stats as sp_stats
 
+from ezcharts import util
 
 sns_type_to_echarts = {
     "categorical": "category",
@@ -42,30 +41,6 @@ class JSCode():
             jscode = jscode.replace(find, '')
 
         return jscode
-
-
-def get_named_logger(name):
-    """Create a logger with a name.
-
-    :param name: name of logger.
-    """
-    name = name.ljust(10)[:10]  # so logging is aligned
-    logger = logging.getLogger('{}.{}'.format(__package__, name))
-    logger.name = name
-    return logger
-
-
-def set_basic_logging(level=logging.INFO):
-    """Set basic log formatting.
-
-    :returns: logger instance.
-    """
-    logging.basicConfig(
-        format='[%(asctime)s - %(name)s] %(message)s',
-        datefmt='%H:%M:%S', level=level)
-    logger = logging.getLogger(__package__)
-    logger.setLevel(level)
-    return logger
 
 
 def read_files(summaries):
@@ -200,7 +175,7 @@ def plot_wrapper(func):
     """
     def wrapper_accepting_arguments(*args, **kwargs):
         """Argument wrapper for decorator."""
-        logger = get_named_logger('PlotWrap')
+        logger = util.get_named_logger('PlotWrap')
         try:
             p = (func(*args, **kwargs))
             return p

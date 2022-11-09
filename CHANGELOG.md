@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - All plots now have a toolbox by default.
 - Added ecStat 1.2.0 to vendor resources
 - Adding paging options to DataTable
+- CLI now configures logging.
+
 
 ## [v0.2.2]
 ### Added
