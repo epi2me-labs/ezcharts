@@ -30,6 +30,9 @@ class Mixin:
         if data.empty:
             return
 
+        if 'hue' not in data:
+            data['hue'] = None
+
         x_name = self.variables.get("x", None)
         y_name = self.variables.get("y", None)
 
@@ -39,11 +42,13 @@ class Mixin:
         plt.yAxis = dict(
             name=y_name,
             type=util.sns_type_to_echarts[str(self.var_types['y'])])
+
         plt.add_dataset({
             'id': 'raw',
             'dimensions': data.columns,
             'source': data.values})
         # TODO: size and style are also grouping "semantic" variables
+
         for series_index, series_name in enumerate(
                 data['hue'].unique(), start=1):
             plt.add_dataset({

@@ -32,7 +32,7 @@ def cli():
     subparsers.required = True
 
     # all component demos, plus some others
-    components = ['params', 'nextclade']
+    components = ['params', 'nextclade', 'fastcat']
     others = ['ezcharts.demo', 'ezcharts.plots', 'ezcharts.plots.ideogram']
 
     demos = [f'ezcharts.components.{comp}' for comp in components] + others
