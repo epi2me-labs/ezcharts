@@ -8,6 +8,7 @@ from pkg_resources import resource_filename
 import ezcharts as ezc
 from ezcharts import util
 from ezcharts.components.ezchart import EZChart
+from ezcharts.components.fastcat import SeqSummary
 from ezcharts.components.nextclade import NextClade, NXTComponent
 from ezcharts.components.reports.labs import LabsReport
 from ezcharts.components.theme import LAB_head_resources
@@ -61,6 +62,8 @@ def main(args):
     params = resource_filename('ezcharts', "data/test/params.json")
     versions = resource_filename('ezcharts', "data/test/versions.txt")
     nxt_json = resource_filename('ezcharts', "data/test/nextclade.json")
+    fastcat_results = resource_filename(
+        'ezcharts', "data/test/fastcat.stats.gz")
 
     # Create report
     # Note we need to add nextclade as a resource
@@ -93,6 +96,10 @@ def main(args):
                 (median_accuracy, 'Median accuracy'),
                 ('10213 bp', 'Some other stat')
             ])
+
+    # Add sequence summary component
+    with report.add_section('Sequence summaries', 'Summaries'):
+        SeqSummary(fastcat_results)
 
     # This also adds to main_content, but provides a nice
     # container snippet as a starting context.
