@@ -2,6 +2,7 @@
 import argparse
 
 from dominate.tags import p
+import numpy as np
 import pandas as pd
 from pkg_resources import resource_filename
 
@@ -50,6 +51,9 @@ def main(args):
             plot = ezc.lineplot(data=df, x='year', y='sales', hue='product')
         elif style == "scatter":
             plot = ezc.scatterplot(data=df, x='year', y='sales', hue='product')
+        elif style == 'histogram':
+            plot = ezc.histplot(
+                data=np.random.randint(0, 10, size=1000), bins=10)
         else:
             raise ValueError("Unknown plot style")
         plot.title = {"text": f"Example {style} chart"}
@@ -130,6 +134,7 @@ def main(args):
             with Grid():
                 EZChart(example_plot("line"), 'epi2melabs')
                 EZChart(example_plot("scatter"), 'epi2melabs')
+                EZChart(example_plot("histogram"), 'epi2melabs')
         with tabs.add_tab('Accuracy', False):
             p("This is a mixed tab!")
             EZChart(example_plot(), 'epi2melabs')
