@@ -54,6 +54,8 @@ def main(args):
         elif style == 'histogram':
             plot = ezc.histplot(
                 data=np.random.randint(0, 10, size=1000), bins=10)
+        elif style == "bar":
+            plot = ezc.barplot(data=df, x='year', y='sales', hue='product')
         else:
             raise ValueError("Unknown plot style")
         plot.title = {"text": f"Example {style} chart"}
@@ -134,6 +136,7 @@ def main(args):
             with Grid():
                 EZChart(example_plot("line"), 'epi2melabs')
                 EZChart(example_plot("scatter"), 'epi2melabs')
+                EZChart(example_plot("bar"), 'epi2melabs')
                 EZChart(example_plot("histogram"), 'epi2melabs')
         with tabs.add_tab('Accuracy', False):
             p("This is a mixed tab!")
