@@ -38,12 +38,15 @@ def histplot(
 
     # WARNING: The bars are centered on the ticks. Add half a bin width to the
     # edges to left-align them with the bin start tick.
-    bin_width = edges[1] - edges[0]
-    edges_right_shift = edges + bin_width / 2
+    binwidth = binwidth if binwidth else edges[1] - edges[0]
+
+    edges_right_shifted = edges + binwidth / 2
+
     heights = np.append(heights, 0)
-    data = np.column_stack([edges_right_shift, heights]).tolist()
+    data = np.column_stack([edges_right_shifted, heights]).tolist()
 
     plt = Plot()
+
     plt.xAxis = dict(type='value', scale=True)
     plt.yAxis = dict()
     plt.dataset = [dict(source=data)]
@@ -52,7 +55,7 @@ def histplot(
         name='histogram', type='bar', barWidth='100%', datasetIndex=0)]
 
     plt.xAxis.min = edges.min()
-    plt.xAxis.max = np.ceil(edges.max())
+    plt.xAxis.max = np.ceil(edges_right_shifted.max())
 
     return plt
 

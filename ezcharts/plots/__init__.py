@@ -85,7 +85,7 @@ class Plot(EChartsOption):
 
     def fix_axis_labels(self):
         """Try to place axis labels so they don't overlap tick labels."""
-        if (hasattr(self, 'grid') and self.grid is not None):
+        if hasattr(self, 'grid') and self.grid is not None:
             self.logger.warning(
                 "Cannot correct axis labels in complicated scenarios.")
             return
