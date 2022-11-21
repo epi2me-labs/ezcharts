@@ -64,6 +64,10 @@ def barplot(
             columns=hue, values=y_name, index=x_name).reset_index(drop=False)
         plt.legend = dict(orient='horizontal', top=25)
 
+    if order:
+        mapper = {x: pos for (pos, x) in enumerate(order)}
+        data = data.sort_values(x_name, key=lambda x: x.map(mapper))
+
     plt.xAxis = dict(name=x_name, type='category')
     plt.yAxis = dict(name=y_name, type='value')
 
