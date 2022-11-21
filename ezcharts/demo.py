@@ -53,7 +53,7 @@ def main(args):
             plot = ezc.scatterplot(data=df, x='year', y='sales', hue='product')
         elif style == 'histogram':
             plot = ezc.histplot(
-                data=np.random.randint(0, 10, size=1000), bins=10)
+                data=np.random.randint(0, 11, size=1000), bins=10)
         elif style == "bar":
             plot = ezc.barplot(data=df, x='year', y='sales', hue='product')
         else:
