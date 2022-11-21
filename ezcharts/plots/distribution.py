@@ -55,7 +55,18 @@ def histplot(
         name='histogram', type='bar', barWidth='100%', datasetIndex=0)]
 
     plt.xAxis.min = edges.min()
+
     plt.xAxis.max = np.ceil(edges_right_shifted.max())
+
+    if len(edges) == 2:
+        # If there's only one bar, echarts makes the bar width too large.
+        # In this case extending the xAxis by setting the xAxis max to
+        # the max of the actual plotted data reults in the correct width.
+        plt.xAxis.max = np.ceil(edges_right_shifted.max())
+    else:
+        # If plotting more than one bar, it is possible to set xAxis max() to
+        # the raw data value and get expected bar widths.
+        plt.xAxis.max = np.ceil(edges.max())
 
     return plt
 
