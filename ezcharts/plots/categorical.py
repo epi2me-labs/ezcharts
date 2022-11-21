@@ -1,5 +1,8 @@
 """Categorical plots."""
 
+
+from ezcharts.plots import Plot
+
 __all__ = [
     "catplot", "stripplot", "swarmplot", "boxplot", "violinplot",
     "boxenplot", "pointplot", "barplot", "countplot"]
@@ -41,10 +44,38 @@ def pointplot(*args, **kwargs):
     raise NotImplementedError
 
 
-def barplot(*args, **kwargs):
+def barplot(
+    data=None, *, x=None, y=None, hue=None, order=None, hue_order=None,
+    estimator='mean', errorbar=('ci', 95), n_boot=1000, units=None, seed=None,
+    orient=None, color=None, palette=None, saturation=0.75, width=0.8,
+    errcolor='.26', errwidth=None, capsize=None, dodge=True, ci='deprecated',
+        ax=None, **kwargs):
     """Show point estimates and confidence intervals as rectangular bars."""
-    # NOTE: default estimator is mean
-    raise NotImplementedError
+    x_name = x if x else data.columns[0]
+    y_name = y if y else data.columns[1]
+
+    plt = Plot()
+
+    if hue not in data:
+        data = data[[x_name, y_name]]
+    else:
+        # Transform to [x, hue, hue, hue ...]
+        data = data.pivot(
+            columns=hue, values=y_name, index=x_name).reset_index(drop=False)
+        plt.legend = dict(orient='horizontal', top=25)
+
+    plt.xAxis = dict(name=x_name, type='category')
+    plt.yAxis = dict(name=y_name, type='value')
+
+    plt.add_dataset({
+        'id': 'raw',
+        'dimensions': data.columns,
+        'source': data.values})
+
+    # Automatically map series to columns in the dataset
+    plt.series = [{'type': 'bar'}] * (data.shape[1] - 1)
+
+    return plt
 
 
 def countplot(*args, **kwargs):
