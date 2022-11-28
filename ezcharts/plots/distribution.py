@@ -3,7 +3,7 @@
 import numpy as np
 from seaborn._statistics import Histogram
 
-from ezcharts.plots import Plot
+from ezcharts.plots import Plot, util
 
 
 __all__ = ["displot", "histplot", "kdeplot", "ecdfplot", "rugplot", "distplot"]
@@ -12,6 +12,67 @@ __all__ = ["displot", "histplot", "kdeplot", "ecdfplot", "rugplot", "distplot"]
 def displot(*args, **kwargs):
     """Figure-level interface for distribution plots in a grid."""
     raise NotImplementedError
+
+
+class MakeRectangles(util.JSCode):
+    """
+    Make JSCode rectangles.
+
+    Use Instance as an argument to series.renderItem.
+    Series.encode should list two x dimensions for bar start and end
+    and one y dimension for bar height.
+    """
+
+    def __init__(self):
+        """Instantiate the class with some jscode.
+
+        Each call to this function creates JS code to make a single echarts
+        rectangle.
+
+        First get the x-start, x-end and height of the rectangle in raw data
+        coords. eg: var data_x_start = api.value(0);
+
+        Convert the raw data coords to canvas coords.
+        Note in canvas coords (x=0, y=0) is in the top left.
+        eg: var start = api.coord([data_start, 0]);
+
+        start[1] is y=0 in canvas coords. Subtract the height from this to get
+        the canvas coords for the top of the rectangle.
+        """
+        jscode = """function renderItem(params, api) {
+            var data_x_start = api.value(0);
+            var data_x_end = api.value(1);
+            var data_height = api.value(2);
+
+            var start = api.coord([data_x_start, 0]);
+            var end = api.coord([data_x_end, 0]);
+            var height = api.size([0, data_height])[1];
+
+            var rectShape = echarts.graphic.clipRectByRect(
+                {
+                    x: start[0],
+                    y: start[1] - height,
+                    width: end[0] - start[0],
+                    height: height
+                },
+                {
+                    x: params.coordSys.x,
+                    y: params.coordSys.y,
+                    width: params.coordSys.width,
+                    height: params.coordSys.height
+                }
+            );
+            return (
+                rectShape && {
+                    type: 'rect',
+                    transition: ['shape'],
+                    shape: rectShape,
+                    style: api.style()
+
+                }
+            );}"""
+
+        super().__init__(jscode)
 
 
 def histplot(
@@ -36,37 +97,28 @@ def histplot(
     estimator = Histogram(**estimate_kws)
     heights, edges = estimator(data, weights=weights)
 
-    # WARNING: The bars are centered on the ticks. Add half a bin width to the
-    # edges to left-align them with the bin start tick.
-    binwidth = binwidth if binwidth else edges[1] - edges[0]
-
-    edges_right_shifted = edges + binwidth / 2
-
-    heights = np.append(heights, 0)
-    data = np.column_stack([edges_right_shifted, heights]).tolist()
+    x_starts = edges[:-1]
+    x_ends = edges[1:]
+    rect_data = np.stack((x_starts, x_ends, heights), axis=-1)
 
     plt = Plot()
 
-    plt.xAxis = dict(type='value', scale=True)
+    plt.xAxis = dict()
     plt.yAxis = dict()
-    plt.dataset = [dict(source=data)]
+    plt.add_dataset(dict(
+        source=rect_data,
+        dimensions=['x_starts', 'ends', 'heights']))
 
-    plt.series = [dict(
-        name='histogram', type='bar', barWidth='100%', datasetIndex=0)]
-
-    plt.xAxis.min = edges.min()
-
-    plt.xAxis.max = np.ceil(edges_right_shifted.max())
-
-    if len(edges) == 2:
-        # If there's only one bar, echarts makes the bar width too large.
-        # In this case extending the xAxis by setting the xAxis max to
-        # the max of the actual plotted data reults in the correct width.
-        plt.xAxis.max = np.ceil(edges_right_shifted.max())
-    else:
-        # If plotting more than one bar, it is possible to set xAxis max() to
-        # the raw data value and get expected bar widths.
-        plt.xAxis.max = np.ceil(edges.max())
+    plt.add_series(dict(
+        type='custom',
+        renderItem=MakeRectangles(),
+        datasetIndex=0,
+        encode={
+            'x': ['x_starts', 'ends'],
+            'y': ['heights']
+        },
+        clip=True
+        ))
 
     return plt
 
