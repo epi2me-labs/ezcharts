@@ -4,12 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [unreleased]
+## [v0.2.3]
 ### Changed
 - All plots now have a toolbox by default.
 ### Added
-- histogram function.
-- fastcat sequence summary component.
+- Histogram and barplot with seaborn API.
+- Fastcat sequence summary component.
+- Some overriding of eCharts defaults.
 - Added ecStat 1.2.0 to vendor resources
 - Adding paging options to DataTable
 - CLI now configures logging.
