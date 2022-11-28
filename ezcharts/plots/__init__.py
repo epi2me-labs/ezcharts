@@ -105,7 +105,6 @@ class Plot(EChartsOption):
         for axis, data_idx in axes:
             # TODO: is data_idx always 0/1 for x/y?
             axis.nameLocation = 'middle'  # 'cos eCharts its weird
-
             if axis.type == 'category':
                 # Warning: Just taking the raw datasource here.
                 # Any plots with transformed data may not have axes setup
