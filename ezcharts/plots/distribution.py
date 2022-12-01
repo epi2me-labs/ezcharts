@@ -105,6 +105,7 @@ def histplot(
 
     plt.xAxis = dict()
     plt.yAxis = dict()
+
     plt.add_dataset(dict(
         source=rect_data,
         dimensions=['x_starts', 'ends', 'heights']))
