@@ -1,21 +1,45 @@
 """Plotting functionality via echarts."""
 
 import argparse
-from math import floor, log10
 
 from pkg_resources import resource_filename
 
 from ezcharts import util as ezutil
 from ezcharts.components.ezchart import EZChart
 from ezcharts.components.reports.comp import ComponentReport
+from ezcharts.plots import util
 from ezcharts.plots._model import EChartsOption
 from ezcharts.plots.util import JSCode
+
 
 # NOTE: the add_x methods below allow for type checking that pydantic V1 would
 #       otherwise not perform, e.g. plt.series.append({...}) evades checking
 #       https://github.com/pydantic/pydantic/issues/496
 
 _logger = ezutil.get_named_logger("Plotter")
+
+
+class Formatter(util.JSCode):
+    """Formatter for echarts axis labels."""
+
+    def __init__(self):
+        """Instantiate the class with some JS code.
+
+        Convert high and low values to scientific notation.
+        """
+        jscode = """function(value, index){
+                        if (value == 0){
+                            return 0;
+                        }
+                        if (value > 10000 || value < 0.0001){
+                            return value.toExponential();
+                        }
+                        else{
+                            return value
+                        }
+                     }
+        """
+        super().__init__(jscode)
 
 
 class Plot(EChartsOption):
@@ -105,42 +129,33 @@ class Plot(EChartsOption):
         for axis, data_idx in axes:
             # TODO: is data_idx always 0/1 for x/y?
             axis.nameLocation = 'middle'  # 'cos eCharts its weird
-            if axis.type == 'category':
-                # Warning: Just taking the raw datasource here.
-                # Any plots with transformed data may not have axes setup
-                # correctly
-                num_label_digits = max((
-                    len(str(x[data_idx]))
-                    for x in self.dataset[0].source))
+
+            if axis.axisLabel is not None:
+                axis.axisLabel.formatter = Formatter()
             else:
-                max_val = max(
-                    (x[data_idx] for x in self.dataset[0].source))
+                axis.axisLabel = {
+                    "formatter": Formatter()}
 
-                if max_val >= 1:
-                    num_label_digits = len(str(round(max_val)))
-                else:
-                    num_label_digits = 0
-                    min_val = sorted([
-                        x[data_idx] for x in self.dataset[0].source
-                        if x[data_idx] != 0])
-                    if len(min_val) > 0:
-                        min_val = min_val[0]
-                        num_label_digits = - floor(log10(abs(min_val))) - 1
+            if axis == self.yAxis:
+                name_offset = 45
+                self.grid.left = 55
 
-            if axis == self.xAxis:
+            elif axis == self.xAxis:
                 name_offset = 25
-                try:
-                    rotation = axis.axisLabel.rotate
-                except AttributeError:
-                    rotation = 0
-                if rotation != 0:
-                    name_offset = 12 + num_label_digits * 6
-                    self.grid.bottom = name_offset + 15
-            elif axis == self.yAxis:
-                name_offset = 15 + (num_label_digits * 6)
-                self.grid.left = name_offset + 10
-            else:
-                raise ValueError("Found unexpected axis.")
+                if axis.type == 'category':
+                    # Warning: Just taking the raw datasource here.
+                    # Any plots with transformed data may not have axes setup
+                    # correctly
+                    num_label_digits = max((
+                        len(str(x[data_idx]))
+                        for x in self.dataset[0].source))
+                    try:
+                        rotation = axis.axisLabel.rotate
+                    except AttributeError:
+                        rotation = 0
+                    if rotation != 0:  # Let's assume a sensible rotation of 45
+                        name_offset = 25 + num_label_digits * 4
+                        self.grid.bottom = name_offset + 15
 
             axis.nameGap = name_offset
 
