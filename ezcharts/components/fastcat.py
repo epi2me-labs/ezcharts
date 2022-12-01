@@ -53,9 +53,18 @@ def base_yield_plot(
 
     ylab = 'Yield above length / Gbases'
     xlab = 'Read length / kbases'
+
+    # If we have u/int8 or u/int16 cast to float to prevent overflow
+    df.read_length = df.read_length.astype('uint64')
     df[ylab] = \
         df.read_length.cumsum()[::-1].values / 1e+9
     df[xlab] = df['read_length'] / 1000
+
+    # No need plot all the points
+    if len(df) > 10000:
+        step = len(df) // 10000
+        df = df.loc[::step, :]
+
     plt = ezc.lineplot(data=df, x=xlab, y=ylab, hue=None)
     plt.series[0].showSymbol = False
     plt.title = dict(text=title)
