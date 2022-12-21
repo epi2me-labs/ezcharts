@@ -127,8 +127,43 @@ class LabsNavigation(Snippet):
                     className=self.classes.nav_item_link)
 
 
-class LabsReport(Report):
+class BasicReport(Report):
     """A basic labs-themed report."""
+
+    def __init__(
+        self,
+        report_title,
+        logo: Type[html_tag] = EPI2MELabsLogo,
+        head_resources: List[Resource] = LAB_head_resources,
+        body_resources: List[Resource] = LAB_body_resources
+    ) -> None:
+        """Create tag."""
+        super().__init__(
+            report_title=report_title,
+            head_resources=head_resources,
+            body_resources=body_resources)
+        with self.header:
+            self.nav = LabsNavigation(logo=logo, groups=['main'])
+
+        with self.main:
+            self.intro_content = section(id="intro-content", role="region")
+            self.main_content = section(id="main-content", role="region")
+
+    def add_section(
+        self,
+        title: str,
+        link: str,
+        overflow: bool = False
+    ) -> Section:
+        """Add a section to the main_content region."""
+        href = link.lower().replace(' ', '_')
+        self.nav.add_link('main', link, f'#{href}')
+        with self.main_content:
+            return Section(href, title, overflow=overflow)
+
+
+class LabsReport(BasicReport):
+    """A basic labs-themed report for a workflow."""
 
     def __init__(
         self,
@@ -161,8 +196,6 @@ class LabsReport(Report):
                     created_date = datetime.today().strftime('%Y-%m-%d')
                 self.banner.add_badge(created_date, bg_class="bg-secondary")
 
-            self.main_content = section(id="main-content", role="region")
-
             self.meta_content = section(id="meta-content", role="region")
             with self.meta_content:
                 with Section(
@@ -181,18 +214,6 @@ class LabsReport(Report):
 
         with self.footer:
             self.addendum = LabsAddendum(workflow_name=workflow_name)
-
-    def add_section(
-        self,
-        title: str,
-        link: str,
-        overflow: bool = False
-    ) -> Section:
-        """Add a section to the main_content region."""
-        href = link.lower().replace(' ', '_')
-        self.nav.add_link('main', link, f'#{href}')
-        with self.main_content:
-            return Section(href, title, overflow=overflow)
 
     def add_badge(
         self,
