@@ -59,6 +59,7 @@ class Mixin:
                     'config': {'dimension': 'hue', '=': series_name}}]})
             plt.add_series({
                 'type': self.series_type,
+                'name': series_name,
                 # would be nicer to use datasetId here, but not documented
                 # so not in our API
                 'datasetIndex': series_index,
