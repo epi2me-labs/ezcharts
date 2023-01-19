@@ -143,7 +143,7 @@ class BasicReport(Report):
             head_resources=head_resources,
             body_resources=body_resources)
         with self.header:
-            self.nav = LabsNavigation(logo=logo, groups=['main'])
+            self.nav = LabsNavigation(logo=logo, groups=['main', 'meta'])
 
         with self.main:
             self.intro_content = section(id="intro-content", role="region")
@@ -183,11 +183,8 @@ class LabsReport(BasicReport):
             body_resources=body_resources)
 
         with self.header:
-            self.nav = LabsNavigation(logo=logo, groups=['main', 'meta'])
             self.nav.add_link('meta', 'Versions', '#versions')
             self.nav.add_link('meta', 'Parameters', '#parameters')
-
-        with self.main:
             self.intro_content = section(id="intro-content", role="region")
             with self.intro_content:
                 self.banner = Banner(report_title, workflow_name)
@@ -196,6 +193,7 @@ class LabsReport(BasicReport):
                     created_date = datetime.today().strftime('%Y-%m-%d')
                 self.banner.add_badge(created_date, bg_class="bg-secondary")
 
+        with self.main:
             self.meta_content = section(id="meta-content", role="region")
             with self.meta_content:
                 with Section(
