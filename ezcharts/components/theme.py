@@ -60,7 +60,7 @@ OND_CSS = StyleResource(
     tag=style,
     loader=transpile)
 
-OND_JS = StyleResource(
+OND_JS = ScriptResource(
     path='epi2melabs.js',
     tag=script,
     loader=inline)
