@@ -22,14 +22,30 @@ class SeqSummary(Snippet):
         If seq_summary contains results from multiple samples, each will be
         plotted in its own tab.
 
-        :param: seq_summary: A path to a fastcat output file.
+        :param seq_summary: A path to a fastcat / bamstats output file or
+            DataFrame
         """
         super().__init__(styles=None, classes=None)
 
         with self:
             tabs = Tabs()
             tab_active = True
-            df_all = util.read_files(seq_summary)
+            if not isinstance(seq_summary, pd.DataFrame):
+                df_all = util.read_files(seq_summary)
+            else:
+                df_all = seq_summary
+            # Out of the intersection of columns between `fastcat` and
+            # `bamstats` output, only the column with the read IDs has a
+            # different name (`read_id` in `fastcat` and `name` in `bamstats`).
+            # Rename to ensure the dataframes produced from either `fastcat` or
+            # `bamstats` are consistent.
+            if df_all.columns[0] == "name":
+                df_all.rename(columns={"name": "read_id"}, inplace=True)
+            # the following assumes that `fastcat` / `bamstats` has been run
+            # with `-s` which is not necessarily the case (if there was only
+            # one sample) --> create a dummy 'sample_name' column if missing
+            if 'sample_name' not in df_all.columns:
+                df_all['sample_name'] = 'sample'
             for sample_id, df_sample in df_all.groupby('sample_name'):
                 with tabs.add_tab(sample_id, tab_active):
                     tab_active = False
@@ -52,7 +68,7 @@ def base_yield_plot(
         (pd.DataFrame.from_dict({'read_length': 0}, orient='index').T, df))
 
     ylab = 'Yield above length / Gbases'
-    xlab = 'Read length / kbases'
+    xlab = 'Read length / kb'
 
     # If we have u/int8 or u/int16 cast to float to prevent overflow
     df.read_length = df.read_length.astype('uint64')
@@ -117,11 +133,11 @@ def read_length_plot(
     median_length = int(np.median(df['read_length']))
     max_ = int(np.max(df['read_length']))
 
-    plt = ezc.histplot(data=df.read_length, bins=bins)
+    plt = ezc.histplot(data=df.read_length / 1000, bins=bins)
     plt.title = dict(
         text=title,
         subtext=f"Mean: {mean_length}. Median: {median_length}. Max: {max_}")
-    plt.xAxis.name = 'Read length / bases'
+    plt.xAxis.name = 'Read length / kb'
     plt.yAxis.name = 'Number of reads'
     return plt
 
