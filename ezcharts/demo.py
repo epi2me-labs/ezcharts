@@ -14,10 +14,12 @@ from ezcharts.components.nextclade import NextClade, NXTComponent
 from ezcharts.components.reports.labs import LabsReport
 from ezcharts.components.theme import LAB_head_resources
 from ezcharts.layout.snippets import Grid
+from ezcharts.layout.snippets import OffCanvas
+from ezcharts.layout.snippets import Progress
 from ezcharts.layout.snippets import Stats
 from ezcharts.layout.snippets import Tabs
-from ezcharts.layout.snippets.cards import Cards, ICard
-from ezcharts.layout.snippets.progress import Progress
+from ezcharts.layout.snippets.cards import Cards
+from ezcharts.layout.snippets.cards import ICard
 from ezcharts.plots import Plot
 from ezcharts.plots.ideogram import ideogram
 
@@ -124,6 +126,10 @@ def main(args):
                     body="The NTC failed",
                     footer="NTC outside set thresholds.",
                     classes="bg-danger text-white")])
+        OffCanvas(
+            label="More details (Offcanvas demo)",
+            title="Details of Controls",
+            body="You can put more details here....")
 
     # This also adds to main_content, but provides a nice
     # container snippet as a starting context.

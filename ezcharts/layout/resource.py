@@ -63,7 +63,7 @@ echarts_js = VendorResource(
     loader=inline)
 
 bootstrap_js = VendorResource(
-    path='bootstrap-5.0.2/js/bootstrap.bundle.min.js',
+    path='bootstrap-5.3.0/js/bootstrap.bundle.min.js',
     tag=script,
     loader=inline)
 
