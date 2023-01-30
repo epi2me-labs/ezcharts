@@ -1,4 +1,7 @@
 """Get default tabs layouts."""
+from typing import Optional
+import warnings
+
 from dominate.tags import button, div, li, style, ul
 from dominate.util import raw
 
@@ -47,6 +50,7 @@ class Tabs(Snippet):
             styles=styles,
             classes=classes,
             className=classes.container)
+        self.ntabs = 0
 
         with self:
             style(raw(render_template(
@@ -65,9 +69,14 @@ class Tabs(Snippet):
                 className=classes.tab_contents_container,
                 id="pills-tabContent")
 
-    def add_tab(self, title: str, active: bool) -> div:
+    def add_tab(self, title: str, active: Optional[bool] = None) -> div:
         """Add a tab button and content container."""
-        _active = 'active' if active else ''
+        if active is not None:
+            warnings.warn(
+                "Explicitely passing 'active' parameter is deprecated "
+                "and will be ignored.",
+                DeprecationWarning)
+        _active = 'active' if self.ntabs == 0 else ''
         lowered = title.lower()
 
         with self.buttons:
@@ -84,7 +93,7 @@ class Tabs(Snippet):
                     **self._get_button_data_aria(lowered))
 
         with self.contents:
-            return self._build_container(
+            return self._build_tab_container(
                 lowered, f"{self.classes.tab_content} {_active}")
 
     def add_dropdown_menu(self, title: str) -> ul:
@@ -102,26 +111,33 @@ class Tabs(Snippet):
                     **dropdown_link_data_aria)
                 return ul(className="dropdown-menu")
 
-    def add_dropdown_tab(self, title: str, active: bool) -> div:
+    def add_dropdown_tab(
+            self, title: str, active: Optional[bool] = None) -> div:
         """Get a dropdown tab."""
-        _active = 'active' if active else ''
+        if active is not None:
+            warnings.warn(
+                "Explicitely passing 'active' parameter is deprecated "
+                "and will be ignored.",
+                DeprecationWarning)
+        _active = 'active' if self.ntabs == 0 else ''
         lowered = title.lower()
 
         with li():
             button(
                 title,
                 role="tab",
-                className="dropdown-item",
+                className=f"dropdown-item {_active}",
                 type="button",
                 id=f"#{self.uid}-tabs-{lowered}-tab",
                 **self._get_button_data_aria(lowered))
 
         with self.contents:
-            return self._build_container(
+            return self._build_tab_container(
                 lowered, f"{self.classes.tab_content} {_active}")
 
-    def _build_container(self, title: str, classes: str) -> div:
+    def _build_tab_container(self, title: str, classes: str) -> div:
         """Get tab content container."""
+        self.ntabs += 1
         return div(
             className=classes,
             id=f"{self.uid}-tabs-{title}",

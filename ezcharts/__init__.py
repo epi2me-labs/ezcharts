@@ -46,6 +46,7 @@ def cli():
     logging.basicConfig(
         format='[%(asctime)s - %(name)s] %(message)s',
         datefmt='%H:%M:%S', level=logging.INFO)
+    logging.captureWarnings(True)
     logger = logging.getLogger(__package__)
     logger.setLevel(args.log_level)
 
