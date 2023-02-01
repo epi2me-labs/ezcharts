@@ -9,6 +9,9 @@ from ezcharts.layout.base import IClasses, IStyles, Snippet
 from ezcharts.layout.util import cls, css, render_template
 
 
+warnings.simplefilter('always', DeprecationWarning)
+
+
 class ITabsClasses(IClasses):
     """Tabs html classes."""
 
@@ -73,9 +76,9 @@ class Tabs(Snippet):
         """Add a tab button and content container."""
         if active is not None:
             warnings.warn(
-                "Explicitely passing 'active' parameter is deprecated "
+                "Explicitly passing 'active' parameter is deprecated "
                 "and will be ignored.",
-                DeprecationWarning)
+                DeprecationWarning, stacklevel=2)
         _active = 'active' if self.ntabs == 0 else ''
         lowered = title.lower()
 
@@ -116,9 +119,9 @@ class Tabs(Snippet):
         """Get a dropdown tab."""
         if active is not None:
             warnings.warn(
-                "Explicitely passing 'active' parameter is deprecated "
+                "Explicitly passing 'active' parameter is deprecated "
                 "and will be ignored.",
-                DeprecationWarning)
+                DeprecationWarning, stacklevel=2)
         _active = 'active' if self.ntabs == 0 else ''
         lowered = title.lower()
 
