@@ -25,6 +25,7 @@ class Progress(Snippet):
         value_min: int = 0,
         value_max: int = 100,
         value_now: int = 50,
+        display_val: Optional[str] = None,
         bar_cls: Optional[str] = None,
         height: Optional[int] = None,
         title: Optional[str] = None,
@@ -42,6 +43,7 @@ class Progress(Snippet):
                 value_min,
                 value_max,
                 value_now,
+                display_val,
                 bar_cls,
                 title,
                 height)
@@ -51,6 +53,7 @@ class Progress(Snippet):
         value_min: int,
         value_max: int,
         value_now: int,
+        display_val: Optional[str] = None,
         bar_cls: Optional[str] = None,
         title: Optional[str] = None,
         height: Optional[int] = None
@@ -62,19 +65,24 @@ class Progress(Snippet):
         # Set style if height of bar is defined
         pstyle = f"height: {str(height)}px" if height is not None else ''
 
-        # Calculate percentage for bootstrap
-        percent = f"{100*(value_now/value_max)}%"
+        # calculate the width in percent
+        width = 100 * (value_now / value_max)
+
+        # define text to be displayed in the progress bar
+        display_val = (
+            display_val if display_val is not None else f"{width:.1f}%"
+        )
 
         ptext = "justify-content-center d-flex position-absolute w-100"
 
         with div(className=cls(self.classes.progress), style=pstyle):
             div(
                 span(
-                    percent,
+                    display_val,
                     cls=ptext,
                     style='' if height is None else f"font-size:{height*4}%"),
                 role="progressbar",
-                style=f"width: {100*(value_now/value_max)}%;height:100%;",
+                style=f"width:{width}%;height:100%;",
                 aria_valuenow=str(value_now),
                 aria_valuemin=str(value_min),
                 aria_valuemax=str(value_max),
