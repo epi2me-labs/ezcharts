@@ -17,7 +17,7 @@ test: venv/bin/activate
 	${IN_VENV} && pip install 'flake8<6.0.0' flake8-rst-docstrings flake8-docstrings flake8-import-order flake8-forbid-visual-indent
 	${IN_VENV} && flake8 ${PROJECT} \
 		--import-order-style google --application-import-names ${PROJECT} \
-		--statistics
+		--statistics --max-line-length 88
 	# demo should run without error
 	${IN_VENV} && python setup.py install
 	${IN_VENV} && ${PROJECT} demo
