@@ -1,9 +1,11 @@
 """Utility functions for aiding plotting."""
+from itertools import cycle, islice
 
 import numpy as np
 import pandas as pd
 import pkg_resources
 from scipy import stats as sp_stats
+
 
 from ezcharts import util
 
@@ -145,12 +147,41 @@ def kernel_density_estimate(x, step=0.2):
     return x_grid, pdf
 
 
-def choose_palette(ncolours):
+def choose_palette(name='colorblind', ncolours=None):
     """Choose colour palette.
 
+    These are seaborn's qualitative color palettes.
+    https://seaborn.pydata.org/tutorial/color_palettes.html
+
+    :param: name: name of palette to return colors from.
     :param: ncolours: number of colours.
     """
-    raise NotImplementedError
+    palletes = {
+        'colorblind': [
+            '#0173b2', '#de8f05', '#029e73', '#d55e00', '#cc78bc',
+            '#ca9161', '#fbafe4', '#949494', '#ece133', '#56b4e9'],
+        'deep': [
+            '#4c72b0', '#dd8452', '#55a868', '#c44e52', '#8172b3',
+            '#937860', '#da8bc3', '#8c8c8c', '#ccb974', '#64b5cd'],
+        'dark': [
+            '#001c7f', '#b1400d', '#12711c', '#8c0800', '#591e71',
+            '#592f0d', '#a23582', '#3c3c3c', '#b8850a', '#006374'],
+        'muted': [
+            '#4878d0', '#ee854a', '#6acc64', '#d65f5f', '#956cb4',
+            '#8c613c', '#dc7ec0', '#797979', '#d5bb67', '#82c6e2'],
+        'bright': [
+            '#023eff', '#ff7c00', '#1ac938', '#e8000b', '#8b2be2',
+            '#9f4800', '#f14cc1', '#a3a3a3', '#ffc400', '#00d7ff'],
+        'pastel': [
+            '#a1c9f4', '#ffb482', '#8de5a1', '#ff9f9b', '#d0bbff',
+            '#debb9b', '#fab0e4', '#cfcfcf', '#fffea3', '#b9f2f0']
+    }
+
+    if ncolours is None:
+        return palletes[name]
+
+    cycler = cycle(palletes[name])
+    return [c for c in islice(cycler, ncolours)]
 
 
 def emptyPlot(**kwargs):
