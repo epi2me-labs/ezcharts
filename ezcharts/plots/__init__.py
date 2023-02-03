@@ -131,11 +131,11 @@ class Plot(EChartsOption):
             # TODO: is data_idx always 0/1 for x/y?
             axis.nameLocation = 'middle'  # 'cos eCharts its weird
 
-            if axis.axisLabel is not None:
+            # Allow formatter to be set from user.
+            if axis.axisLabel is None:
+                axis.axisLabel = dict(formatter=Formatter())
+            elif axis.axisLabel.formatter is None:
                 axis.axisLabel.formatter = Formatter()
-            else:
-                axis.axisLabel = {
-                    "formatter": Formatter()}
 
             if axis == self.yAxis:
                 name_offset = 45
