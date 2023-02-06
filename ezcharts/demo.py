@@ -54,8 +54,15 @@ def main(args):
         elif style == "scatter":
             plot = ezc.scatterplot(data=df, x='year', y='sales', hue='product')
         elif style == 'histogram':
-            plot = ezc.histplot(
-                data=np.random.randint(0, 11, size=1000), bins=10)
+            hist_data = pd.DataFrame(
+                        [np.random.normal(loc=10.0, size=1000),
+                         np.random.normal(loc=12.0, size=1000),
+                         np.random.normal(loc=14.0, size=1000)]).T
+            hist_data.columns = ['sample1', 'sample2', 'sample3']
+            plot = ezc.histplot(hist_data, bins=50, stat='proportion')
+
+            plot.xAxis.name = 'Read length'
+            plot.yAxis.name = 'Number of reads'
         elif style == "bar":
             plot = ezc.barplot(data=df, x='year', y='sales', hue='product')
         else:
