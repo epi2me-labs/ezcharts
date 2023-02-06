@@ -1,6 +1,7 @@
 """Distributional plots."""
 
 import numpy as np
+import pandas as pd
 from seaborn._statistics import Histogram
 
 from ezcharts.plots import Plot, util
@@ -85,7 +86,11 @@ def histplot(
     cbar=False, cbar_ax=None, cbar_kws=None, palette=None,
     hue_order=None, hue_norm=None, color=None, log_scale=None,
         legend=True, ax=None, **kwargs):
-    """Plot univariate or bivariate histograms to show distributions."""
+    """Plot univariate or multivariate histograms."""
+    plt = Plot()
+    plt.xAxis = dict()
+    plt.yAxis = dict()
+
     estimate_kws = dict(
         stat=stat,
         bins=bins,
@@ -94,33 +99,49 @@ def histplot(
         discrete=discrete,
         cumulative=cumulative,
     )
-    estimator = Histogram(**estimate_kws)
-    heights, edges = estimator(data, weights=weights)
 
-    x_starts = edges[:-1]
-    x_ends = edges[1:]
-    rect_data = np.stack((x_starts, x_ends, heights), axis=-1)
+    data = pd.DataFrame(data)
 
-    plt = Plot()
+    if data.shape[1] > 1:
+        # multivariate data
+        opacity = 0.5
+        if palette is None:
+            palette = util.choose_palette(ncolours=data.shape[1])
+    else:
+        opacity = 1.0
+        if color is None:
+            palette = util.choose_palette(ncolours=1)
+        else:
+            palette = [color]
 
-    plt.xAxis = dict()
-    plt.yAxis = dict()
+    if hue:
+        data = data.pivot(columns=hue, values=data.columns[0])
 
-    plt.add_dataset(dict(
-        source=rect_data,
-        dimensions=['x_starts', 'ends', 'heights']))
+    for dataset_idx, col in enumerate(data.columns):
+        variable_data = data[col].dropna()
+        estimator = Histogram(**estimate_kws)
+        heights, edges = estimator(variable_data, weights=weights)
 
-    plt.add_series(dict(
-        type='custom',
-        renderItem=MakeRectangles(),
-        datasetIndex=0,
-        encode={
-            'x': ['x_starts', 'ends'],
-            'y': ['heights']
-        },
-        clip=True
-        ))
+        x_starts = edges[:-1]
+        x_ends = edges[1:]
+        rect_data = np.stack((x_starts, x_ends, heights), axis=-1)
 
+        plt.add_dataset(dict(
+            source=rect_data,
+            dimensions=['x_starts', 'ends', 'heights']))
+
+        plt.add_series(dict(
+            name=str(col),
+            type='custom',
+            renderItem=MakeRectangles(),
+            itemStyle=dict(opacity=opacity, color=palette[dataset_idx]),
+            datasetIndex=dataset_idx,
+            encode={
+                'x': ['x_starts', 'ends'],
+                'y': ['heights']
+            },
+            clip=True
+            ))
     return plt
 
 
