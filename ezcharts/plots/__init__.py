@@ -19,27 +19,57 @@ from ezcharts.plots.util import JSCode
 _logger = ezutil.get_named_logger("Plotter")
 
 
-class Formatter(util.JSCode):
+class AxisLabelFormatter(JSCode):
     """Formatter for echarts axis labels."""
 
-    def __init__(self):
-        """Instantiate the class with some JS code.
+    def __init__(self, sci_notation=(0.0001, 10000)):
+        """Init.
 
-        Convert high and low values to scientific notation.
+        :param: sci_notation:
+            True: use scientific notation for the axis.
+            False: use raw values for the axis.
+            tuple: Upper and lower limits for determining use of scientific notation.
         """
-        jscode = """function(value, index){
+        self.sci_notation = sci_notation
+
+    def apply(self, values=None):
+        """
+        Create the JS formatter.
+
+        Use the values from the axis to dertermine if scientific notation
+        or raw values will be used. If values is None, use raw values as this is
+        likely a category axis.
+
+        :param values: The raw values from the current axis.
+        """
+        self.jscode = """function(value, index){
                         if (value == 0){
                             return 0;
                         }
-                        if (value > 10000 || value < 0.0001){
-                            return value.toExponential();
+                        if (@use_sci == 'false'){
+                            return value;
                         }
-                        else{
-                            return value
+                        if (@use_sci == 'true'){
+                            return value.toExponential();
                         }
                      }
         """
-        super().__init__(jscode)
+        if values is None:
+            use_sci = False
+        else:
+            if self.sci_notation is True:
+                use_sci = True
+            elif self.sci_notation is False:
+                use_sci = False
+            else:
+                # If any values fall outside the limits, covert all to sci_notation.
+                sci_limits = self.sci_notation
+                if any([x < sci_limits[0] or x > sci_limits[1] for x in values]):
+                    use_sci = True
+                else:
+                    use_sci = False
+        super().__init__(self.jscode.replace('@use_sci', f"'{str(use_sci).lower()}'"))
+        return use_sci
 
 
 class Plot(EChartsOption):
@@ -131,32 +161,39 @@ class Plot(EChartsOption):
             # TODO: is data_idx always 0/1 for x/y?
             axis.nameLocation = 'middle'  # 'cos eCharts its weird
 
-            # Allow formatter to be set from user.
+            # Warning: Just taking the raw datasource here.
+            # Any plots with transformed data may not have axes setup correctly.
+            raw_vals = self.dataset[0].source[:, data_idx]
+            max_n_label_digits = max([len(str(x)) for x in raw_vals])
+
+            # Allow formatter to be set by user.
             if axis.axisLabel is None:
-                axis.axisLabel = dict(formatter=Formatter())
+                axis.axisLabel = dict(formatter=AxisLabelFormatter())
             elif axis.axisLabel.formatter is None:
-                axis.axisLabel.formatter = Formatter()
+                axis.axisLabel.formatter = AxisLabelFormatter()
 
-            if axis == self.yAxis:
-                name_offset = 45
-                self.grid.left = 55
+            if axis.type == 'value':
+                is_sci = axis.axisLabel.formatter.apply(raw_vals)
+                # If using sci. notation, there will be 4 characters in the label
+                if is_sci:
+                    max_n_label_digits = 4
+            else:
+                axis.axisLabel.formatter.apply()
 
-            elif axis == self.xAxis:
+            if axis == self.xAxis:
                 name_offset = 25
-                if axis.type == 'category':
-                    # Warning: Just taking the raw datasource here.
-                    # Any plots with transformed data may not have axes setup
-                    # correctly
-                    num_label_digits = max((
-                        len(str(x[data_idx]))
-                        for x in self.dataset[0].source))
-                    try:
-                        rotation = axis.axisLabel.rotate
-                    except AttributeError:
-                        rotation = 0
-                    if rotation != 0:  # Let's assume a sensible rotation of 45
-                        name_offset = 25 + num_label_digits * 4
-                        self.grid.bottom = name_offset + 15
+                try:
+                    rotation = axis.axisLabel.rotate
+                except AttributeError:
+                    rotation = 0
+                if rotation != 0:  # Let's assume a sensible rotation of 45
+                    # Rotation makes axis labels project downwards more
+                    name_offset = 25 + max_n_label_digits * 4
+                    self.grid.bottom = name_offset + 15
+
+            elif axis == self.yAxis:
+                name_offset = 20 + max_n_label_digits * 6
+                self.grid.left = name_offset + 10
 
             axis.nameGap = name_offset
 
