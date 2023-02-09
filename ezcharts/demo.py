@@ -143,7 +143,7 @@ def main(args):
     with report.add_section('Alignment results', 'Results'):
         # This is the tabbed section with ezcharts!
         tabs = Tabs()
-        with tabs.add_tab('Summary', True):
+        with tabs.add_tab('Summary'):
             # Grids are snippets that provide responsive
             # layouts via css grid
             with Grid():
@@ -151,16 +151,19 @@ def main(args):
                 EZChart(example_plot("scatter"), 'epi2melabs')
                 EZChart(example_plot("bar"), 'epi2melabs')
                 EZChart(example_plot("histogram"), 'epi2melabs')
-        with tabs.add_tab('Accuracy', False):
+        with tabs.add_tab('Accuracy'):
             p("This is a mixed tab!")
             EZChart(example_plot(), 'epi2melabs')
-        with tabs.add_tab('Depth', False):
+        with tabs.add_tab('Depth'):
             p('Testing, testing, 1 2 3')
 
         # Dropdowns are nested one more level
-        with tabs.add_dropdown_menu('Example'):
-            with tabs.add_dropdown_tab('First', False):
+        with tabs.add_dropdown_menu('Example', change_header=False):
+            with tabs.add_dropdown_tab('First'):
                 EZChart(example_plot(), 'epi2melabs')
+            with tabs.add_dropdown_tab('Second'):
+                p("This is the second dropdown item.")
+                EZChart(example_plot('bar'), 'epi2melabs')
 
     with report.add_section('Nextclade results', 'Nextclade', True):
         NextClade(nxt_json)

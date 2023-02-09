@@ -53,8 +53,9 @@ class Tabs(Snippet):
             styles=styles,
             classes=classes,
             className=classes.container)
-        self.ntabs = 0
-
+        # store the number of tabs so that we know if a tab is the first one and should
+        # be active
+        self._ntabs: int = 0
         with self:
             style(raw(render_template(
                 self.BUTTON_TEMPLATE,
@@ -72,6 +73,10 @@ class Tabs(Snippet):
                 className=classes.tab_contents_container,
                 id="pills-tabContent")
 
+    @property
+    def _active_class_name(self) -> str:
+        return "" if self._ntabs > 0 else " active"
+
     def add_tab(self, title: str, active: Optional[bool] = None) -> div:
         """Add a tab button and content container."""
         if active is not None:
@@ -79,9 +84,8 @@ class Tabs(Snippet):
                 "Explicitly passing 'active' parameter is deprecated "
                 "and will be ignored.",
                 DeprecationWarning, stacklevel=2)
-        _active = 'active' if self.ntabs == 0 else ''
-        lowered = title.lower()
 
+        tab_id = f"{self.uid}-tabs-{title.lower()}"
         with self.buttons:
             with li(
                 className=self.classes.tab_buttons_list_item,
@@ -89,19 +93,20 @@ class Tabs(Snippet):
             ):
                 button(
                     title,
-                    className=f"{self.classes.tab_button} {_active}",
-                    id=f"{self.uid}-tabs-{lowered}-tab",
+                    className=f"{self.classes.tab_button}{self._active_class_name}",
+                    id=f"{tab_id}-tab",
                     type="button",
                     role="tab",
-                    **self._get_button_data_aria(lowered))
+                    **self._get_button_data_aria(tab_id))
 
         with self.contents:
-            return self._build_tab_container(
-                lowered, f"{self.classes.tab_content} {_active}")
+            return self._build_tab_container(tab_id)
 
-    def add_dropdown_menu(self, title: str) -> ul:
+    def add_dropdown_menu(
+        self, title: str = "Dropdown", change_header: bool = True
+    ) -> ul:
         """Get a dropdown menu."""
-        dropdown_link_data_aria = {"data-bs-toggle": "dropdown"}
+        button_id = f"{self.uid}-tabs-{title.lower()}-dropdown"
         with self.buttons:
             with li(
                 className=self.classes.tab_buttons_list_item + ' dropdown',
@@ -110,8 +115,10 @@ class Tabs(Snippet):
                 button(
                     title,
                     className=f"{self.classes.tab_button} dropdown-toggle",
+                    id=button_id,
                     href="#",
-                    **dropdown_link_data_aria)
+                    **{"data-bs-toggle": "dropdown"},
+                    **({"data-ezc-updateDropDownTitle": ""} if change_header else {}))
                 return ul(className="dropdown-menu")
 
     def add_dropdown_tab(
@@ -122,41 +129,35 @@ class Tabs(Snippet):
                 "Explicitly passing 'active' parameter is deprecated "
                 "and will be ignored.",
                 DeprecationWarning, stacklevel=2)
-        _active = 'active' if self.ntabs == 0 else ''
-        lowered = title.lower()
 
+        tab_id = f"{self.uid}-tabs-{title.lower()}"
         with li():
             button(
                 title,
-                role="tab",
-                className=f"dropdown-item {_active}",
+                className=f"dropdown-item{self._active_class_name}",
+                id=f"#{tab_id}-tab",
                 type="button",
-                id=f"#{self.uid}-tabs-{lowered}-tab",
-                **self._get_button_data_aria(lowered))
+                role="tab",
+                **self._get_button_data_aria(tab_id))
 
         with self.contents:
-            return self._build_tab_container(
-                lowered, f"{self.classes.tab_content} {_active}")
+            return self._build_tab_container(tab_id)
 
-    def _build_tab_container(self, title: str, classes: str) -> div:
+    def _build_tab_container(self, tab_id: str) -> div:
         """Get tab content container."""
-        self.ntabs += 1
-        return div(
-            className=classes,
-            id=f"{self.uid}-tabs-{title}",
+        tab_container = div(
+            className=f"{self.classes.tab_content}{self._active_class_name}",
+            id=tab_id,
             role="tabpanel",
-            **self._get_content_data_aria(title))
+            **{"aria-labelledby": f"{tab_id}-tab"})
+        # increment the number of tabs and return the div
+        self._ntabs += 1
+        return tab_container
 
-    def _get_button_data_aria(self, title: str):
+    def _get_button_data_aria(self, tab_id: str) -> dict:
         """Get ARIA data for tab buttons."""
         return {
             "data-bs-toggle": "tab",
-            "data-bs-target": f"#{self.uid}-tabs-{title}",
-            "aria-controls": f"{self.uid}-tabs-{title}",
-        }
-
-    def _get_content_data_aria(self, title: str):
-        """Get ARIA data for tab content containers."""
-        return {
-            "aria-labelledby": f"{self.uid}-tabs-{title}-tab"
+            "data-bs-target": f"#{tab_id}",
+            "aria-controls": f"{tab_id}",
         }
