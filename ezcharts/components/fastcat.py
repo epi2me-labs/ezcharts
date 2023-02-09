@@ -29,7 +29,6 @@ class SeqSummary(Snippet):
 
         with self:
             tabs = Tabs()
-            tab_active = True
             if not isinstance(seq_summary, pd.DataFrame):
                 df_all = util.read_files(seq_summary)
             else:
@@ -47,8 +46,7 @@ class SeqSummary(Snippet):
             if 'sample_name' not in df_all.columns:
                 df_all['sample_name'] = 'sample'
             for sample_id, df_sample in df_all.groupby('sample_name'):
-                with tabs.add_tab(sample_id, tab_active):
-                    tab_active = False
+                with tabs.add_tab(sample_id):
                     with Grid(columns=3):
                         EZChart(read_quality_plot(df_sample), theme)
                         EZChart(read_length_plot(df_sample), theme)
