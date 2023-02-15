@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Allow axis label gap fix for numberical axis type.
 ### Addded
 - Color palette chooser.
+- Dataframes to tables (`DataTable.from_pandas()`).
+- Dicts to tables (`DataTable.from_dict()`).
 - Option for dropdown menus to update the title of the dropdown tab when selecting an item.
 - Multivariate histograms.
 

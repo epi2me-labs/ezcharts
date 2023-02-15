@@ -13,6 +13,7 @@ from ezcharts.components.fastcat import SeqSummary
 from ezcharts.components.nextclade import NextClade, NXTComponent
 from ezcharts.components.reports.labs import LabsReport
 from ezcharts.components.theme import LAB_head_resources
+from ezcharts.layout.snippets import DataTable
 from ezcharts.layout.snippets import Grid
 from ezcharts.layout.snippets import OffCanvas
 from ezcharts.layout.snippets import Progress
@@ -172,6 +173,14 @@ def main(args):
         EZChart(
             ideogram(blocks='cytobands'),
             'epi2melabs', height="800px")
+
+    with report.add_section('Table', 'Table'):
+        df = pd.DataFrame(np.random.random((4, 4))) * 10
+        df.columns = pd.MultiIndex.from_product(
+            [['sample1', 'sample2'], ['mapped', 'unmapped']])
+        df['chr'] = [1, 2, 3, 4]
+        df = df.set_index('chr', drop=True)
+        DataTable.from_pandas(df, use_index=True)
 
     logger.info('Reticulating splines')
     report.write(args.output)
