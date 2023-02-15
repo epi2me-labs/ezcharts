@@ -6,7 +6,6 @@ import pandas as pd
 import pkg_resources
 from scipy import stats as sp_stats
 
-
 from ezcharts import util
 
 sns_type_to_echarts = {
