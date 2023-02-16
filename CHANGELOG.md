@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### [Unreleased]
 ### Fixed
 - Allow axis label gap fix for numberical axis type.
+- Bug caused when there were spaces or other special characters in tab headers.
 ### Addded
 - Color palette chooser.
 - Dataframes to tables (`DataTable.from_pandas()`).

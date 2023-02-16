@@ -1,6 +1,7 @@
 """A base snippet to inherit from."""
 from abc import ABC
 from dataclasses import dataclass
+import re
 from uuid import uuid4
 
 from dominate.tags import html_tag
@@ -50,4 +51,11 @@ class Snippet(html_tag):
 
     def get_uid(self, name: str) -> str:
         """Generate an ID."""
+        # make sure `name` does not contain special characters so that the resulting uid
+        # can be safely used in HTML `id` attributes
+        if not re.match(r"^[a-zA-Z0-9_\-]+$", name):
+            raise ValueError(
+                "`name` cannot contain characters other than"
+                "alphanumeric, '_', and '-'."
+            )
         return name + '_' + str(uuid4()).replace("-", "")
