@@ -156,7 +156,7 @@ class BasicReport(Report):
         overflow: bool = False
     ) -> Section:
         """Add a section to the main_content region."""
-        href = link.lower().replace(' ', '_')
+        href = self.get_uid('Section')
         self.nav.add_link('main', link, f'#{href}')
         with self.main_content:
             return Section(href, title, overflow=overflow)

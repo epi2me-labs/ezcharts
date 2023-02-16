@@ -85,7 +85,7 @@ class Tabs(Snippet):
                 "and will be ignored.",
                 DeprecationWarning, stacklevel=2)
 
-        tab_id = f"{self.uid}-tabs-{title.lower()}"
+        tab_id = f"{self.uid}-{self.get_uid('Tab')}"
         with self.buttons:
             with li(
                 className=self.classes.tab_buttons_list_item,
@@ -106,7 +106,7 @@ class Tabs(Snippet):
         self, title: str = "Dropdown", change_header: bool = True
     ) -> ul:
         """Get a dropdown menu."""
-        button_id = f"{self.uid}-tabs-{title.lower()}-dropdown"
+        button_id = f"{self.uid}-{self.get_uid('DropdownMenu')}"
         with self.buttons:
             with li(
                 className=self.classes.tab_buttons_list_item + ' dropdown',
@@ -130,7 +130,7 @@ class Tabs(Snippet):
                 "and will be ignored.",
                 DeprecationWarning, stacklevel=2)
 
-        tab_id = f"{self.uid}-tabs-{title.lower()}"
+        tab_id = f"{self.uid}-{self.get_uid('DropdownItem')}"
         with li():
             button(
                 title,
