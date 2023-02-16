@@ -82,7 +82,7 @@ class Plot(EChartsOption):
             "show": True,
             "feature": {
                 "dataZoom": {"show": True},
-                "dataView": {"readOnly": True},
+                "dataView": {"readOnly": False},
                 "restore": {},
                 "saveAsImage": {}
             }

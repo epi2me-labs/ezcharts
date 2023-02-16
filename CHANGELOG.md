@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Dicts to tables (`DataTable.from_dict()`).
 - Option for dropdown menus to update the title of the dropdown tab when selecting an item.
 - Multivariate histograms.
+### Removed
+- Dataview no longer enabled by default as its somewhat flakey.
 
 ## [v0.3.1]
 ### Fixed
