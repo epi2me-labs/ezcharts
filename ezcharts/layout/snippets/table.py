@@ -152,7 +152,7 @@ class DataTable(Snippet):
                 headers = [df.index.name or "index", *headers]
         dtable = cls(headers=headers, **kwargs)
 
-        for idx, row in df.iterrows():
+        for idx, *row in df.itertuples():
             title = idx if use_index else None
             dtable.add_row(title=title, columns=row)
 
