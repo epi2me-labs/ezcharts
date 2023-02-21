@@ -8,3 +8,4 @@ pandas
 pydantic
 scipy
 seaborn==0.12.0b2
+sigfig

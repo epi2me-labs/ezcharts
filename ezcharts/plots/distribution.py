@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 from seaborn._statistics import Histogram
 
-from ezcharts.plots import Plot, util
+from ezcharts.plots import _HistogramPlot, util
 
 
 __all__ = ["displot", "histplot", "kdeplot", "ecdfplot", "rugplot", "distplot"]
@@ -87,7 +87,7 @@ def histplot(
     hue_order=None, hue_norm=None, color=None, log_scale=None,
         legend=True, ax=None, **kwargs):
     """Plot univariate or multivariate histograms."""
-    plt = Plot()
+    plt = _HistogramPlot()
     plt.xAxis = dict()
     plt.yAxis = dict()
 
@@ -128,7 +128,7 @@ def histplot(
 
         plt.add_dataset(dict(
             source=rect_data,
-            dimensions=['x_starts', 'ends', 'heights']))
+            dimensions=['x_start', 'x_end', 'height']))
 
         plt.add_series(dict(
             name=str(col),
@@ -137,11 +137,12 @@ def histplot(
             itemStyle=dict(opacity=opacity, color=palette[dataset_idx]),
             datasetIndex=dataset_idx,
             encode={
-                'x': ['x_starts', 'ends'],
-                'y': ['heights']
+                'x': ['x_start', 'x_end'],
+                'y': ['height']
             },
             clip=True
             ))
+        plt.xAxis.type = 'value'
     return plt
 
 
