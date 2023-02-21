@@ -3,6 +3,7 @@
 import argparse
 
 from pkg_resources import resource_filename
+import sigfig
 
 from ezcharts import util as ezutil
 from ezcharts.components.ezchart import EZChart
@@ -10,7 +11,6 @@ from ezcharts.components.reports.comp import ComponentReport
 from ezcharts.plots import util
 from ezcharts.plots._model import EChartsOption
 from ezcharts.plots.util import JSCode
-
 
 # NOTE: the add_x methods below allow for type checking that pydantic V1 would
 #       otherwise not perform, e.g. plt.series.append({...}) evades checking
@@ -138,6 +138,15 @@ class Plot(EChartsOption):
         """
         self.fix_axis_labels()
 
+    def _axes_dimensions(self):
+        """Get axes for each dimension."""
+        axes = list()
+        if not isinstance(self.xAxis, list):
+            axes.append([self.xAxis, 0])
+        if not isinstance(self.yAxis, list):
+            axes.append([self.yAxis, 1])
+        return axes
+
     def fix_axis_labels(self):
         """Try to place axis labels so that they don't overlap tick labels."""
         if hasattr(self, 'grid') and self.grid is not None:
@@ -147,24 +156,22 @@ class Plot(EChartsOption):
 
         # we only try to fix up axes if we have one, else we don't
         # really know what's going on
-        axes = list()
-        if not isinstance(self.xAxis, list):
-            axes.append([self.xAxis, 0])
-        if not isinstance(self.xAxis, list):
-            axes.append([self.yAxis, 1])
+        axes = self._axes_dimensions()
 
         # to make space for axis labels we shrink the plot by setting a grid
         # and changing the margins of its sole component
         self.grid = dict()
 
         for axis, data_idx in axes:
-            # TODO: is data_idx always 0/1 for x/y?
             axis.nameLocation = 'middle'  # 'cos eCharts its weird
 
+            # Get all the raw values from each dataset that contains a source.
             # Warning: Just taking the raw datasource here.
             # Any plots with transformed data may not have axes setup correctly.
-            raw_vals = self.dataset[0].source[:, data_idx]
-            max_n_label_digits = max([len(str(x)) for x in raw_vals])
+            raw_vals = []
+            for ds in self.dataset:
+                if ds.source is not None:
+                    raw_vals.extend(ds.source[:, data_idx])
 
             # Allow formatter to be set by user.
             if axis.axisLabel is None:
@@ -174,11 +181,16 @@ class Plot(EChartsOption):
 
             if axis.type == 'value':
                 is_sci = axis.axisLabel.formatter.apply(raw_vals)
-                # If using sci. notation, there will be 4 characters in the label
+                # If using sci. notation, there will be 4-5 characters in the label
                 if is_sci:
-                    max_n_label_digits = 4
+                    max_n_label_digits = 5
+                else:
+                    round_vals = [
+                        sigfig.round(val, sigfigs=1) for val in raw_vals]
+                    max_n_label_digits = max([len(str(x)) for x in round_vals])
             else:
                 axis.axisLabel.formatter.apply()
+                max_n_label_digits = max([len(str(x)) for x in raw_vals])
 
             if axis == self.xAxis:
                 name_offset = 25
@@ -198,6 +210,19 @@ class Plot(EChartsOption):
             axis.nameGap = name_offset
 
         return self
+
+
+class _HistogramPlot(Plot):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def _axes_dimensions(self):
+        """Get correct axes for histograms.
+
+        For histograms, the first two dataset columns are start/stop
+        rectangle x coords. The third column contains bar heights.
+        """
+        return [self.xAxis, 1], [self.yAxis, 2]
 
 
 def main(args):
