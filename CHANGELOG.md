@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [v0.3.3]
 ### Fixed
-- CI issue with v0.3.2 causing a partial release.
+- CI issues with v0.3.2 causing a partial release.
 
 ## [v0.3.2]
 ### Fixed
