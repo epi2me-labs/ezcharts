@@ -2,6 +2,7 @@
 
 import argparse
 
+import numpy as np
 from pkg_resources import resource_filename
 import sigfig
 
@@ -63,8 +64,11 @@ class AxisLabelFormatter(JSCode):
                 use_sci = False
             else:
                 # If any values fall outside the limits, covert all to sci_notation.
+                # Do not include zeros as they are always plotted as '0'.
                 sci_limits = self.sci_notation
-                if any([x < sci_limits[0] or x > sci_limits[1] for x in values]):
+                v = np.array(values)
+                v = v[v != 0]
+                if ((v < sci_limits[0]) | (v > sci_limits[1])).any():
                     use_sci = True
                 else:
                     use_sci = False
