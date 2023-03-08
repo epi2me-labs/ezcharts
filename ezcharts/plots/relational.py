@@ -1,5 +1,7 @@
 """Relational plots."""
 
+import numbers
+
 from seaborn.relational import _LinePlotter, _ScatterPlotter
 
 from ezcharts.plots import Plot, util
@@ -68,6 +70,21 @@ class Mixin:
                     'itemName': x_name, 'tooltip': [y_name]}})
             plt.tooltip = {"trigger": "axis"}
 
+            # They keyword parameters are optionally set here so as not to override
+            # theme defaults.
+            for series in plt.series:
+                if kws.get('s'):
+                    if isinstance(kws['s'], numbers.Number):
+                        series.symbolSize = kws['s']
+                    else:
+                        raise NotImplementedError(
+                            "symbol size (s) currently only accepts a constant value")
+
+                # marker/symbol options are:
+                # circle, rect, roundRect, triangle, diamond, pin, arrow, none
+                if kws.get('marker'):
+                    series.symbol = kws['marker']
+
         # TODO: add legend
         return plt
 
@@ -97,6 +114,7 @@ def scatterplot(
 
     plt = Plot()
     p.plot(plt, kwargs)
+
     return plt
 
 
