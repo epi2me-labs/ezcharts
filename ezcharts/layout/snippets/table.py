@@ -2,7 +2,7 @@
 from collections.abc import Iterable
 from typing import List, Optional, Union
 
-from dominate.tags import script, table, tbody, td, th, thead, tr
+from dominate.tags import button, script, table, tbody, td, th, thead, tr
 from dominate.util import raw
 import pandas as pd
 
@@ -27,6 +27,8 @@ class DataTable(Snippet):
         headers: Optional[List[str]] = None,
         page_length: Optional[int] = 10,
         paging: Optional[bool] = True,
+        file_name: Optional[str] = 'datatable-export',
+        export: Optional[bool] = False,
         classes: ITableClasses = ITableClasses(),
     ) -> None:
         """
@@ -65,17 +67,24 @@ class DataTable(Snippet):
                                     th(_header, scope="col")
                 self.body = tbody()
 
-            script(render_template(
-                """
-                new simpleDatatables.DataTable('#{{ id }}_inner', {
-                    searchable: true,
-                    pageLength: {{ page_length }},
-                    paging: {{ paging }}
-                })
-                """,
-                id=self.uid,
-                paging=str(paging).lower(),
-                page_length=page_length))
+            # Prepare table
+            datatable_render = """
+                var {{ id }}_table = new simpleDatatables.DataTable( \
+                    '#{{ id }}_inner', { \
+                    searchable: true, \
+                    pageLength: {{ page_length }}, \
+                    paging: {{ paging }} \
+                })"""
+
+            if export:
+                datatable_render, exportCSVButton = self._export_table(datatable_render)
+            else:
+                exportCSVButton = None
+
+            script(raw(render_template(
+                datatable_render,
+                id=self.uid, paging=str(paging).lower(), page_length=page_length,
+                button_id=exportCSVButton, file_name=file_name)))
 
     def _is_multilevel_header(self, headers: list) -> bool:
         """Check if header list is a multi-level header (i.e. a list of lists).
@@ -114,6 +123,21 @@ class DataTable(Snippet):
                 for column in columns:
                     td(raw(str(column)))
         return row
+
+    def _export_table(self, datatable_render) -> str:
+        """Add a button for exporting the datatable."""
+        # Add button
+        exportCSVButton = f"{self.uid}_exportButton"
+        button(
+            "Export CSV", id=exportCSVButton, type="button",
+            className=cls("btn btn-outline-primary"))
+        datatable_render = datatable_render + \
+            """
+            document.getElementById('{{ button_id }}').addEventListener('click',\
+            () => {{ id }}_table.export({ \
+            type: 'csv', download: true, filename: '{{file_name}}'}))
+            """
+        return datatable_render, exportCSVButton
 
     @classmethod
     def from_pandas(
