@@ -50,7 +50,11 @@ def barplot(
     orient=None, color=None, palette=None, saturation=0.75, width=0.8,
     errcolor='.26', errwidth=None, capsize=None, dodge=True, ci='deprecated',
         ax=None, **kwargs):
-    """Show point estimates and confidence intervals as rectangular bars."""
+    """Show point estimates and confidence intervals as rectangular bars.
+
+    Contrary to the seaborn implementation, setting `dodge=False` does not
+    result in overlaying the bars, but rather stacking them.
+    """
     x_name = x if x else data.columns[0]
     y_name = y if y else data.columns[1]
 
@@ -77,7 +81,10 @@ def barplot(
         'source': data.values})
 
     # Automatically map series to columns in the dataset
-    plt.series = [{'type': 'bar'}] * (data.shape[1] - 1)
+    if dodge:
+        plt.series = [{'type': 'bar'}] * (data.shape[1] - 1)
+    else:
+        plt.series = [{'type': 'bar', 'stack': x_name}] * (data.shape[1] - 1)
 
     return plt
 

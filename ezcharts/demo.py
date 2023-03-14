@@ -36,24 +36,26 @@ def main(args):
     # Good location to prepare plots
     logger.info('Building plots')
 
+    # Example data
+    example_df = pd.DataFrame({
+        # as laid out in echarts docs for a dataset
+        'product': [
+            'Matcha Latte', 'Milk Tea', 'Cheese Cocoa', 'Walnut Brownie'],
+        '2015': [43.3, 83.1, 86.4, 72.4],
+        '2016': [85.8, 73.4, 65.2, 53.9],
+        '2017': [93.7, 55.1, 82.5, 39.1]
+    })
+    # how we'd likely normally have it
+    example_df = example_df.melt(
+        id_vars=['product'], value_vars=['2015', '2016', '2017'],
+        var_name='year', value_name='sales')
+
     def example_plot(style="line") -> Plot:
         """Create example plot."""
-        df = pd.DataFrame({
-            # as laid out in echarts docs for a dataset
-            'product': [
-                'Matcha Latte', 'Milk Tea', 'Cheese Cocoa', 'Walnut Brownie'],
-            '2015': [43.3, 83.1, 86.4, 72.4],
-            '2016': [85.8, 73.4, 65.2, 53.9],
-            '2017': [93.7, 55.1, 82.5, 39.1]
-        })
-        # how we'd likely normally have it
-        df = df.melt(
-            id_vars=['product'], value_vars=['2015', '2016', '2017'],
-            var_name='year', value_name='sales')
         if style == "line":
-            plot = ezc.lineplot(data=df, x='year', y='sales', hue='product')
+            plot = ezc.lineplot(data=example_df, x='year', y='sales', hue='product')
         elif style == "scatter":
-            plot = ezc.scatterplot(data=df, x='year', y='sales', hue='product')
+            plot = ezc.scatterplot(data=example_df, x='year', y='sales', hue='product')
         elif style == 'histogram':
             hist_data = pd.DataFrame(
                         [np.random.normal(loc=10.0, size=1000),
@@ -65,7 +67,7 @@ def main(args):
             plot.xAxis.name = 'Read length'
             plot.yAxis.name = 'Number of reads'
         elif style == "bar":
-            plot = ezc.barplot(data=df, x='year', y='sales', hue='product')
+            plot = ezc.barplot(data=example_df, x='year', y='sales', hue='product')
         else:
             raise ValueError("Unknown plot style")
         plot.title = {"text": f"Example {style} chart"}
@@ -164,7 +166,11 @@ def main(args):
                 EZChart(example_plot(), 'epi2melabs')
             with tabs.add_dropdown_tab('Second'):
                 p("This is the second dropdown item.")
-                EZChart(example_plot('bar'), 'epi2melabs')
+                # set dodge=False for a stacked barplot
+                plot = ezc.barplot(
+                    data=example_df, x='year', y='sales', hue='product', dodge=False
+                )
+                EZChart(plot, 'epi2melabs')
 
     with report.add_section('Nextclade results', 'Nextclade', True):
         NextClade(nxt_json)
