@@ -181,12 +181,18 @@ def main(args):
             'epi2melabs', height="800px")
 
     with report.add_section('Table', 'Table'):
-        df = pd.DataFrame(np.random.random((4, 4))) * 10
-        df.columns = pd.MultiIndex.from_product(
-            [['sample1', 'sample2'], ['mapped', 'unmapped']])
-        df['chr'] = [1, 2, 3, 4]
-        df = df.set_index('chr', drop=True)
-        DataTable.from_pandas(df, use_index=True)
+        tabs = Tabs()
+        with tabs.add_tab('Table'):
+            df = pd.DataFrame(np.random.random((4, 4))) * 10
+            df.columns = pd.MultiIndex.from_product(
+                [['sample1', 'sample2'], ['mapped', 'unmapped']])
+            df['chr'] = [1, 2, 3, 4]
+            df = df.set_index('chr', drop=True)
+            DataTable.from_pandas(df, use_index=True)
+        with tabs.add_tab('Export'):
+            df_simple = pd.DataFrame(np.random.random((4, 2))) * 10
+            df_simple.columns = ['sample1', 'sample2']
+            DataTable.from_pandas(df_simple, export=True, file_name='samples')
 
     logger.info('Reticulating splines')
     report.write(args.output)
