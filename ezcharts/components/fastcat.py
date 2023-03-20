@@ -45,12 +45,13 @@ class SeqSummary(Snippet):
             # one sample) --> create a dummy 'sample_name' column if missing
             if 'sample_name' not in df_all.columns:
                 df_all['sample_name'] = 'sample'
-            for sample_id, df_sample in df_all.groupby('sample_name'):
-                with tabs.add_tab(sample_id):
-                    with Grid(columns=3):
-                        EZChart(read_quality_plot(df_sample), theme)
-                        EZChart(read_length_plot(df_sample), theme)
-                        EZChart(base_yield_plot(df_sample), theme)
+            with tabs.add_dropdown_menu():
+                for sample_id, df_sample in df_all.groupby('sample_name'):
+                    with tabs.add_dropdown_tab(sample_id):
+                        with Grid(columns=3):
+                            EZChart(read_quality_plot(df_sample), theme)
+                            EZChart(read_length_plot(df_sample), theme)
+                            EZChart(base_yield_plot(df_sample), theme)
 
 
 def base_yield_plot(
