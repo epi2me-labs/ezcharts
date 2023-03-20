@@ -3,6 +3,7 @@
 import argparse
 
 import numpy as np
+import pandas as pd
 from pkg_resources import resource_filename
 import sigfig
 
@@ -175,7 +176,10 @@ class Plot(EChartsOption):
             raw_vals = []
             for ds in self.dataset:
                 if ds.source is not None:
-                    raw_vals.extend(ds.source[:, data_idx])
+                    # `ds.source` could be a numpy array or just a list of lists; we'll
+                    # transform it into a `pd.DataFrame` so that we can do column-wise
+                    # indexing while preserving dtypes
+                    raw_vals.extend(pd.DataFrame(ds.source).iloc[:, data_idx])
 
             # Allow formatter to be set by user.
             if axis.axisLabel is None:
