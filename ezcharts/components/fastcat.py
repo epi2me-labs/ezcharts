@@ -28,7 +28,6 @@ class SeqSummary(Snippet):
         super().__init__(styles=None, classes=None)
 
         with self:
-            tabs = Tabs()
             if not isinstance(seq_summary, pd.DataFrame):
                 df_all = util.read_files(seq_summary)
             else:
@@ -45,13 +44,24 @@ class SeqSummary(Snippet):
             # one sample) --> create a dummy 'sample_name' column if missing
             if 'sample_name' not in df_all.columns:
                 df_all['sample_name'] = 'sample'
-            with tabs.add_dropdown_menu():
-                for sample_id, df_sample in df_all.groupby('sample_name'):
-                    with tabs.add_dropdown_tab(sample_id):
-                        with Grid(columns=3):
-                            EZChart(read_quality_plot(df_sample), theme)
-                            EZChart(read_length_plot(df_sample), theme)
-                            EZChart(base_yield_plot(df_sample), theme)
+            if len(df_all['sample_name'].unique()) == 1:
+                # we only got a single sample --> no dropdown
+                draw_all_plots(df_all, theme)
+            else:
+                # several samples --> use a dropdown menu
+                tabs = Tabs()
+                with tabs.add_dropdown_menu():
+                    for sample_id, df_sample in df_all.groupby('sample_name'):
+                        with tabs.add_dropdown_tab(sample_id):
+                            draw_all_plots(df_sample, theme)
+
+
+def draw_all_plots(seq_summary, theme):
+    """Draw all three plots."""
+    with Grid(columns=3):
+        EZChart(read_quality_plot(seq_summary), theme)
+        EZChart(read_length_plot(seq_summary), theme)
+        EZChart(base_yield_plot(seq_summary), theme)
 
 
 def base_yield_plot(

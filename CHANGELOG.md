@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - A regression that prevented using lists of lists as dataset sources.
 ### Changed
-- Now uses dropdown menu instead of regular tabs for `fastcat.SeqSummary`.
+- Now uses a dropdown menu instead of regular tabs for `fastcat.SeqSummary` if there are multiple samples.
 ### Added
 - Add stack option to barplot.
 - Add export button to datatables.
