@@ -37,7 +37,7 @@ def main(args):
     logger.info('Building plots')
 
     # Example data
-    example_df = pd.DataFrame({
+    raw_df = pd.DataFrame({
         # as laid out in echarts docs for a dataset
         'product': [
             'Matcha Latte', 'Milk Tea', 'Cheese Cocoa', 'Walnut Brownie'],
@@ -46,7 +46,7 @@ def main(args):
         '2017': [93.7, 55.1, 82.5, 39.1]
     })
     # how we'd likely normally have it
-    example_df = example_df.melt(
+    example_df = raw_df.melt(
         id_vars=['product'], value_vars=['2015', '2016', '2017'],
         var_name='year', value_name='sales')
 
@@ -68,6 +68,13 @@ def main(args):
             plot.yAxis.name = 'Number of reads'
         elif style == "bar":
             plot = ezc.barplot(data=example_df, x='year', y='sales', hue='product')
+        elif style == "heatmap":
+            # make data a matrix like you would expect for a heatmap
+            df = raw_df.set_index([raw_df.columns[0]])
+            # set the names of the axes
+            df = df.rename_axis("Product")
+            df = df.rename_axis("Year", axis=1)
+            plot = ezc.heatmap(data=df)
         else:
             raise ValueError("Unknown plot style")
         plot.title = {"text": f"Example {style} chart"}
@@ -174,6 +181,9 @@ def main(args):
 
     with report.add_section('Nextclade results', 'Nextclade', True):
         NextClade(nxt_json)
+
+    with report.add_section('Heatmap', 'Heatmap'):
+        EZChart(example_plot("heatmap"), 'epi2melabs')
 
     with report.add_section('Human Genome', 'Genome'):
         EZChart(

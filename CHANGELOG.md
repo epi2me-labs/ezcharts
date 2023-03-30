@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Add stack option to barplot.
 - Add export button to datatables.
+- Add function to plot cartesian heatmaps.
 
 ## [v0.3.4]
 ### Added
