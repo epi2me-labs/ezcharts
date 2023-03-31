@@ -55,9 +55,20 @@ def heatmap(
     plt = Plot()
 
     plt.xAxis = dict(
-        name=x_name, type='category')
+        name=x_name,
+        type='category',
+        axisLabel=dict(
+            interval=0,
+            rotate=40
+        ),
+        axisTick=dict(
+            alignWithLabel=True))
+
     plt.yAxis = dict(
-        name=y_name, type='category')
+        name=y_name,
+        type='category',
+        axisTick=dict(
+            alignWithLabel=True))
 
     # On mouse over emphasize the heatmap tile
     emphasis_style = dict(
