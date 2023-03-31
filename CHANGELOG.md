@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 ### Changed
+- Now draws a maximum of 1,000 instead of 10,000 points in the `fastcat.SeqSummary` yield plot.
 - Display and centre all axis tick labels in heatmaps
 
 ## [v0.3.5]

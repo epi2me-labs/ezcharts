@@ -86,9 +86,10 @@ def base_yield_plot(
     df[xlab] = df['read_length'] / 1000
 
     # No need plot all the points
-    if len(df) > 10000:
-        step = len(df) // 10000
-        df = df.loc[::step, :]
+    if len(df) > 1000:
+        step = len(df) // 1000
+        # thin the data while keeping the last data point
+        df = pd.concat((df.loc[::step, :], df.iloc[[-1]]), axis=0)
 
     plt = ezc.lineplot(data=df, x=xlab, y=ylab, hue=None)
     plt.series[0].showSymbol = False
