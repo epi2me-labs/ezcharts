@@ -7,8 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [unreleased]
 ### Added
 - `isolate_context` context manager that prevents `dominate` from adding items to the enclosing context.
-### Updated
+### Changed
 - Nextclade widget updated to 1.0.4
+- To more sensible behaviour governing when to use scientific notation for axis tick labels.
 
 ## [v0.3.6]
 ### Changed
