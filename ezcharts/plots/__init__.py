@@ -2,7 +2,6 @@
 
 import argparse
 
-import numpy as np
 import pandas as pd
 from pkg_resources import resource_filename
 import sigfig
@@ -24,7 +23,7 @@ _logger = ezutil.get_named_logger("Plotter")
 class AxisLabelFormatter(JSCode):
     """Formatter for echarts axis labels."""
 
-    def __init__(self, sci_notation=(0.0001, 10000)):
+    def __init__(self, sci_notation=(0.001, 10000)):
         """Init.
 
         :param: sci_notation:
@@ -64,12 +63,12 @@ class AxisLabelFormatter(JSCode):
             elif self.sci_notation is False:
                 use_sci = False
             else:
-                # If any values fall outside the limits, covert all to sci_notation.
-                # Do not include zeros as they are always plotted as '0'.
+                # If the value with the largest magnitude (in other words, the largest
+                # positive or negative value or value furthest from zero) falls outside
+                # the limits, convert all to sci_notation.
                 sci_limits = self.sci_notation
-                v = np.array(values)
-                v = v[v != 0]
-                if ((v < sci_limits[0]) | (v > sci_limits[1])).any():
+                v = max(abs(min(values)), max(values))
+                if v < sci_limits[0] or v > sci_limits[1]:
                     use_sci = True
                 else:
                     use_sci = False
