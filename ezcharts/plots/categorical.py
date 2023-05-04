@@ -86,6 +86,9 @@ def barplot(
     else:
         plt.series = [{'type': 'bar', 'stack': x_name}] * (data.shape[1] - 1)
 
+    # Show a label per bar by default as ezcharts 'auto' method is very conservative.
+    plt.xAxis.axisLabel = dict(interval=0)
+
     return plt
 
 
