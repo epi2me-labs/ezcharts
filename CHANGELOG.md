@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [unreleased]
 ### Added
 - `isolate_context` context manager that prevents `dominate` from adding items to the enclosing context.
+- OND style
 ### Changed
 - Nextclade widget updated to 1.0.4
 - To more sensible behaviour governing when to use scientific notation for axis tick labels.
@@ -57,7 +58,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [v0.3.0]
 ### Changed
-- Bootstrap updated to 5.0.3
+- Bootstrap updated to 5.3.0
 ### Added
 - Create fastcat.SeqSummary from bamstats data.
 - Snippet for offcanvas

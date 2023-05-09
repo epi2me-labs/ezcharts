@@ -21,7 +21,7 @@ class ICardClasses(IClasses):
     """Cards html classes."""
 
     container: str = cls("container", "px-0")
-    card: str = cls("card", "px-0", "mb-4")
+    card: str = cls("card", "px-0", "mb-4", "shadow-sm")
     card_body: str = cls("card-body")
     card_heading: str = cls("card-header")
     card_text: str = cls("card-text")
