@@ -41,31 +41,37 @@ LAB_head_resources = [LAB_CSS, *base_head_resources, LAB_CHART_THEME]
 LAB_body_resources = [LAB_JS, *base_body_resources]
 
 
-class ONDLogo(img):
+class ONDLogo(div):
     """OND logo element."""
 
     def __init__(self) -> None:
         """Create an img with the data URI logo."""
         super().__init__(
-            inline(ImageResource('OND_logo.txt').data_file),
-            tagname='img',
-            style="height: 35px;",
+            inline(ImageResource('OND_logo.svg').data_file),
+            tagname='div',
+            style="width: 35px; height: 35px;",
             className="d-flex",
             alt="OND Logo")
 
 
 # TODO: Create
 OND_CSS = StyleResource(
-    path='epi2melabs.scss',
+    path='ond.scss',
     tag=style,
     loader=transpile)
 
 OND_JS = ScriptResource(
-    path='epi2melabs.js',
+    path='ond.js',
     tag=script,
     loader=inline)
 
-OND_head_resources = [OND_CSS, *base_head_resources]
+
+OND_CHART_THEME = ThemeResource(
+    path='ond.json',
+    tag=EZChartTheme,
+    loader=load_json)
+
+OND_head_resources = [OND_CSS, *base_head_resources, OND_CHART_THEME]
 OND_body_resources = [OND_JS, *base_body_resources]
 
 

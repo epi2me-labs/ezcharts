@@ -30,6 +30,12 @@ $enable-negative-margins: true;
     -moz-osx-font-smoothing: grayscale;
 }
 
+// Allow use of an info button
+.btn-info {
+    @extend .btn;
+    @extend .btn-primary;
+}
+
 // Logo sizing
 #logo {
     width: 100%;

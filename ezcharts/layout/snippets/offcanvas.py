@@ -13,7 +13,7 @@ class IOffCanvasClasses(IClasses):
 
     container: str = cls("container", "px-0")
     offcanvas: str = cls("offcanvas", "offcanvas-bottom", "h-auto")
-    offcanvas_button: str = cls("btn")
+    offcanvas_button: str = cls("")
     offcanvas_header: str = cls("offcanvas-header")
     offcanvas_title: str = cls("offcanvas-title")
     offcanvas_body: str = cls("offcanvas-body")
@@ -51,7 +51,7 @@ class OffCanvas(Snippet):
         new_uid: str,
         body: Optional[str] = None,
         offcanvas_cls: Optional[str] = None,
-        offcanvas_btn_cls: Optional[str] = "btn-primary",
+        offcanvas_btn_cls: Optional[str] = "btn-info",
         head_tag: Type[html_tag] = h5
     ) -> None:
         """Add cards to the grid."""
@@ -74,7 +74,10 @@ class OffCanvas(Snippet):
                 self.classes.offcanvas,
                 offcanvas_cls if offcanvas_cls is not None else '')):
 
-            with div(className=cls(self.classes.offcanvas_header)):
+            with div(className=cls(
+                    self.classes.offcanvas_header,
+                    'container',
+                    'px-0')):
                 head_tag(title, className=self.classes.offcanvas_title)
                 button(
                     type="button",

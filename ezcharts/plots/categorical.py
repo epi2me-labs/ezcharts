@@ -72,7 +72,12 @@ def barplot(
         mapper = {x: pos for (pos, x) in enumerate(order)}
         data = data.sort_values(x_name, key=lambda x: x.map(mapper))
 
-    plt.xAxis = dict(name=x_name, type='category')
+    plt.xAxis = dict(
+        name=x_name,
+        type='category',
+        axisLabel=dict(interval=0, rotate=30),
+        axisTick=dict(alignWithLabel=True))
+
     plt.yAxis = dict(name=y_name, type='value')
 
     plt.add_dataset({

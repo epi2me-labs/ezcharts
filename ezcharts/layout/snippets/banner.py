@@ -46,8 +46,9 @@ class Badge(Snippet):
 class IBannerClasses(IClasses):
     """Section html classes."""
 
-    container: str = cls("px-4", "bg-dark")
-    inner: str = cls("container", "px-0", "py-5", "border-top", "text-white")
+    container: str = cls("px-4", "bg-dark", "labs-banner")
+    inner: str = cls(
+        "container", "px-0", "py-3", "border-top", "text-white", "report-title")
 
 
 class IBannerStyles(IStyles):
