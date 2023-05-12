@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [v0.3.7]
 ### Added
 - `isolate_context` context manager that prevents `dominate` from adding items to the enclosing context.
+- `sep` in read_files to customise the default delimiter when reading tables.
 - OND style
 ### Changed
 - Nextclade widget updated to 1.0.4

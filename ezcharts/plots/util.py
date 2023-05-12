@@ -44,13 +44,13 @@ class JSCode():
         return jscode
 
 
-def read_files(summaries):
+def read_files(summaries, sep="\t"):
     """Read a set of files and join to single dataframe."""
     dfs = list()
     if not isinstance(summaries, (list, tuple)):
         summaries = [summaries]
     for fname in sorted(summaries):
-        dfs.append(pd.read_csv(fname, sep="\t"))
+        dfs.append(pd.read_csv(fname, sep=sep))
     return pd.concat(dfs)
 
 
