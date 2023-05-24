@@ -98,18 +98,18 @@ def base_yield_plot(
 
 
 def read_quality_plot(
-        seq_summary, bins=100,
+        seq_summary, binwidth=0.2,
         min_qual=4, max_qual=30, title='Read quality'):
     """Create read quality summary plot."""
     if not isinstance(seq_summary, pd.DataFrame):
-        df = util.read_files(seq_summary)[['read_length']]
+        df = util.read_files(seq_summary)[['mean_quality']]
     else:
         df = seq_summary
     mean_q = np.round(df.mean_quality.mean(), 1)
     median_q = int(df.mean_quality.median())
 
     plt = ezc.histplot(
-        data=df.mean_quality, bins=bins)
+        data=df.mean_quality, binwidth=binwidth, binrange=(min_qual, max_qual))
     plt.title = dict(
         text=title,
         subtext=f"Mean: {mean_q}. Median: {median_q}")
