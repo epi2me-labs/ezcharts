@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [unreleased]
+### Fixed
+- `SeqSummary` read quality histograms only showing one bar which is too thin to see when all reads have the same quality score.
+
 ## [v0.3.7]
 ### Added
 - `isolate_context` context manager that prevents `dominate` from adding items to the enclosing context.
