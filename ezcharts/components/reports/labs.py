@@ -52,7 +52,7 @@ class LabsAddendum(Snippet):
                     f"epi2me-labs/{workflow_name}. The workflow "
                     "can be run using"
                 ):
-                    code(f"nextflow epi2me-labs/{workflow_name} --help")
+                    code(f"nextflow run epi2me-labs/{workflow_name} --help")
                 p(
                     "Oxford Nanopore Technologies products are not "
                     "intended for use for health assessment or to "
