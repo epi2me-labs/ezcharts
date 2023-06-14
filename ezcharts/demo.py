@@ -190,6 +190,23 @@ def main(args):
             ideogram(blocks='cytobands'),
             'epi2melabs', height="800px")
 
+    with report.add_section('Sunburst', 'Sunburst'):
+        lineages = [{'name': 'Bacteria', 'value': 600, 'children': [
+            {'name': 'Firmicutes', 'value': 600, 'children': [
+                {'name': 'Bacilli', 'value': 600, 'children': [
+                    {'name': 'Bacillales', 'value': 600, 'children': [
+                        {'name': 'Bacillaceae', 'value': 500, 'children': [
+                            {'name': 'Bacillus', 'value': 500, 'children': [
+                                {'name': 'Bacillus subtilis', 'value': 250},
+                                {'name': 'Bacillus aquiflavi', 'value': 250}]}]},
+                        {'name': 'Staphylococcaceae', 'value': 100, 'children': [
+                            {'name': 'Staphylococcus', 'value': 100, 'children': [
+                                {'name': 'Staphylococcus saccharolyticus',
+                                    'value': 100}]}]}]}]}]}]}]
+
+        EZChart(ezc.sunburst(
+            lineages, label_rotate="tangential", label_minAngle=100), 'epi2melabs')
+
     with report.add_section('Table', 'Table'):
         tabs = Tabs()
         with tabs.add_tab('Table'):
