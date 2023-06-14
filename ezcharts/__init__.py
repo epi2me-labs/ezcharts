@@ -13,6 +13,7 @@ from ezcharts.plots.distribution import *  # noqa: F401,F403
 from ezcharts.plots.matrix import *  # noqa: F401,F403
 from ezcharts.plots.regression import *  # noqa: F401,F403
 from ezcharts.plots.relational import *  # noqa: F401,F403
+from ezcharts.plots.sunburst import *  # noqa: F401,F403
 
 
 def cli():

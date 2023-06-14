@@ -173,7 +173,36 @@ def choose_palette(name='colorblind', ncolours=None):
             '#9f4800', '#f14cc1', '#a3a3a3', '#ffc400', '#00d7ff'],
         'pastel': [
             '#a1c9f4', '#ffb482', '#8de5a1', '#ff9f9b', '#d0bbff',
-            '#debb9b', '#fab0e4', '#cfcfcf', '#fffea3', '#b9f2f0']
+            '#debb9b', '#fab0e4', '#cfcfcf', '#fffea3', '#b9f2f0'],
+        # Uniform palettes
+        'rocket': [
+            '#35193e', '#701f57', '#ad1759', '#e13342', '#f37651',
+            '#f6b48f'],
+        'mako': [
+            '#2e1e3b', '#413d7b', '#37659e', '#348fa7', '#40b7ad',
+            '#8bdab2'],
+        'flare': [
+            '#e98d6b', '#e3685c', '#d14a61', '#b13c6c', '#8f3371',
+            '#6c2b6d'],
+        'crest': [
+            '#7dba91', '#59a590', '#40908e', '#287a8c', '#1c6488',
+            '#254b7f'],
+        'magma': [
+            '#221150', '#5f187f', '#982d80', '#d3436e', '#f8765c',
+            '#febb81'],
+        'viridis': [
+            '#46327e', '#365c8d', '#277f8e', '#1fa187', '#4ac16d',
+            '#a0da39'],
+        'rocket_r': [
+            '#f6b48f', '#f37651', '#e13342', '#ad1759', '#701f57',
+            '#35193e'],
+        # Uniform diverging palettes
+        'vlag': [
+            '#6e90bf', '#aab8d0', '#e4e5eb', '#f2dfdd', '#d9a6a4',
+            '#c26f6d'],
+        'icefire': [
+            '#55a3cd', '#4954b0', '#282739', '#3b2127', '#9c2f45',
+            '#e96f36']
     }
 
     if ncolours is None:

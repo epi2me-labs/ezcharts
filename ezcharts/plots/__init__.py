@@ -232,6 +232,14 @@ class _HistogramPlot(Plot):
         return [self.xAxis, 1], [self.yAxis, 2]
 
 
+class _NoAxisFixPlot(Plot):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def fix_axis_labels(self):
+        self.logger.warning("Skipping axis label fixing")
+
+
 def main(args):
     """Entry point to demonstrate an ezChart."""
     plt = Plot.parse_file(args.plot_spec)
