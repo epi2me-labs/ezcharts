@@ -11,6 +11,7 @@ from ezcharts.plots.axisgrid import *  # noqa: F401,F403
 from ezcharts.plots.categorical import *  # noqa: F401,F403
 from ezcharts.plots.distribution import *  # noqa: F401,F403
 from ezcharts.plots.matrix import *  # noqa: F401,F403
+from ezcharts.plots.metagenomics_sankey import *  # noqa: F401,F403
 from ezcharts.plots.regression import *  # noqa: F401,F403
 from ezcharts.plots.relational import *  # noqa: F401,F403
 

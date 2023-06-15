@@ -1,5 +1,6 @@
 """Run ezCharts demo."""
 import argparse
+import json
 
 from dominate.tags import p
 import numpy as np
@@ -203,6 +204,12 @@ def main(args):
             df_simple = pd.DataFrame(np.random.random((4, 2))) * 10
             df_simple.columns = ['sample1', 'sample2']
             DataTable.from_pandas(df_simple, export=True, file_name='samples')
+
+    with report.add_section('Sankey plot', 'Sankey'):
+        sankey_json = resource_filename('ezcharts', "data/test/sankey.json")
+        with open(sankey_json, 'r') as sfh:
+            sankey_dict = json.load(sfh)
+            ezc.metagenomics_sankey(sankey_dict)
 
     logger.info('Reticulating splines')
     report.write(args.output)

@@ -1,0 +1,25 @@
+{"barcode01": 
+    {"Bacteria": {"rank": "superkingdom", "count": 1000, "children": {
+        "Firmicutes": {"rank": "phylum", "count": 800, "children": {
+            "Bacilli": {"rank": "class", "count": 700, "children": {
+                "Bacillales": {"rank": "order", "count": 700, "children": {
+                    "Bacillaceae": {"rank": "family", "count": 500, "children": {
+                        "Bacillus": {"rank": "genus", "count": 500, "children": {
+                            "Bacillus subtilis": {"rank": "species", "count": 250, "children": {}},
+                            "Bacillus aquiflavi": {"rank": "species", "count": 250, "children": {}}
+                        }}}},  
+                    "Staphylococcaceae": {"rank": "family", "count": 100, "children": {
+                        "Staphylococcus": {"rank": "genus", "count": 100, "children": {
+                            "Staphylococcus saccharolyticus": {"rank": "species", "count": 30, "children": {}}, 
+                            "Staphylococcus aureus": {"rank": "species", "count": 30, "children": {}},
+                            "Staphylococcus haemolyticus": {"rank": "species", "count": 40, "children": {}}
+                        }}}},
+                    "Listeriaceae": {"rank": "family", "count": 95, "children": {}},
+                    "Enterococcaceae": {"rank": "family", "count": 5, "children": {}}
+                }}}},
+            "Clostridia": {"rank": "class", "count": 100, "children": {
+                "Eubacteriales": {"rank": "order", "count": 100, "children": {}}}}}},
+        "Actinobacteria": {"rank": "phylum", "count": 200, "children": {}}}
+    },
+    "Unclassified": {"rank": "superkingdom", "count": 200, "children": {"Unknown": {"rank": "species", "count": 200, "children": {}}}}
+}}
