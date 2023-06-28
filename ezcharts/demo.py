@@ -9,8 +9,13 @@ from pkg_resources import resource_filename
 
 import ezcharts as ezc
 from ezcharts import util
+from ezcharts.components.common import fasta_idx, HSA_CHROMOSOME_ORDER
+from ezcharts.components.dss import load_dml, load_dmr
 from ezcharts.components.ezchart import EZChart
+from ezcharts.components.fastcat import load_bamstats_flagstat, load_stats
 from ezcharts.components.fastcat import SeqSummary
+from ezcharts.components.modkit import load_bedmethyl, load_modkit_summary
+from ezcharts.components.mosdepth import load_mosdepth_regions, load_mosdepth_summary
 from ezcharts.components.nextclade import NextClade, NXTComponent
 from ezcharts.components.reports.labs import LabsReport
 from ezcharts.components.theme import LAB_head_resources
@@ -24,6 +29,7 @@ from ezcharts.layout.snippets.cards import Cards
 from ezcharts.layout.snippets.cards import ICard
 from ezcharts.plots import Plot
 from ezcharts.plots.ideogram import ideogram
+from ezcharts.plots.karyomap import karyomap
 
 # Setup simple globals
 WORKFLOW_NAME = 'wf-template'
@@ -191,6 +197,16 @@ def main(args):
             ideogram(blocks='cytobands'),
             'epi2melabs', height="800px")
 
+    with report.add_section('Human karyotype heatmap', 'Karyomap'):
+        vals = pd.read_csv(
+            resource_filename('ezcharts', "data/test/karyomap_vals.tsv.gz"), sep='\t')
+        faidx = fasta_idx(resource_filename('ezcharts', "data/test/ref.fa.fai"))
+        EZChart(karyomap(
+            vals, 'chr', 'pos', 'values',
+            stats='count',
+            ref_lengths=faidx,
+            order=HSA_CHROMOSOME_ORDER), 'epi2melabs')
+
     with report.add_section('Sunburst', 'Sunburst'):
         lineages = [{'name': 'Bacteria', 'value': 600, 'children': [
             {'name': 'Firmicutes', 'value': 600, 'children': [
@@ -227,6 +243,42 @@ def main(args):
         with open(sankey_json, 'r') as sfh:
             sankey_dict = json.load(sfh)
             ezc.metagenomics_sankey(sankey_dict)
+
+    dataset_examples = {
+        'fastcat': load_stats(resource_filename(
+            'ezcharts', "data/test/fastcat.stats.gz"), format='fastcat'),
+        'bamstats': load_stats(resource_filename(
+            'ezcharts', "data/test/bamstats.readstats.tsv.gz"), format='bamstats'),
+        'flagstat': load_bamstats_flagstat(resource_filename(
+            'ezcharts', "data/test/bamstats.flagstat.tsv")),
+        'modkit summary': load_modkit_summary(resource_filename(
+            'ezcharts', "data/test/test_modkit_summary.tsv")),
+        'modkit bedMethyl': load_bedmethyl(resource_filename(
+            'ezcharts', "data/test/test_modkit.bed.gz")),
+        'DSS DML': load_dml(resource_filename(
+            'ezcharts', "data/test/test_dml.tsv.gz")),
+        'DSS DMR': load_dmr(resource_filename(
+            'ezcharts', "data/test/test_dmr.tsv.gz")),
+        'mosdepth summary': load_mosdepth_summary(resource_filename(
+            'ezcharts', "data/test/test_mosdepth_summary.tsv")),
+        'mosdepth regions': load_mosdepth_regions(resource_filename(
+            'ezcharts', "data/test/test_mosdepth.bed.gz")),
+        'fai index': fasta_idx(resource_filename(
+            'ezcharts', "data/test/ref.fa.fai")),
+    }
+    with report.add_section('Data types', 'Data'):
+        p(
+            "The workflow comes with a range of data loaders, as shown in the",
+            "tables below (10 rows max displayed).")
+        tabs = Tabs()
+        for data_type in dataset_examples.keys():
+            df = dataset_examples[data_type]
+            with tabs.add_tab(data_type):
+                if isinstance(df, tuple) or isinstance(df, tuple):
+                    for d in df:
+                        DataTable.from_pandas(d.head(10))
+                else:
+                    DataTable.from_pandas(df.head(10))
 
     logger.info('Reticulating splines')
     report.write(args.output)
