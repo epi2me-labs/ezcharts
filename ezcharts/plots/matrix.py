@@ -4,6 +4,7 @@ import seaborn as sns
 
 from ezcharts.plots import Plot
 
+
 __all__ = ["heatmap", "clustermap"]
 
 

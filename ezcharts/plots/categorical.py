@@ -1,5 +1,6 @@
 """Categorical plots."""
 
+import numpy as np
 
 from ezcharts.plots import Plot
 
@@ -84,6 +85,9 @@ def barplot(
         'id': 'raw',
         'dimensions': data.columns,
         'source': data.values})
+
+    # If there are nan values, replace with zeros
+    plt.dataset[0].source = np.nan_to_num(plt.dataset[0].source, nan=0)
 
     # Automatically map series to columns in the dataset
     if dodge:

@@ -1,16 +1,21 @@
 """An ezcharts component for plotting sequence summaries."""
 import argparse
+import os
 
 import numpy as np
 import pandas as pd
+from pandas.api import types as pd_types
 from pkg_resources import resource_filename
 
 import ezcharts as ezc
 from ezcharts.components.ezchart import EZChart
 from ezcharts.components.reports.comp import ComponentReport
 from ezcharts.layout.base import Snippet
-from ezcharts.layout.snippets import Grid, Tabs
+from ezcharts.layout.snippets import DataTable, Grid, Tabs
 from ezcharts.plots import util
+
+# Categorical types
+CATEGORICAL = pd_types.CategoricalDtype(ordered=True)
 
 
 class SeqSummary(Snippet):
@@ -22,38 +27,106 @@ class SeqSummary(Snippet):
         If seq_summary contains results from multiple samples, each will be
         plotted in its own tab.
 
-        :param seq_summary: A path to a fastcat / bamstats output file or
+        :param seq_summary: A path to a fastcat read stats output file or
+            DataFrame
+        :param bam_summary: A path to a bamstats read stats output file or
+            DataFrame
+        :param flagstat: A path to a bamstats flagstat output file or
             DataFrame
         """
         super().__init__(styles=None, classes=None)
 
         with self:
-            if not isinstance(seq_summary, pd.DataFrame):
-                df_all = util.read_files(seq_summary)
-            else:
-                df_all = seq_summary
-            # Out of the intersection of columns between `fastcat` and
-            # `bamstats` output, only the column with the read IDs has a
-            # different name (`read_id` in `fastcat` and `name` in `bamstats`).
-            # Rename to ensure the dataframes produced from either `fastcat` or
-            # `bamstats` are consistent.
-            if df_all.columns[0] == "name":
-                df_all.rename(columns={"name": "read_id"}, inplace=True)
-            # the following assumes that `fastcat` / `bamstats` has been run
-            # with `-s` which is not necessarily the case (if there was only
-            # one sample) --> create a dummy 'sample_name' column if missing
-            if 'sample_name' not in df_all.columns:
-                df_all['sample_name'] = 'sample'
-            if len(df_all['sample_name'].unique()) == 1:
-                # we only got a single sample --> no dropdown
-                draw_all_plots(df_all, theme)
-            else:
-                # several samples --> use a dropdown menu
-                tabs = Tabs()
-                with tabs.add_dropdown_menu():
-                    for sample_id, df_sample in df_all.groupby('sample_name'):
-                        with tabs.add_dropdown_tab(sample_id):
-                            draw_all_plots(df_sample, theme)
+            if seq_summary:
+                # Assume the input is in fastcat format. If not, try to import as
+                # bamstats format.
+                if not isinstance(seq_summary, pd.DataFrame):
+                    try:
+                        df_all = load_stats(seq_summary, format='fastcat')
+                    except ValueError:
+                        df_all = load_stats(seq_summary, format='bamstats')
+                else:
+                    df_all = seq_summary
+                # Check that the file is not empty
+                if df_all.empty:
+                    raise pd.errors.EmptyDataError('seq_summary is empty')
+                # Out of the intersection of columns between `fastcat` and
+                # `bamstats` output, only the column with the read IDs has a
+                # different name (`read_id` in `fastcat` and `name` in `bamstats`).
+                # Rename to ensure the dataframes produced from either `fastcat` or
+                # `bamstats` are consistent.
+                if df_all.columns[0] == "name":
+                    df_all.rename(columns={"name": "read_id"}, inplace=True)
+                # the following assumes that `fastcat` / `bamstats` has been run
+                # with `-s` which is not necessarily the case (if there was only
+                # one sample) --> create a dummy 'sample_name' column if missing
+                if 'sample_name' not in df_all.columns:
+                    df_all['sample_name'] = 'sample'
+                if len(df_all['sample_name'].unique()) == 1:
+                    # we only got a single sample --> no dropdown
+                    draw_all_plots(df_all, theme)
+                else:
+                    # several samples --> use a dropdown menu
+                    tabs = Tabs()
+                    with tabs.add_dropdown_menu():
+                        for sample_id, df_sample in df_all.groupby('sample_name'):
+                            with tabs.add_dropdown_tab(sample_id):
+                                draw_all_plots(df_sample, theme)
+            # Create flagstat tables
+            if "flagstat" in kwargs:
+                if not isinstance(kwargs["flagstat"], pd.DataFrame):
+                    flagstat = load_bamstats_flagstat(kwargs["flagstat"])
+                else:
+                    flagstat = kwargs["flagstat"]
+                # Check that the file is not empty
+                if flagstat.empty:
+                    raise pd.errors.EmptyDataError('flagstat is empty')
+                # the following assumes that `fastcat` / `bamstats` has been run
+                # with `-s` which is not necessarily the case (if there was only
+                # one sample) --> create a dummy 'sample_name' column if missing
+                if 'sample_name' not in df_all.columns:
+                    flagstat['sample_name'] = 'sample'
+                if len(flagstat['sample_name'].unique()) == 1:
+                    # we only got a single sample --> no dropdown
+                    DataTable.from_pandas(flagstat, use_index=False)
+                else:
+                    # several samples --> use a dropdown menu
+                    tabs = Tabs()
+                    with tabs.add_dropdown_menu():
+                        for sample_id, df_sample in flagstat.groupby('sample_name'):
+                            with tabs.add_dropdown_tab(sample_id):
+                                DataTable.from_pandas(df_sample, use_index=False)
+            # Create bamstats metrics
+            if "bam_summary" in kwargs:
+                if not isinstance(kwargs["bam_summary"], pd.DataFrame):
+                    df_all = load_stats(kwargs["bam_summary"], format='bamstats')
+                else:
+                    df_all = kwargs["bam_summary"]
+                # Check that the file is not empty
+                if df_all.empty:
+                    raise pd.errors.EmptyDataError('seq_summary is empty')
+                # Out of the intersection of columns between `fastcat` and
+                # `bamstats` output, only the column with the read IDs has a
+                # different name (`read_id` in `fastcat` and `name` in `bamstats`).
+                # Rename to ensure the dataframes produced from either `fastcat` or
+                # `bamstats` are consistent.
+                if df_all.columns[0] == "name":
+                    df_all.rename(columns={"name": "read_id"}, inplace=True)
+                # the following assumes that `fastcat` / `bamstats` has been run
+                # with `-s` which is not necessarily the case (if there was only
+                # one sample) --> create a dummy 'sample_name' column if missing
+                if 'sample_name' not in df_all.columns:
+                    df_all['sample_name'] = 'sample'
+                if len(df_all['sample_name'].unique()) == 1:
+                    # we only got a single sample --> no dropdown
+                    draw_all_plots(df_all, theme)
+                else:
+                    # several samples --> use a dropdown menu
+                    tabs = Tabs()
+                    with tabs.add_dropdown_menu():
+                        for sample_id, df_sample in df_all.groupby('sample_name'):
+                            with tabs.add_dropdown_tab(sample_id):
+                                draw_all_plots(df_sample, theme)
 
 
 def draw_all_plots(seq_summary, theme):
@@ -152,10 +225,148 @@ def read_length_plot(
     return plt
 
 
+def load_bamstats_flagstat(flagstat):
+    """Load and prepare bamstats flagstat output."""
+    relevant_stats_cols_dtypes = {
+        "ref": CATEGORICAL,
+        "sample_name": CATEGORICAL,
+        "total": int,
+        "primary": int,
+        "secondary": int,
+        "supplementary": int,
+        "unmapped": int,
+        "qcfail": int,
+        "duplicate": int,
+    }
+    # Prepare input files
+    dfs = []
+    if os.path.isdir(flagstat):
+        input_files = [(flagstat, i) for i in os.listdir(flagstat)]
+    elif os.path.isfile(flagstat):
+        input_files = [(None, flagstat)]
+    else:
+        raise Exception(f'No valid input: {flagstat}')
+    # If no files, throw error
+    if len(input_files) == 0:
+        raise FileNotFoundError(f'No valid input found in {flagstat}')
+    # Start processing file
+    for inpath, fname in input_files:
+        try:
+            flagstat_file = fname if inpath is None else f'{inpath}/{fname}'
+            df = pd.read_csv(
+                flagstat_file, sep="\t",
+                usecols=relevant_stats_cols_dtypes.keys(),
+                dtype=relevant_stats_cols_dtypes)
+            # Add mapped/unmapped status
+            df["Status"] = df["ref"].apply(
+                lambda x: "Unmapped" if x == "*" else "Mapped"
+            )
+            # Add file name
+            df['filename'] = fname.split('/')[-1]
+            # Append processed DF
+            dfs.append(df)
+        except pd.errors.EmptyDataError:
+            cols = relevant_stats_cols_dtypes.update({'filename': str})
+            dfs.append(pd.DataFrame(columns=cols.keys()).astype(cols))
+    return pd.concat(dfs).reset_index(drop=True)
+
+
+def load_stats(stat, format=None):
+    """Load and prepare bamstats flagstat."""
+    # Input columns for bamstats
+    bamstats_cols_dtypes = {
+        "name": str,
+        "sample_name": CATEGORICAL,
+        "ref": CATEGORICAL,
+        "coverage": float,
+        "ref_coverage": float,
+        "read_length": int,
+        "mean_quality": float,
+        "acc": float,
+    }
+    # Input columns for fastcat
+    fastcat_cols_dtypes = {
+        "read_id": str,
+        "filename": CATEGORICAL,
+        "sample_name": CATEGORICAL,
+        "read_length": int,
+        "mean_quality": float,
+        "channel": int,
+        "read_number": int,
+        "start_time": str,
+    }
+    # Infer format
+    if format == 'bamstats':
+        relevant_stats_cols_dtypes = bamstats_cols_dtypes
+        time_cols = None
+    elif format == 'fastcat':
+        relevant_stats_cols_dtypes = fastcat_cols_dtypes
+        time_cols = ['start_time']
+    else:
+        raise ValueError(f"{format} not valid file type")
+    # Prepare input files
+    dfs = []
+    if os.path.isdir(stat):
+        input_files = [(stat, i) for i in os.listdir(stat)]
+    elif os.path.isfile(stat):
+        input_files = [(None, stat)]
+    else:
+        raise Exception(f'No valid input: {stat}')
+    # If no files, throw error
+    if len(input_files) == 0:
+        raise FileNotFoundError(f'No valid input found in {stat}')
+    # Start processing
+    for (inpath, fname) in input_files:
+        try:
+            fastcat_file = fname if not inpath else f'{inpath}/{fname}'
+            df = pd.read_csv(
+                fastcat_file,
+                sep="\t",
+                header=0,
+                usecols=relevant_stats_cols_dtypes.keys(),
+                dtype=relevant_stats_cols_dtypes,
+                parse_dates=time_cols
+                )
+            # Add file name if missing
+            if 'filename' not in df.columns:
+                df['filename'] = fname.split('/')[-1]
+            # Rename "name" to "read_id"
+            if 'read_id' not in df.columns and 'name' in df.columns:
+                df.rename(columns={'name': 'read_id'}, inplace=True)
+            if format == 'fastcat':
+                df['start_time'] = df.start_time.dt.tz_localize(None)
+            # Append processed DF
+            dfs.append(df)
+        except pd.errors.EmptyDataError:
+            cols = relevant_stats_cols_dtypes.update({'filename': str})
+            dfs.append(
+                pd.DataFrame(columns=cols.keys()).astype(cols))
+    # concatenate and emit
+    return pd.concat(dfs).reset_index(drop=True)
+
+
 def main(args):
     """Entry point to demonstrate a sequence summmary component."""
     comp_title = 'Sequence Summary'
-    seq_sum = SeqSummary(args.seq_summary)
+    # Define inputs.
+    # If seq_summary is not passed, then use bam_readstats
+    if args.seq_summary:
+        seq_summary = args.seq_summary
+    elif args.seq_summary is None and args.bam_readstats is not None:
+        seq_summary = args.bam_readstats
+    else:
+        raise ValueError('No valid input for seq_summary/bam_readstats.')
+    if args.seq_summary is not None and args.bam_readstats is not None:
+        bam_summary = args.bam_readstats
+    else:
+        bam_summary = None
+    # Create summary
+    seq_sum = SeqSummary(
+        seq_summary,
+        bam_summary=bam_summary,
+        flagstat=args.bam_flagstat
+        )
+    # Write report
     report = ComponentReport(comp_title, seq_sum)
     report.write(args.output)
 
@@ -170,6 +381,14 @@ def argparser():
         "--seq_summary",
         default=resource_filename('ezcharts', "data/test/fastcat.stats.gz"),
         help="Sequence summary TSV from fastcat.")
+    parser.add_argument(
+        "--bam_flagstat",
+        default=resource_filename('ezcharts', "data/test/bamstats.flagstat.tsv"),
+        help="Bam flagstats TSV from bamstats.")
+    parser.add_argument(
+        "--bam_readstats",
+        default=resource_filename('ezcharts', "data/test/bamstats.readstats.tsv.gz"),
+        help="Read statistics TSV from bamstats.")
     parser.add_argument(
         "--output",
         default="seq_summary_report.html",
