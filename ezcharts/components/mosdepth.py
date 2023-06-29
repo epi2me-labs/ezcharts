@@ -158,6 +158,14 @@ def load_mosdepth_regions(
                 names=relevant_stats_cols_dtypes.keys(),
                 dtype=relevant_stats_cols_dtypes
             )
+            # If it's empty, add an empty DF
+            if df.empty:
+                cols = relevant_stats_cols_dtypes.update(
+                    {
+                        'mean_pos': int, 'step': int,
+                        "total_mean_pos": int, "filename": str})
+                dfs.append(pd.DataFrame(columns=cols))
+                continue
             # If chrom sizes are provided, add missing windows in each chrom
             if isinstance(faidx, pd.DataFrame) and isinstance(winsize, int):
                 if 'length' not in faidx.columns:
@@ -169,12 +177,12 @@ def load_mosdepth_regions(
                         'No "chrom" column found.',
                         'Import the fai with fasta_idx() and try again.')
                 faidx = faidx.loc[faidx['length'] > min_size]
-                df = add_missing_windows(df, faidx, winsize)
+                df = add_missing_windows(df, faidx, value='depth', winsize=winsize)
             # If karyo provided, sort by given order
             df = (
                 df.eval("mean_pos = (start + end) / 2")
                 .eval("step = end - start")
-                .reset_index()
+                .reset_index(drop=True)
                 )
             if subset:
                 subset = subset if isinstance(subset, list) else [subset]
@@ -250,6 +258,13 @@ def load_mosdepth_summary(summary):
                 usecols=relevant_stats_cols_dtypes.keys(),
                 dtype=relevant_stats_cols_dtypes
                 )
+            # If it's empty, add an empty DF
+            if df.empty:
+                cols = relevant_stats_cols_dtypes.update(
+                    {'filename': str})
+                dfs_tot.append(pd.DataFrame(columns=cols))
+                dfs_reg.append(pd.DataFrame(columns=cols))
+                continue
             # Add filename
             df['filename'] = fname.split('/')[-1]
             # Split region/total stats

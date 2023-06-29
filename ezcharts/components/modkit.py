@@ -145,6 +145,12 @@ def load_modkit_summary(summary_dir):
                     dtype=relevant_stats_cols_dtypes,
                     sep='\t',
                     comment='#')
+            # If it's empty, add an empty DF
+            if df.empty:
+                cols = relevant_stats_cols_dtypes.update(
+                    {'mod': str, 'threshold': str, 'filename': int})
+                dfs.append(pd.DataFrame(columns=cols))
+                continue
             # Convert modification to the appropriate code
             df['mod'] = df.apply(
                 lambda x: MOD_CONVERT.get(x.code, MOD_CONVERT.get(x.base)), axis=1)
@@ -219,6 +225,13 @@ def load_bedmethyl(bedmethyl_input, faidx=None):
                 names=relevant_stats_cols_dtypes.keys(),
                 dtype=relevant_stats_cols_dtypes)\
                 .drop(columns=['startp', 'endp'])
+            # If it's empty, add an empty DF
+            if df.empty:
+                cols = relevant_stats_cols_dtypes.update(
+                    {'total_mean_pos': str, 'filename': int})
+                dfs.append(
+                    pd.DataFrame(columns=cols).drop(columns=['startp', 'endp']))
+                continue
             # If the dataframe is empty, append it directly.
             if isinstance(faidx, pd.DataFrame):
                 if 'length' not in faidx.columns:
