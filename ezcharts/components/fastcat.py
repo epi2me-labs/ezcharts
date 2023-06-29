@@ -257,6 +257,12 @@ def load_bamstats_flagstat(flagstat):
                 flagstat_file, sep="\t",
                 usecols=relevant_stats_cols_dtypes.keys(),
                 dtype=relevant_stats_cols_dtypes)
+            # If it's empty, add an empty DF
+            if df.empty:
+                cols = relevant_stats_cols_dtypes.update(
+                    {'Status': str, 'filename': int})
+                dfs.append(pd.DataFrame(columns=cols))
+                continue
             # Add mapped/unmapped status
             df["Status"] = df["ref"].apply(
                 lambda x: "Unmapped" if x == "*" else "Mapped"
@@ -327,6 +333,13 @@ def load_stats(stat, format=None):
                 dtype=relevant_stats_cols_dtypes,
                 parse_dates=time_cols
                 )
+            # If it's empty, add an empty DF
+            if df.empty:
+                cols = relevant_stats_cols_dtypes.update(
+                    {'filename': int})
+                dfs.append(
+                    pd.DataFrame(columns=cols).rename(columns={'name': 'read_id'}))
+                continue
             # Add file name if missing
             if 'filename' not in df.columns:
                 df['filename'] = fname.split('/')[-1]

@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.5.1]
+### Fixed
+- Data loaders not handling files with header-only appropriately.
+- `add_missing_intervals` crashes with unsorted dataframes and is now generic.
+
 ## [v0.5.0]
 ### Added
 - Data load utilities for modkit, DSS, mosdepth and bamstats.

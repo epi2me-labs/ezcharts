@@ -151,6 +151,11 @@ def load_dml(dml, faidx=None, rename=None, order=None):
             tdf = pd.read_csv(dml_file, sep="\t", dtype=relevant_stats_cols_dtypes) \
                 .rename(columns={'chr': 'chrom'}) \
                 .eval("neg_log10_p = abs(log10(fdr))")
+            if tdf.empty:
+                cols = relevant_stats_cols_dtypes.update(
+                    {'cum_pos': str, 'filename': int})
+                dfs.append(pd.DataFrame(columns=cols))
+                continue
             # Fix category names to use chrN format
             if rename:
                 tdf['chrom'] = tdf['chrom'].cat.rename_categories(rename)
@@ -249,6 +254,12 @@ def load_dmr(dmr, faidx=None, rename=None, order=None):
                 .drop(columns=['abs_diff']) \
                 .eval("mean_pos=start+(length/2)") \
                 .astype({'chrom': CATEGORICAL, 'mean_pos': int})
+            # If it's empty, add an empty DF
+            if tdf.empty:
+                cols = relevant_stats_cols_dtypes.update(
+                    {'cum_pos': str, 'filename': int})
+                dfs.append(pd.DataFrame(columns=cols))
+                continue
             # Rename categories if required
             if rename:
                 tdf['chrom'] = tdf['chrom'].cat.rename_categories(rename)

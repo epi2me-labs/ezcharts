@@ -80,10 +80,10 @@ def make_breaks(minval, maxval, winsize):
     return breaks
 
 
-def add_missing_windows(intervals, faidx, winsize=25000):
-    """Add missing windows to depth dataframe.
+def add_missing_windows(intervals, faidx, value='value', winsize=25000):
+    """Add missing windows to value dataframe.
 
-    If the depth refers to a narrow region of the chromosome, this will
+    If the value refers to a narrow region of the chromosome, this will
     cause to generate a dataframe with either a single-entry, or only
     few entries. This causes the production of poor quality or impossible to
     understand plots.
@@ -97,9 +97,10 @@ def add_missing_windows(intervals, faidx, winsize=25000):
         "chrom": CATEGORICAL,
         "start": int,
         "end": int,
-        "depth": float,
+        value: float,
     }
-
+    # Ensure it is sorted
+    intervals = intervals.sort_values(['chrom', 'start'])
     # Get unique chromosomes
     chrs = faidx.query(f'length>={winsize}').chrom.unique().tolist()
     # New intervals
@@ -112,8 +113,7 @@ def add_missing_windows(intervals, faidx, winsize=25000):
         minval = chr_entry.start.min() if not chr_entry.empty \
             else faidx[faidx['chrom'] == chr_id].length.max()
         # Final window end
-        maxval = chr_entry.end.max() if not chr_entry.empty \
-            else faidx[faidx['chrom'] == chr_id].length.max()
+        maxval = faidx[faidx['chrom'] == chr_id].length.max()
         # Chromosome length
         chr_len = faidx[faidx['chrom'] == chr_id].length.max()
         # If the minimum value is != 0, add intermediate windows
@@ -126,7 +126,7 @@ def add_missing_windows(intervals, faidx, winsize=25000):
                     'chrom': chr_id,
                     'start': breaks[0:-1],
                     'end': breaks[1:],
-                    'depth': 0}))
+                    value: 0}))
         # Append precomputed intervals, checking for breaks
         # in between regions.
         for idx, region in chr_entry.iterrows():
@@ -150,7 +150,7 @@ def add_missing_windows(intervals, faidx, winsize=25000):
                         'chrom': chr_id,
                         'start': breaks[0:-1],
                         'end': breaks[1:],
-                        'depth': 0}))
+                        value: 0}))
             final_intervals.append(region)
         # If the max value is less than the chromosome length, add these too
         if maxval < chr_len:
@@ -158,13 +158,13 @@ def add_missing_windows(intervals, faidx, winsize=25000):
             breaks = make_breaks(maxval, chr_len, winsize)
             # Create vectors to populate the DF
             chr_vec = [chr_id] * (len(breaks) - 1)
-            depths = [0] * (len(breaks) - 1)
+            values = [0] * (len(breaks) - 1)
             # Add tailing intervals
             final_intervals.append(
                 pd.DataFrame(data={
                     'chrom': chr_vec,
                     'start': breaks[0:-1],
                     'end': breaks[1:],
-                    'depth': depths}))
+                    value: values}))
     return pd.concat(final_intervals).astype(
         relevant_stats_cols_dtypes).reset_index(drop=True)
