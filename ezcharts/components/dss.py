@@ -47,10 +47,10 @@ class DMSummary(Snippet):
                 else:
                     faidx = None
             if "dml" in kwargs:
-                if not isinstance(kwargs["dml"], pd.DataFrame):
-                    dml = load_dml(kwargs["dml"], faidx=None)
-                else:
+                if isinstance(kwargs["dml"], pd.DataFrame):
                     dml = kwargs["dml"]
+                else:
+                    dml = load_dml(kwargs["dml"], faidx=None)
                 # Check that the file is not empty
                 if dml.empty:
                     raise pd.errors.EmptyDataError('DML is empty')
@@ -74,10 +74,10 @@ class DMSummary(Snippet):
                                     df_sample, 'chrom', 'pos',
                                     'fdr', ref_lengths=faidx), 'epi2melabs')
             if "dmr" in kwargs:
-                if not isinstance(kwargs["dmr"], pd.DataFrame):
-                    dmr = load_dmr(kwargs["dmr"], faidx=faidx)
-                else:
+                if isinstance(kwargs["dmr"], pd.DataFrame):
                     dmr = kwargs["dmr"]
+                else:
+                    dmr = load_dmr(kwargs["dmr"], faidx=faidx)
                 # Check that the file is not empty
                 if dmr.empty:
                     raise pd.errors.EmptyDataError('DMR is empty')
