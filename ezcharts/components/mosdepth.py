@@ -46,10 +46,10 @@ class DepthSummary(Snippet):
 
             # Make modkit summary table
             if "mosdepth_summary" in kwargs:
-                if not isinstance(kwargs["mosdepth_summary"], pd.DataFrame):
-                    summary = load_mosdepth_summary(kwargs["mosdepth_summary"])
-                else:
+                if isinstance(kwargs["mosdepth_summary"], pd.DataFrame):
                     summary = kwargs["mosdepth_summary"]
+                else:
+                    summary = load_mosdepth_summary(kwargs["mosdepth_summary"])
                 # Check that the file is not empty
                 if summary[0].empty:
                     raise pd.errors.EmptyDataError('Summary is empty')
@@ -73,12 +73,12 @@ class DepthSummary(Snippet):
 
             # Make mosdepth line plot
             if "mosdepth_region" in kwargs:
-                if not isinstance(kwargs["mosdepth_region"], pd.DataFrame):
+                if isinstance(kwargs["mosdepth_region"], pd.DataFrame):
+                    bed = kwargs["mosdepth_region"]
+                else:
                     bed = load_mosdepth_regions(
                         kwargs["mosdepth_region"], faidx=faidx,
                         winsize=25000, min_size=10000000)
-                else:
-                    bed = kwargs["mosdepth_region"]
                 # Check that the file is not empty
                 if bed.empty:
                     raise pd.errors.EmptyDataError('Region DF is empty')

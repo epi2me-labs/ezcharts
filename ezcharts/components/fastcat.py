@@ -37,16 +37,16 @@ class SeqSummary(Snippet):
         super().__init__(styles=None, classes=None)
 
         with self:
-            if seq_summary:
+            if seq_summary is not None:
                 # Assume the input is in fastcat format. If not, try to import as
                 # bamstats format.
-                if not isinstance(seq_summary, pd.DataFrame):
+                if isinstance(seq_summary, pd.DataFrame):
+                    df_all = seq_summary
+                else:
                     try:
                         df_all = load_stats(seq_summary, format='fastcat')
                     except ValueError:
                         df_all = load_stats(seq_summary, format='bamstats')
-                else:
-                    df_all = seq_summary
                 # Check that the file is not empty
                 if df_all.empty:
                     raise pd.errors.EmptyDataError('seq_summary is empty')
@@ -74,10 +74,10 @@ class SeqSummary(Snippet):
                                 draw_all_plots(df_sample, theme)
             # Create flagstat tables
             if "flagstat" in kwargs:
-                if not isinstance(kwargs["flagstat"], pd.DataFrame):
-                    flagstat = load_bamstats_flagstat(kwargs["flagstat"])
-                else:
+                if isinstance(kwargs["flagstat"], pd.DataFrame):
                     flagstat = kwargs["flagstat"]
+                else:
+                    flagstat = load_bamstats_flagstat(kwargs["flagstat"])
                 # Check that the file is not empty
                 if flagstat.empty:
                     raise pd.errors.EmptyDataError('flagstat is empty')
@@ -98,10 +98,10 @@ class SeqSummary(Snippet):
                                 DataTable.from_pandas(df_sample, use_index=False)
             # Create bamstats metrics
             if "bam_summary" in kwargs:
-                if not isinstance(kwargs["bam_summary"], pd.DataFrame):
-                    df_all = load_stats(kwargs["bam_summary"], format='bamstats')
-                else:
+                if isinstance(kwargs["bam_summary"], pd.DataFrame):
                     df_all = kwargs["bam_summary"]
+                else:
+                    df_all = load_stats(kwargs["bam_summary"], format='bamstats')
                 # Check that the file is not empty
                 if df_all.empty:
                     raise pd.errors.EmptyDataError('seq_summary is empty')

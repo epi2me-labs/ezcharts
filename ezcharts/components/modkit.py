@@ -45,10 +45,10 @@ class MKSummary(Snippet):
                     faidx = None
             # Make modkit summary table
             if "modkit_summary" in kwargs:
-                if not isinstance(kwargs["modkit_summary"], pd.DataFrame):
-                    summary = load_modkit_summary(kwargs["modkit_summary"])
-                else:
+                if isinstance(kwargs["modkit_summary"], pd.DataFrame):
                     summary = kwargs["modkit_summary"]
+                else:
+                    summary = load_modkit_summary(kwargs["modkit_summary"])
                 # Check that the file is not empty
                 if summary.empty:
                     raise pd.errors.EmptyDataError('Summary is empty')
@@ -70,10 +70,10 @@ class MKSummary(Snippet):
                                 DataTable.from_pandas(df_sample, use_index=False)
             # Make modkit bedmethyl karyomap
             if "bedmethyl" in kwargs:
-                if not isinstance(kwargs["bedmethyl"], pd.DataFrame):
-                    bedmethyl = load_bedmethyl(kwargs["bedmethyl"], faidx=faidx)
-                else:
+                if isinstance(kwargs["bedmethyl"], pd.DataFrame):
                     bedmethyl = kwargs["bedmethyl"]
+                else:
+                    bedmethyl = load_bedmethyl(kwargs["bedmethyl"], faidx=faidx)
                 # Check that the file is not empty
                 if bedmethyl.empty:
                     raise pd.errors.EmptyDataError('Bedmethyl is empty')
