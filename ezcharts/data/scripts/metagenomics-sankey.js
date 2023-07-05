@@ -192,17 +192,19 @@ const setTextStyles = (enter, colour = "#555") => {
     *
     * @param {object} enter
     * @param {object} colourScale
-    * @param {number} total
+    * @param {object} parsed
     * @param {object} counts
     */
-const updateToolTip = (enter, colourScale, total, counts) => {
+const updateToolTip = (enter, colourScale, parsed, counts) => {
     const toolTip = d3.select("#tooltip")
     enter.on("mouseover", (event, d) => {
+        const sample = d3.select("#sample-select").property('value')
+        const _total = getTotalCount(parsed[sample])
         const toolTipData = [
             `Name: ${d.name}`,
             `Rank: ${counts[d.name].rank}`,
             `Count: ${d.value}`,
-            `Percentage: ${(100 / total * d.value).toFixed(2)}%`
+            `Percentage: ${(100 / _total * d.value).toFixed(2)}%`
         ]
         toolTip
             .select("text")
@@ -251,7 +253,7 @@ const updateToolTip = (enter, colourScale, total, counts) => {
     * @param {number} total
     * @param {object} counts
     */
-const updateVisualisation = (svg, graph, depth, colourScale, total, counts) => {
+const updateVisualisation = (svg, graph, depth, colourScale, parsed, counts) => {
     const { nodes, links } = graph
 
     const _filteredNodes = nodes.filter(Node =>
@@ -283,7 +285,7 @@ const updateVisualisation = (svg, graph, depth, colourScale, total, counts) => {
                     .attr("pointer-events", "all")
                     .call(enter => enter.transition(t)
                         .attr("height", d => d.y1 - d.y0))
-                    .call(enter => updateToolTip(enter, colourScale, total, counts))
+                    .call(enter => updateToolTip(enter, colourScale, parsed, counts))
 
                 // Add node accessibility title
                 container
@@ -397,14 +399,14 @@ const updateVisualisation = (svg, graph, depth, colourScale, total, counts) => {
     * @param {number} total
     * @param {object} counts
     */
-const renderVisualisation = (svg, graph, depth, colourScale, total, counts) => {
+const renderVisualisation = (svg, graph, depth, colourScale, parsed, counts) => {
     const nodelist = svg.append("g")
         .attr("id", "nodes")
     const linklist = svg.append("g")
         .attr("id", "links")
         .attr("fill", "none")
 
-    updateVisualisation(svg, graph, depth, colourScale, total, counts)
+    updateVisualisation(svg, graph, depth, colourScale, parsed, counts)
     return svg
 }
 
@@ -417,7 +419,7 @@ const renderVisualisation = (svg, graph, depth, colourScale, total, counts) => {
     *
     * @param {object} counts
     */
-const handlePlotSelectChange = (counts) => {
+const handlePlotSelectChange = (counts, parsed) => {
     const rank = d3.select("#rank-select").property('value');
     const cutoff = d3.select("#cutoff-select").property('value');
     const sample = d3.select("#sample-select").property('value');
@@ -426,7 +428,7 @@ const handlePlotSelectChange = (counts) => {
     const _graph = getSankeyGraph(sample, parsed[sample], generator, cutoff, _total)
     const colourScale = d3.scaleQuantize().domain([0, _total]).range(colours);
     setStateGraph(_graph)
-    updateVisualisation(svg, _graph, ranks.indexOf(rank), colourScale, _total, counts);
+    updateVisualisation(svg, _graph, ranks.indexOf(rank), colourScale, parsed, counts);
 }
 
 /**
@@ -577,13 +579,13 @@ const total = getTotalCount(sample_data)
 const graph = getSankeyGraph(
     default_sample, sample_data, generator, default_cutoff, total)
 const colourScale = d3.scaleQuantize().domain([0, total]).range(colours);
-renderVisualisation(svg, graph, ranks.indexOf(default_rank), colourScale, total, sample_counts)
+renderVisualisation(svg, graph, ranks.indexOf(default_rank), colourScale, parsed, sample_counts)
 setStateGraph(graph)
 
 // Initialise select reactivity
-d3.select("#sample-select").on("change", () => handlePlotSelectChange(sample_counts));
-d3.select("#rank-select").on("change", () => handlePlotSelectChange(sample_counts));
-d3.select("#cutoff-select").on("change", () => handlePlotSelectChange(sample_counts));
+d3.select("#sample-select").on("change", () => handlePlotSelectChange(sample_counts, parsed));
+d3.select("#rank-select").on("change", () => handlePlotSelectChange(sample_counts, parsed));
+d3.select("#cutoff-select").on("change", () => handlePlotSelectChange(sample_counts, parsed));
 
 // Initialise zoom reactivity
 const zoom = d3.zoom().on('zoom', handleZoom);
