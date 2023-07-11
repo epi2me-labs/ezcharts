@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [unreleased]
 ### Fixed
 - Sankey uses the right total value to calculate percentages when there are more than one sample.
+- `fastcat.read_length_plot()` now actually uses the parameters `min_len`, `max_len`, `xlim`, and `bin_width`.
 
 ## [v0.5.3]
 ### Fixed
