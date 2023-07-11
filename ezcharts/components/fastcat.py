@@ -197,15 +197,17 @@ def read_length_plot(
         xlim=(0, None), bins=100, bin_width=None, title='Read length'):
     """Create a read length plot.
 
-    :param seq_summary: summary data from fastcat.
-    :param min_len: minimum length.
-    :param max_len: maximum length.
-    :param xlim: tuple for plotting limits (start, end). A value None will
-        trigger calculation from the data.
-    :param: bins number of bins
+    :param seq_summary: summary data from fastcat
+    :param min_len: minimum length
+    :param max_len: maximum length
+    :param xlim: x-axis limits
+    :param bins: number of bins
+    :param bin_width: bin width
+    :param title: plot title
 
-    The minimum and maximum lengths are used only to annotate the plot
-    (not filter the data).
+    The reads will be filtered with `min_len` and `max_len` before calculating the
+    histogram. The subtext of the plot title will still show the mean / median / maximum
+    of the full data.
     """
     if not isinstance(seq_summary, pd.DataFrame):
         df = util.read_files(seq_summary)[['read_length']]
@@ -216,12 +218,28 @@ def read_length_plot(
     median_length = int(np.median(df['read_length']))
     max_ = int(np.max(df['read_length']))
 
-    plt = ezc.histplot(data=df.read_length / 1000, bins=bins)
+    # filter the reads and divide by 1000 to transform into kb
+    read_lengths = df['read_length'].values
+    if min_len is not None:
+        read_lengths = read_lengths[read_lengths >= min_len]
+    if max_len is not None:
+        read_lengths = read_lengths[read_lengths <= max_len]
+    read_lengths = read_lengths / 1000
+    if bin_width is not None:
+        bin_width /= 1000
+
+    plt = ezc.histplot(data=read_lengths, bins=bins, binwidth=bin_width)
     plt.title = dict(
         text=title,
-        subtext=f"Mean: {mean_length}. Median: {median_length}. Max: {max_}")
+        subtext=f"Mean: {mean_length:,d}. Median: {median_length:,d}. Max: {max_:,d}"
+    )
     plt.xAxis.name = 'Read length / kb'
     plt.yAxis.name = 'Number of reads'
+
+    if xlim[0] is not None:
+        plt.xAxis.min = xlim[0] / 1000
+    if xlim[1] is not None:
+        plt.xAxis.max = xlim[1] / 1000
     return plt
 
 
