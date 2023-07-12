@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [unreleased]
+## [v0.5.4]
 ### Fixed
 - Sankey uses the right total value to calculate percentages when there are more than one sample.
 - `fastcat.read_length_plot()` now actually uses the parameters `min_len`, `max_len`, `xlim`, and `bin_width`.
