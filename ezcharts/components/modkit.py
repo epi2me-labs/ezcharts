@@ -73,7 +73,8 @@ class MKSummary(Snippet):
                 if isinstance(kwargs["bedmethyl"], pd.DataFrame):
                     bedmethyl = kwargs["bedmethyl"]
                 else:
-                    bedmethyl = load_bedmethyl(kwargs["bedmethyl"], faidx=faidx)
+                    bedmethyl = load_bedmethyl(
+                        kwargs["bedmethyl"], faidx=faidx, split_all=True)
                 # Check that the file is not empty
                 if bedmethyl.empty:
                     raise pd.errors.EmptyDataError('Bedmethyl is empty')
@@ -153,7 +154,7 @@ def load_modkit_summary(summary_dir):
                 continue
             # Convert modification to the appropriate code
             df['mod'] = df.apply(
-                lambda x: MOD_CONVERT.get(x.code, MOD_CONVERT.get(x.base)), axis=1)
+                lambda x: MOD_CONVERT.get(x.code, x.base), axis=1)
             df.astype({'mod': CATEGORICAL})
             # Read and add the thresholds value
             for line in open(f_path):
@@ -172,7 +173,7 @@ def load_modkit_summary(summary_dir):
     return pd.concat(dfs).reset_index(drop=True)
 
 
-def load_bedmethyl(bedmethyl_input, faidx=None):
+def load_bedmethyl(bedmethyl_input, faidx=None, split_all=False):
     """Load modkit bedmethyl file.
 
     Input is either a single directory with all the modkit bedmethyls or
@@ -182,7 +183,7 @@ def load_bedmethyl(bedmethyl_input, faidx=None):
     - faidx: A faidx dataframe with 'chrom' 'length' cols (add missing intervals)
     """
     # Col names
-    relevant_stats_cols_dtypes = {
+    long_cols_dtypes = {
         "chrom": CATEGORICAL,
         "start": int,
         "end": int,
@@ -202,6 +203,18 @@ def load_bedmethyl(bedmethyl_input, faidx=None):
         "Ndiff": int,
         "Nnocall": int,
     }
+    short_cols_dtypes = {
+        'chrom': CATEGORICAL,
+        'start': int,
+        'end': int,
+        'mod': str,
+        'score': int,
+        'strand': str,
+        'start_p': int,
+        'end_p': int,
+        "colour": CATEGORICAL,
+        'vals': str,
+    }
     # Check inputs
     dfs = []
     if os.path.isdir(bedmethyl_input):
@@ -218,19 +231,27 @@ def load_bedmethyl(bedmethyl_input, faidx=None):
         try:
             bedmethyl = fname if not inpath else f'{inpath}/{fname}'
             # Load input bedmethyl
-            df = pd.read_csv(
-                bedmethyl,
-                sep="\t| ",
-                engine='python',
-                names=relevant_stats_cols_dtypes.keys(),
-                dtype=relevant_stats_cols_dtypes)\
-                .drop(columns=['startp', 'endp'])
+            if split_all is True:
+                cols = long_cols_dtypes
+                df = pd.read_csv(
+                    bedmethyl,
+                    sep="\t| ",
+                    engine='python',
+                    names=cols.keys(),
+                    dtype=cols)
+            else:
+                cols = short_cols_dtypes
+                df = pd.read_csv(
+                    bedmethyl,
+                    sep="\t",
+                    engine='python',
+                    names=short_cols_dtypes.keys(),
+                    dtype=short_cols_dtypes)
             # If it's empty, add an empty DF
             if df.empty:
-                cols = relevant_stats_cols_dtypes.update(
+                cols = cols.update(
                     {'total_mean_pos': str, 'filename': int})
-                dfs.append(
-                    pd.DataFrame(columns=cols).drop(columns=['startp', 'endp']))
+                dfs.append(pd.DataFrame(columns=cols))
                 continue
             # If the dataframe is empty, append it directly.
             if isinstance(faidx, pd.DataFrame):
@@ -261,8 +282,11 @@ def load_bedmethyl(bedmethyl_input, faidx=None):
             # Add to output list
             dfs.append(df)
         except pd.errors.EmptyDataError:
-            cols = relevant_stats_cols_dtypes.update({'filename': str})
-            dfs.append(pd.DataFrame(columns=cols).drop(columns=['startp', 'endp']))
+            if split_all is True:
+                cols = long_cols_dtypes.update({'filename': str})
+            else:
+                cols = short_cols_dtypes.update({'filename': str})
+            dfs.append(pd.DataFrame(columns=cols))
     return pd.concat(dfs).reset_index(drop=True)
 
 

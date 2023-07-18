@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [unreleased]
+### Fixed
+- modkit summary loader converting canonical C counts to modC.
+### Changed
+- improve modkit bedMethyl to account both spacers or a single one.
+
 ## [v0.5.4]
 ### Fixed
 - Sankey uses the right total value to calculate percentages when there are more than one sample.
