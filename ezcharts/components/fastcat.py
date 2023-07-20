@@ -217,6 +217,7 @@ def read_length_plot(
     mean_length = int(df['read_length'].mean())
     median_length = int(np.median(df['read_length']))
     max_ = int(np.max(df['read_length']))
+    min_ = int(np.min(df['read_length']))
 
     # filter the reads and divide by 1000 to transform into kb
     read_lengths = df['read_length'].values
@@ -231,7 +232,10 @@ def read_length_plot(
     plt = ezc.histplot(data=read_lengths, bins=bins, binwidth=bin_width)
     plt.title = dict(
         text=title,
-        subtext=f"Mean: {mean_length:,d}. Median: {median_length:,d}. Max: {max_:,d}"
+        subtext=(
+            f"Mean: {mean_length:,d}. Median: {median_length:,d}. "
+            f"Min: {min_:,d}. Max: {max_:,d}"
+        )
     )
     plt.xAxis.name = 'Read length / kb'
     plt.yAxis.name = 'Number of reads'

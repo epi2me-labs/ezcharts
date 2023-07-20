@@ -6,9 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 ### Fixed
-- modkit summary loader converting canonical C counts to modC.
+- Modkit summary loader converting canonical C counts to modC.
 ### Changed
-- improve modkit bedMethyl to account both spacers or a single one.
+- Improve modkit bedMethyl to account both spacers or a single one.
+- Read length plot in `SeqSummary` now also displays the minimum read length in the title sub-text.
 
 ## [v0.5.4]
 ### Fixed
