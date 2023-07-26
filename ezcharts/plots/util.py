@@ -155,7 +155,7 @@ def choose_palette(name='colorblind', ncolours=None):
     :param: name: name of palette to return colors from.
     :param: ncolours: number of colours.
     """
-    palletes = {
+    palettes = {
         'colorblind': [
             '#0173b2', '#de8f05', '#029e73', '#d55e00', '#cc78bc',
             '#ca9161', '#fbafe4', '#949494', '#ece133', '#56b4e9'],
@@ -206,9 +206,9 @@ def choose_palette(name='colorblind', ncolours=None):
     }
 
     if ncolours is None:
-        return palletes[name]
+        return palettes[name]
 
-    cycler = cycle(palletes[name])
+    cycler = cycle(palettes[name])
     return [c for c in islice(cycler, ncolours)]
 
 

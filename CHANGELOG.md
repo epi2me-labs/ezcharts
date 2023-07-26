@@ -4,12 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [unreleased]
+## [v0.6.0]
 ### Fixed
 - Modkit summary loader converting canonical C counts to modC.
 ### Changed
 - Improve modkit bedMethyl to account both spacers or a single one.
 - Read length plot in `SeqSummary` now also displays the minimum read length in the title sub-text.
+### Added
+- Bokeh as alternative plotting utility.
 
 ## [v0.5.4]
 ### Fixed

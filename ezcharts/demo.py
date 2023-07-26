@@ -9,6 +9,7 @@ from pkg_resources import resource_filename
 
 import ezcharts as ezc
 from ezcharts import util
+from ezcharts.components.bokehchart import BokehChart
 from ezcharts.components.common import fasta_idx, HSA_CHROMOSOME_ORDER
 from ezcharts.components.dss import load_dml, load_dmr
 from ezcharts.components.ezchart import EZChart
@@ -27,7 +28,7 @@ from ezcharts.layout.snippets import Stats
 from ezcharts.layout.snippets import Tabs
 from ezcharts.layout.snippets.cards import Cards
 from ezcharts.layout.snippets.cards import ICard
-from ezcharts.plots import Plot
+from ezcharts.plots import BokehPlot, Plot
 from ezcharts.plots.ideogram import ideogram
 from ezcharts.plots.karyomap import karyomap
 
@@ -279,7 +280,17 @@ def main(args):
                         DataTable.from_pandas(d.head(10))
                 else:
                     DataTable.from_pandas(df.head(10))
-
+    with report.add_section("Bokeh", "Bokeh"):
+        plot = BokehPlot()
+        plot._fig.circle(
+            [1, 2, 3, 4, 5],
+            [6, 7, 2, 4, 5],
+            size=20,
+            color="navy",
+            alpha=0.5,
+        )
+        plot._fig.title = "Bokeh plot title"
+        BokehChart(plot)
     logger.info('Reticulating splines')
     report.write(args.output)
 

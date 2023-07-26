@@ -27,6 +27,7 @@ requirements:
     - scipy
     - seaborn==0.12.0
     - sigfig
+    - bokeh==3.1.*
 
 test:
   imports:
