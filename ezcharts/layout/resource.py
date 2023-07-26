@@ -1,61 +1,105 @@
 """Re-usable external resources."""
-from dataclasses import dataclass
 from typing import Callable, Optional, Type
 
+from bokeh.resources import INLINE as bk_inline
 from dominate.tags import dom_tag, script, style
+from dominate.util import raw
 from pkg_resources import resource_filename
 
 from ezcharts.layout.util import inline
 
 
-@dataclass
 class Resource:
     """Resource definition."""
 
-    path: str
-    loader: Callable
-    tag: Optional[Type[dom_tag]] = None
+    def __init__(
+        self,
+        path: Optional[str] = None,
+        loader: Optional[Callable] = None,
+        tag: Optional[Type[dom_tag]] = None,
+        func: Optional[Callable] = None,
+    ):
+        """Construct resource from a path or a function.
+
+        Either `path` or `func` must be given. `path` needs to point to a file in
+        `ezcharts/data`, whereas `func` needs to be a callable that returns the resource
+        as a string or dominate object.
+        """
+        # make sure we got only either a path or a function
+        if not ((path is None) ^ (func is None)):
+            raise ValueError("Resource needs either `path` or `func`.")
+        # if we got a path, we require a loader as well
+        if path is not None and loader is None:
+            raise ValueError("`loader` is required when `path` was provided.")
+        self.path = path
+        self.loader = loader
+        self.tag = tag
+        self.func = func
 
     @property
     def data_file(self):
         """Filepath to resource data file."""
-        return resource_filename('ezcharts', f'data/{self.path}')
+        return (
+            resource_filename("ezcharts", f"data/{self.path}")
+            if self.path is not None
+            else None
+        )
 
     def __call__(self):
         """Render the resource."""
-        loaded = self.loader(self.data_file)
+        if self.path is not None:
+            loaded = self.loader(self.data_file)
+        elif self.func is not None:
+            loaded = self.func()
         if self.tag:
             return self.tag(loaded)
         return loaded
 
 
-# dataclasses are annoying to derive
-
-
-def VendorResource(path, loader=inline, tag=None):
+def VendorResource(path=None, loader=inline, tag=None, func=None):
     """Fetch a vendor resource."""
-    return Resource(f'vendor/{path}', loader, tag)
+    if path is not None:
+        path = f"vendor/{path}"
+    return Resource(path=path, loader=loader, func=func, tag=tag)
 
 
-def ScriptResource(path, loader=inline, tag=None):
+def ScriptResource(path=None, loader=inline, tag=None, func=None):
     """Fetch a script resource."""
-    return Resource(f'scripts/{path}', loader, tag)
+    if path is not None:
+        path = f"scripts/{path}"
+    return Resource(path=path, loader=loader, func=func, tag=tag)
 
 
-def ImageResource(path, loader=inline, tag=None):
+def ImageResource(path=None, loader=inline, tag=None, func=None):
     """Fetch an image resource."""
-    return Resource(f'images/{path}', loader, tag)
+    if path is not None:
+        path = f"images/{path}"
+    return Resource(path=path, loader=loader, func=func, tag=tag)
 
 
-def StyleResource(path, loader=inline, tag=None):
+def StyleResource(path=None, loader=inline, tag=None, func=None):
     """Fetch a style resource."""
-    return Resource(f'styles/{path}', loader, tag)
+    if path is not None:
+        path = f"styles/{path}"
+    return Resource(path=path, loader=loader, func=func, tag=tag)
 
 
-def ThemeResource(path, loader=inline, tag=None):
+def ThemeResource(path=None, loader=inline, tag=None, func=None):
     """Fetch a theme resource."""
-    return Resource(f'themes/{path}', loader, tag)
+    if path is not None:
+        path = f"themes/{path}"
+    return Resource(path=path, loader=loader, func=func, tag=tag)
 
+
+def get_bokeh_js():
+    """Get BokehJS library."""
+    # make a dict mapping components to indices in `bk_inline.raw_js`
+    comp_idx_dict = {comp: i for i, comp in enumerate(bk_inline.components_for('js'))}
+    # we only support the basic Bokeh functionality for now (i.e. no widgets etc.)
+    return raw(bk_inline.js_raw[comp_idx_dict["bokeh"]])
+
+
+bokeh_js = ScriptResource(func=get_bokeh_js, tag=script)
 
 echarts_js = VendorResource(
     path='echarts.min.js',
@@ -78,6 +122,7 @@ datatables_css = VendorResource(
     loader=inline)
 
 base_head_resources = [
+    bokeh_js,
     echarts_js,
     datatables_js,
     datatables_css]

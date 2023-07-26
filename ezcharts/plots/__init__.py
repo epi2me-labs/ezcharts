@@ -2,11 +2,13 @@
 
 import argparse
 
+from bokeh.plotting import figure
 import pandas as pd
 from pkg_resources import resource_filename
 import sigfig
 
 from ezcharts import util as ezutil
+from ezcharts.components.bokehchart import BokehChart
 from ezcharts.components.ezchart import EZChart
 from ezcharts.components.reports.comp import ComponentReport
 from ezcharts.plots import util
@@ -230,6 +232,42 @@ class _HistogramPlot(Plot):
         rectangle x coords. The third column contains bar heights.
         """
         return [self.xAxis, 1], [self.yAxis, 2]
+
+
+class BokehPlot:
+    """Plotting interface for Bokeh."""
+
+    colors = util.choose_palette()
+    tools = "hover,crosshair,pan,box_zoom,zoom_in,zoom_out,reset,save"
+
+    def __init__(self, *args, **kwargs):
+        """Initialize a bokeh figure."""
+        defaults = dict(
+            output_backend="webgl",
+            tools=self.tools,
+            height=300,
+            width=600,
+        )
+        defaults.update(kwargs)
+        self._fig = figure(*args, **defaults)
+        # remove Bokeh logo
+        self._fig.toolbar.logo = None
+
+    @property
+    def logger(self):
+        """Return logger for class."""
+        return _logger
+
+    def render_html(self, output, **kwargs):
+        """Render plot to a file.
+
+        :params output: output file.
+        :param kwargs: passed to `BokehChart`.
+        """
+        title = self._fig.title.text or "Bokeh Plot"
+        chart = BokehChart(self, "epi2melabs", **kwargs)
+        report = ComponentReport(title, chart)
+        report.write(output)
 
 
 class _NoAxisFixPlot(Plot):
