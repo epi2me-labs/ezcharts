@@ -1,6 +1,6 @@
 """Simple eCharts API."""
 
-__version__ = "0.6.2"
+__version__ = "0.6.3"
 
 import argparse
 import importlib
@@ -36,7 +36,7 @@ def cli():
     # all component demos, plus some others
     components = [
         'params', 'nextclade', 'fastcat', 'dss',
-        'modkit', 'mosdepth', 'clinvar'
+        'modkit', 'mosdepth', 'clinvar', 'bcfstats'
         ]
     others = ['ezcharts.demo', 'ezcharts.plots', 'ezcharts.plots.ideogram']
 
