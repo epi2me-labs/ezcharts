@@ -33,6 +33,11 @@ MOD_CONVERT = {
 # Human chromosome order
 HSA_CHROMOSOME_ORDER = [f'chr{i}' for i in range(1, 23)] + ['chrX', 'chrY']
 
+# ClinVar/NCBI info
+CLINVAR_BASE = "https://www.ncbi.nlm.nih.gov/clinvar/variation/"
+NCBI_BASE = "https://www.ncbi.nlm.nih.gov/gene/"
+CLINVAR_DOCS_URL = "https://www.ncbi.nlm.nih.gov/clinvar/docs/clinsig/"
+
 
 # Load faidx
 def fasta_idx(faidx, rename=None):
