@@ -19,6 +19,7 @@ test: venv/bin/activate
 		--import-order-style google --application-import-names ${PROJECT} \
 		--statistics --max-line-length 88
 	# demo should run without error
+	${IN_VENV} && python check_deps.py
 	${IN_VENV} && python setup.py install
 	${IN_VENV} && ${PROJECT} demo
 
