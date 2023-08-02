@@ -25,9 +25,11 @@ requirements:
     - pandas
     - pydantic<2.0.0
     - scipy
-    - seaborn==0.12.0
+    - seaborn~=0.12.0
     - sigfig
-    - bokeh==3.1.*
+    - bokeh~=3.1.0
+    - natsort==8.4.0
+    - pysam
 
 test:
   imports:
