@@ -334,7 +334,10 @@ def load_stats(stat, format=None):
         raise ValueError(f"{format} not valid file type")
     # Prepare input files
     dfs = []
-    if os.path.isdir(stat):
+    if isinstance(stat, (list, tuple)) and all([os.path.isfile(path) for path in stat]):
+        # got a list of files
+        input_files = [(None, file) for file in stat]
+    elif os.path.isdir(stat):
         input_files = [(stat, i) for i in os.listdir(stat)]
     elif os.path.isfile(stat):
         input_files = [(None, stat)]
