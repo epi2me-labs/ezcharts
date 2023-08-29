@@ -67,14 +67,6 @@ class ClinVarTable(Snippet):
 # Function to load a single VCF file.
 def load_vcf(vcf_fn, benign=False, all_sites=False):
     """Import a single vcf file."""
-    vcf_file = VariantFile(vcf_fn)
-
-    # Get sample name
-    if len(vcf_file.header.samples) != 1:
-        raise ValueError(f'File {vcf_fn} has more than one sample')
-    else:
-        sample_name = vcf_file.header.samples[0]
-
     # Start processing the data
     data = []
     columns = {
@@ -89,6 +81,19 @@ def load_vcf(vcf_fn, benign=False, all_sites=False):
         "HGVSc": CATEGORICAL,
         "HGVSp": CATEGORICAL,
     }
+
+    # Load the VCF. If empty, return empty DF.
+    try:
+        vcf_file = VariantFile(vcf_fn)
+    except ValueError:
+        return pd.DataFrame(columns=columns).astype(columns)
+
+    # Get sample name
+    if len(vcf_file.header.samples) != 1:
+        raise ValueError(f'File {vcf_fn} has more than one sample')
+    else:
+        sample_name = vcf_file.header.samples[0]
+
     # Process each record in the VCF file
     for variant in vcf_file.fetch():
         # First thing first, we check if the site has an alternative allele
