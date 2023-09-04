@@ -193,14 +193,19 @@ def read_quality_plot(
 
 
 def read_length_plot(
-        seq_summary, min_len=None, max_len=None,
-        xlim=(0, None), bins=100, bin_width=None, title='Read length'):
+    seq_summary,
+    xlim=(0, None),
+    quantile_limits=False,
+    bins=100,
+    bin_width=None,
+    title="Read length",
+):
     """Create a read length plot.
 
     :param seq_summary: summary data from fastcat
-    :param min_len: minimum length
-    :param max_len: maximum length
-    :param xlim: x-axis limits
+    :param xlim: viewable read length limits
+    :param quantile_limits: if True, xlim is interpreted as quantiles of the data rather
+        than absolute values.
     :param bins: number of bins
     :param bin_width: bin width
     :param title: plot title
@@ -219,12 +224,24 @@ def read_length_plot(
     max_ = int(np.max(df['read_length']))
     min_ = int(np.min(df['read_length']))
 
-    # filter the reads and divide by 1000 to transform into kb
     read_lengths = df['read_length'].values
-    if min_len is not None:
-        read_lengths = read_lengths[read_lengths >= min_len]
-    if max_len is not None:
-        read_lengths = read_lengths[read_lengths <= max_len]
+
+    min_len, max_len = xlim
+
+    if min_len is None:
+        min_len = 0
+    if max_len is None:
+        max_len = 1 if quantile_limits else read_lengths.max()
+
+    if quantile_limits:
+        min_len, max_len = np.quantile(read_lengths, [min_len, max_len])
+        # set `xlim` so that we can use it to set the x-axis limits below
+        xlim = (min_len, max_len)
+
+    read_lengths = read_lengths[
+        (read_lengths >= min_len) & (read_lengths <= max_len)
+    ]
+
     read_lengths = read_lengths / 1000
     if bin_width is not None:
         bin_width /= 1000
