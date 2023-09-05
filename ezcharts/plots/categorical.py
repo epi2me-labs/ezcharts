@@ -59,7 +59,9 @@ def barplot(
     Contrary to the seaborn implementation, setting `dodge=False` does not
     result in overlaying the bars, but rather stacking them.
     """
-    palette = BokehPlot.colors if palette is None else palette
+    # use our default palette if no colour options were provided
+    if palette is None and color is None:
+        palette = BokehPlot.colors
 
     plotter = _BarPlotter(
         x,
