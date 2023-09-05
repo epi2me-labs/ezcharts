@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 ### Changed
+- Now uses Bokeh as plotting backend for `barplot()`.
 - Parameters of `fastcat.read_length_plot()`: removed `min_len` and `max_len` and added `quantile_limits`.
 
 ## [v0.6.6]
