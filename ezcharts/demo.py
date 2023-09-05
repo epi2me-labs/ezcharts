@@ -167,7 +167,7 @@ def main(args):
             with Grid():
                 EZChart(example_plot("line"), 'epi2melabs')
                 EZChart(example_plot("scatter"), 'epi2melabs')
-                EZChart(example_plot("bar"), 'epi2melabs')
+                BokehChart(example_plot("bar"))
                 EZChart(example_plot("histogram"), 'epi2melabs')
         with tabs.add_tab('Accuracy'):
             p("This is a mixed tab!")
@@ -185,7 +185,7 @@ def main(args):
                 plot = ezc.barplot(
                     data=example_df, x='year', y='sales', hue='product', dodge=False
                 )
-                EZChart(plot, 'epi2melabs')
+                BokehChart(plot)
 
     with report.add_section('Nextclade results', 'Nextclade', True):
         NextClade(nxt_json)
