@@ -35,7 +35,9 @@ class NextClade(Snippet):
                     """
                     const data = {{ data }}
                     var nxt = document.querySelector('nxt-table')
-                    nxt.data = data.results
+                    window.addEventListener("load", () => {
+                        nxt.data = data.results
+                    })
                     """),
                 data=data)))
 
