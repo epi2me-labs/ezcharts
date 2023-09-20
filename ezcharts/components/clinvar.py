@@ -121,7 +121,18 @@ def load_vcf(vcf_fn, benign=False, all_sites=False):
             try:
                 all_ncbi_urls = []
                 clinvar_gene_string = variant.info['GENEINFO']
-                all_genes = clinvar_gene_string.split('|')
+                # CW-2783: If there is a tuple, each element will be split
+                # independently and added to the list. Duplicated entries are
+                # dropped using a tuple/set/tuple conversion.
+                if type(clinvar_gene_string) is tuple:
+                    all_genes = list(
+                        set([
+                            i for string in clinvar_gene_string
+                            for i in string.split('|')
+                        ]))
+                else:
+                    all_genes = clinvar_gene_string.split('|')
+
                 for gene in all_genes:
                     gene_symbol, gene_id = gene.split(':')
                     with isolate_context():
@@ -154,9 +165,21 @@ def load_vcf(vcf_fn, benign=False, all_sites=False):
             # tidy up variant types
             try:
                 variant_type = variant.info['CLNVC']
-                variant_type = variant_type.replace("_", " ").capitalize()
-                if variant_type == 'Single nucleotide variant':
-                    variant_type = 'SNV'
+                # CW-2783: There should be just one variant type, but in case multiple
+                # alleles are present the variant types are combined in a
+                # comma-separated list (duplicates are still removed via set).
+                if type(variant_type) is tuple:
+                    variant_type = [
+                        vt.replace("_", " ").capitalize() for vt in set(variant_type)
+                    ]
+                    variant_type = ','.join([
+                        'SNV' if v == 'Single nucleotide variant' else v
+                        for v in variant_type
+                    ])
+                else:
+                    variant_type = variant_type.replace("_", " ").capitalize()
+                    if variant_type == 'Single nucleotide variant':
+                        variant_type = 'SNV'
             except KeyError:
                 # If not CLNVC, use variant type from pysam
                 variant_type = variant.alleles_variant_types[1]
