@@ -3,6 +3,7 @@ from typing import List, Type
 
 from dominate.tags import a, div, h4, html_tag, p
 
+from ezcharts.components.ezchart import EZChart
 from ezcharts.components.reports import Report
 from ezcharts.components.theme import (
     EPI2MELabsLogo, LAB_body_resources, LAB_head_resources)
@@ -63,3 +64,14 @@ class ComponentReport(Report):
                         "intended for use for health assessment or to "
                         "diagnose, treat, mitigate, cure or prevent any "
                         "disease or condition.")
+
+    @staticmethod
+    def from_plot(plot, path, title="ezChart plot", **kwargs):
+        """Create component report from a plot.
+
+        :params path: path to output file.
+        :param kwargs: passed to `EZChart`.
+        """
+        chart = EZChart(plot, "epi2melabs", **kwargs)
+        report = ComponentReport(title, chart)
+        report.write(path)

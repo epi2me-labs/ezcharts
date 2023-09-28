@@ -1,4 +1,5 @@
 """Get ezchart containers."""
+from abc import ABC, abstractmethod
 import json
 
 from dominate.tags import script
@@ -6,12 +7,56 @@ from dominate.util import raw
 
 from ezcharts.layout.base import Snippet
 from ezcharts.layout.util import render_template
+from ezcharts.plots import BokehPlot, Plot
 
 
-class EZChart(Snippet):
-    """Wraps an ezchart plot in a div."""
+def EZChart(plot, *args, **kwargs):
+    """Wrap an ECharts or Bokeh plot in a div."""
+    if isinstance(plot, BokehPlot):
+        return _BokehChart(plot, *args, **kwargs)
+    elif isinstance(plot, Plot):
+        return _EChart(plot, *args, **kwargs)
+    else:
+        raise ValueError(f"`EZChart()` called with argument of unexpected type: {plot}")
+
+
+class _ReportChart(ABC, Snippet):
+    """ABC for `div` containers containing ECharts or Bokeh plots."""
 
     TAG = 'div'
+
+    @abstractmethod
+    def __init__(self, width, height):
+        """Set width and height of plot."""
+        Snippet.__init__(
+            self,
+            styles=None,
+            classes=None,
+            className="chart-container",
+            style=f"width:{width}; height:{height};")
+
+
+class _BokehChart(_ReportChart):
+    """Wraps a Bokeh plot in a div."""
+
+    def __init__(
+        self,
+        plot,
+        theme: str,
+        width: str = '100%',
+        height: str = '500px'
+    ) -> None:
+        """Add placeholder div for BokehChart.
+
+        The JS for all Bokeh plots will be added at report generation; no need to do
+        anything besides keeping a ref to the plot at this point.
+        """
+        super().__init__(width, height)
+        self.plot = plot
+
+
+class _EChart(_ReportChart):
+    """Wraps an ECharts plot in a div."""
 
     def __init__(
         self,
@@ -21,15 +66,9 @@ class EZChart(Snippet):
         height: str = '500px'
     ) -> None:
         """Create a div and script tag for initialising the plot."""
-        width = "100%"
-        super().__init__(
-            styles=None,
-            classes=None,
-            className="chart-container",
-            style=f"width:{width}; height:{height};")
+        super().__init__(width, height)
 
         with self:
-
             script(raw(render_template(
                 """
                 var chart_{{ id }} = echarts.init(
@@ -68,4 +107,4 @@ class EZChartTheme(script):
                 n=theme, t=json.dumps(theme)))
 
 
-# No module demo here as method is directly on plot class.
+# No module demo here as entrypoint is in `plots.demo`.

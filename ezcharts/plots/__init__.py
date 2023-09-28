@@ -1,16 +1,11 @@
 """Plotting functionality via echarts."""
 
-import argparse
 
 from bokeh.plotting import figure
 import pandas as pd
-from pkg_resources import resource_filename
 import sigfig
 
 from ezcharts import util as ezutil
-from ezcharts.components.bokehchart import BokehChart
-from ezcharts.components.ezchart import EZChart
-from ezcharts.components.reports.comp import ComponentReport
 from ezcharts.plots import util
 from ezcharts.plots._model import EChartsOption
 from ezcharts.plots.util import JSCode
@@ -18,8 +13,6 @@ from ezcharts.plots.util import JSCode
 # NOTE: the add_x methods below allow for type checking that pydantic V1 would
 #       otherwise not perform, e.g. plt.series.append({...}) evades checking
 #       https://github.com/pydantic/pydantic/issues/496
-
-_logger = ezutil.get_named_logger("Plotter")
 
 
 class AxisLabelFormatter(JSCode):
@@ -79,7 +72,9 @@ class AxisLabelFormatter(JSCode):
 
 
 class Plot(EChartsOption):
-    """Main plotting interface."""
+    """EChart plotting interface."""
+
+    _logger = ezutil.get_named_logger("EChrtPlotr")
 
     def __init__(self, *args, **kwargs):
         """Initialize a plot with defaults."""
@@ -98,7 +93,7 @@ class Plot(EChartsOption):
     @property
     def logger(self):
         """Return logger for class."""
-        return _logger
+        return self._logger
 
     def add_series(self, spec):
         """Add a series to chart."""
@@ -122,20 +117,6 @@ class Plot(EChartsOption):
         """
         self.finalise()
         return JSCode._clean(self.json(exclude_unset=True))
-
-    def render_html(self, output, **kwargs):
-        """Render plot to a file.
-
-        :params output: output file.
-        :param kwargs: passed to `EZChart`.
-        """
-        try:
-            title = self.title.text
-        except AttributeError:
-            title = 'ezChart Plot'
-        chart = EZChart(self, 'epi2melabs', **kwargs)
-        report = ComponentReport(title, chart)
-        report.write(output)
 
     def finalise(self):
         """Apply a standard set of defaults to patch eCharts.
@@ -237,6 +218,7 @@ class _HistogramPlot(Plot):
 class BokehPlot:
     """Plotting interface for Bokeh."""
 
+    _logger = ezutil.get_named_logger("BokehPlotr")
     colors = util.choose_palette()
     tools = "hover,crosshair,pan,box_zoom,zoom_in,zoom_out,reset,save"
 
@@ -256,18 +238,7 @@ class BokehPlot:
     @property
     def logger(self):
         """Return logger for class."""
-        return _logger
-
-    def render_html(self, output, **kwargs):
-        """Render plot to a file.
-
-        :params output: output file.
-        :param kwargs: passed to `BokehChart`.
-        """
-        title = self._fig.title.text or "Bokeh Plot"
-        chart = BokehChart(self, "epi2melabs", **kwargs)
-        report = ComponentReport(title, chart)
-        report.write(output)
+        return self._logger
 
 
 class _NoAxisFixPlot(Plot):
@@ -276,29 +247,3 @@ class _NoAxisFixPlot(Plot):
 
     def fix_axis_labels(self):
         self.logger.warning("Skipping axis label fixing")
-
-
-def main(args):
-    """Entry point to demonstrate an ezChart."""
-    plt = Plot.parse_file(args.plot_spec)
-    plt.render_html(args.output)
-
-
-def argparser():
-    """Argument parser for entrypoint."""
-    parser = argparse.ArgumentParser(
-        'ezChart Demo',
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-        add_help=False)
-    parser.add_argument(
-        "--plot_spec",
-        default=resource_filename('ezcharts', "data/test/plot-spec.json"),
-        help=(
-            "A JSON file defining an eCharts plot",
-            "key/values."
-        ))
-    parser.add_argument(
-        "--output",
-        default="ezcharts_plot_report.html",
-        help="Output HTML file.")
-    return parser

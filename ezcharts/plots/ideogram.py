@@ -5,6 +5,7 @@ import argparse
 import pandas as pd
 from pkg_resources import resource_filename
 
+from ezcharts.components.reports.comp import ComponentReport
 from ezcharts.plots import Plot, util
 
 
@@ -361,7 +362,7 @@ def main(args):
         track_data['value'] = track_data['value'].clip(lower=args.track_floor)
 
     plot = ideogram(blocks=blocks, track=track_data, genome=args.genome)
-    plot.render_html(args.output, height="1000px")
+    ComponentReport.from_plot(plot, args.output, height="1000px")
 
 
 def argparser():
