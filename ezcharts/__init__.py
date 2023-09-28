@@ -1,6 +1,6 @@
 """Simple eCharts API."""
 
-__version__ = "0.6.8"
+__version__ = "0.7.1"
 
 import argparse
 import importlib
