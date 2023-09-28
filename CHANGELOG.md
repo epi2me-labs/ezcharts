@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.7.1]
+### Fixed
+- `barplot()` failing with numerical group names (i.e. values of categorical axis).
+
 ## [v0.7.0]
 ### Removed
 - `BokehChart` class for adding Bokeh plots to the enclosing `dominate` context. This can be done with `EZChart` now (just as with ECharts plots).

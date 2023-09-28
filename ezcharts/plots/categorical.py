@@ -86,6 +86,8 @@ def barplot(
         dodge,
     )
 
+    plotter.group_names = [str(x) for x in plotter.group_names]
+
     if plotter.orient == "v":
         plt = BokehPlot(x_range=plotter.group_names)
     else:
