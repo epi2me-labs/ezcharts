@@ -5,7 +5,7 @@ from bokeh.embed import components
 from dominate.tags import body, footer, head, header, main, style, title
 from dominate.util import raw
 
-from ezcharts.components.bokehchart import BokehChart
+from ezcharts.components.ezchart import _BokehChart
 from ezcharts.layout.base import Snippet
 from ezcharts.layout.resource import (
     base_body_resources, base_head_resources, Resource)
@@ -55,7 +55,7 @@ class Report(Snippet):
         bokeh_charts = self.get_bokeh_charts()
         if bokeh_charts:
             # get the script + divs for all the plots; then place the div in the
-            # corresponding `BokehChart` div
+            # corresponding `_BokehChart` div
             bokeh_script, bokeh_divs = components([x.plot._fig for x in bokeh_charts])
             for chart, bokeh_div in zip(bokeh_charts, bokeh_divs):
                 with chart:
@@ -76,14 +76,14 @@ class Report(Snippet):
         write_report(path, self)
 
     def get_bokeh_charts(self):
-        """Return all children of the report that are of type `BokehChart`."""
+        """Return all children of the report that are of type `_BokehChart`."""
         bokeh_charts = []
 
         def _get_charts_in_children(s):
             if not hasattr(s, 'children') or not s.children:
                 return
             for child in s.children:
-                if isinstance(child, BokehChart):
+                if isinstance(child, _BokehChart):
                     bokeh_charts.append(child)
                 _get_charts_in_children(child)
 

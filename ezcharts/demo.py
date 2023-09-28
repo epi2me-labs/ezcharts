@@ -9,7 +9,6 @@ from pkg_resources import resource_filename
 
 import ezcharts as ezc
 from ezcharts import util
-from ezcharts.components.bokehchart import BokehChart
 from ezcharts.components.common import fasta_idx, HSA_CHROMOSOME_ORDER
 from ezcharts.components.dss import load_dml, load_dmr
 from ezcharts.components.ezchart import EZChart
@@ -167,7 +166,7 @@ def main(args):
             with Grid():
                 EZChart(example_plot("line"), 'epi2melabs')
                 EZChart(example_plot("scatter"), 'epi2melabs')
-                BokehChart(example_plot("bar"))
+                EZChart(example_plot("bar"), 'epi2melabs')
                 EZChart(example_plot("histogram"), 'epi2melabs')
         with tabs.add_tab('Accuracy'):
             p("This is a mixed tab!")
@@ -185,7 +184,7 @@ def main(args):
                 plot = ezc.barplot(
                     data=example_df, x='year', y='sales', hue='product', dodge=False
                 )
-                BokehChart(plot)
+                EZChart(plot, "epi2melabs")
 
     with report.add_section('Nextclade results', 'Nextclade', True):
         NextClade(nxt_json)
@@ -290,7 +289,7 @@ def main(args):
             alpha=0.5,
         )
         plot._fig.title = "Bokeh plot title"
-        BokehChart(plot)
+        EZChart(plot, "epi2melabs")
     logger.info('Reticulating splines')
     report.write(args.output)
 

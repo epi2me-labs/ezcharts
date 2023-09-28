@@ -38,13 +38,16 @@ def cli():
         'params', 'nextclade', 'fastcat', 'dss',
         'modkit', 'mosdepth', 'clinvar', 'bcfstats'
         ]
-    others = ['ezcharts.demo', 'ezcharts.plots', 'ezcharts.plots.ideogram']
+    others = ['ezcharts.demo', 'ezcharts.plots.demo', 'ezcharts.plots.ideogram']
 
     demos = [f'ezcharts.components.{comp}' for comp in components] + others
     for module in demos:
         mod = importlib.import_module(module)
+        subparser_name = module.split(".")[-1]
+        if module == 'ezcharts.plots.demo':
+            subparser_name = 'plots'
         p = subparsers.add_parser(
-            module.split(".")[-1], parents=[mod.argparser()])
+            subparser_name, parents=[mod.argparser()])
         p.set_defaults(func=mod.main)
 
     args = parser.parse_args()
