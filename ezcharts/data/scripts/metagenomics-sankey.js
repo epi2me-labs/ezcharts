@@ -571,7 +571,7 @@ rankSelect.property('value', default_rank);
 
 // Initialise cutoff
 const default_cutoff = 1
-const cutoffSelect = renderSelect('#cutoff-select', cutoffs, '%')
+const cutoffSelect = renderSelect('#cutoff-select', cutoffs, '% reads')
 cutoffSelect.property('value', `${default_cutoff}`);
 
 // Render default sample
