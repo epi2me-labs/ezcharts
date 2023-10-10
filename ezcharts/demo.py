@@ -164,38 +164,37 @@ def main(args):
             # Grids are snippets that provide responsive
             # layouts via css grid
             with Grid():
-                EZChart(example_plot("line"), 'epi2melabs')
-                EZChart(example_plot("scatter"), 'epi2melabs')
-                EZChart(example_plot("bar"), 'epi2melabs')
-                EZChart(example_plot("histogram"), 'epi2melabs')
+                EZChart(example_plot("line"))
+                EZChart(example_plot("scatter"))
+                EZChart(example_plot("bar"))
+                EZChart(example_plot("histogram"))
         with tabs.add_tab('Accuracy'):
             p("This is a mixed tab!")
-            EZChart(example_plot(), 'epi2melabs')
+            EZChart(example_plot())
         with tabs.add_tab('Depth'):
             p('Testing, testing, 1 2 3')
 
         # Dropdowns are nested one more level
         with tabs.add_dropdown_menu('Example', change_header=False):
             with tabs.add_dropdown_tab('First'):
-                EZChart(example_plot(), 'epi2melabs')
+                EZChart(example_plot())
             with tabs.add_dropdown_tab('Second'):
                 p("This is the second dropdown item.")
                 # set dodge=False for a stacked barplot
                 plot = ezc.barplot(
                     data=example_df, x='year', y='sales', hue='product', dodge=False
                 )
-                EZChart(plot, "epi2melabs")
+                EZChart(plot)
 
     with report.add_section('Nextclade results', 'Nextclade', True):
         NextClade(nxt_json)
 
     with report.add_section('Heatmap', 'Heatmap'):
-        EZChart(example_plot("heatmap"), 'epi2melabs')
+        EZChart(example_plot("heatmap"))
 
     with report.add_section('Human Genome', 'Genome'):
         EZChart(
-            ideogram(blocks='cytobands'),
-            'epi2melabs', height="800px")
+            ideogram(blocks='cytobands'), height="800px")
 
     with report.add_section('Human karyotype heatmap', 'Karyomap'):
         vals = pd.read_csv(
@@ -205,7 +204,7 @@ def main(args):
             vals, 'chr', 'pos', 'values',
             stats='count',
             ref_lengths=faidx,
-            order=HSA_CHROMOSOME_ORDER), 'epi2melabs')
+            order=HSA_CHROMOSOME_ORDER))
 
     with report.add_section('Sunburst', 'Sunburst'):
         lineages = [{'name': 'Bacteria', 'value': 600, 'children': [
@@ -222,7 +221,7 @@ def main(args):
                                     'value': 100}]}]}]}]}]}]}]
 
         EZChart(ezc.sunburst(
-            lineages, label_rotate="tangential", label_minAngle=100), 'epi2melabs')
+            lineages, label_rotate="tangential", label_minAngle=100))
 
     with report.add_section('Table', 'Table'):
         tabs = Tabs()
@@ -289,7 +288,7 @@ def main(args):
             alpha=0.5,
         )
         plot._fig.title = "Bokeh plot title"
-        EZChart(plot, "epi2melabs")
+        EZChart(plot)
     logger.info('Reticulating splines')
     report.write(args.output)
 

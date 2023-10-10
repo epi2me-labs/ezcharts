@@ -10,12 +10,17 @@ from ezcharts.layout.util import render_template
 from ezcharts.plots import BokehPlot, Plot
 
 
-def EZChart(plot, *args, **kwargs):
+def EZChart(
+    plot,
+    theme: str = 'epi2melabs',
+    width: str = '100%',
+    height: str = '500px',
+):
     """Wrap an ECharts or Bokeh plot in a div."""
     if isinstance(plot, BokehPlot):
-        return _BokehChart(plot, *args, **kwargs)
+        return _BokehChart(plot, theme=theme, width=width, height=height)
     elif isinstance(plot, Plot):
-        return _EChart(plot, *args, **kwargs)
+        return _EChart(plot, theme=theme, width=width, height=height)
     else:
         raise ValueError(f"`EZChart()` called with argument of unexpected type: {plot}")
 
@@ -42,9 +47,9 @@ class _BokehChart(_ReportChart):
     def __init__(
         self,
         plot,
-        theme: str,
+        theme: str = 'epi2melabs',
         width: str = '100%',
-        height: str = '500px'
+        height: str = '500px',
     ) -> None:
         """Add placeholder div for BokehChart.
 
@@ -61,9 +66,9 @@ class _EChart(_ReportChart):
     def __init__(
         self,
         plot,
-        theme: str,
+        theme: str = 'epi2melabs',
         width: str = '100%',
-        height: str = '500px'
+        height: str = '500px',
     ) -> None:
         """Create a div and script tag for initialising the plot."""
         super().__init__(width, height)
