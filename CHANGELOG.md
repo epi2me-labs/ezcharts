@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [v0.7.2]
 ### Changed
 - OND styling
+- `"epi2melabs"` is now the default `theme` for `EZChart()`.
 
 ## [v0.7.1]
 ### Fixed
