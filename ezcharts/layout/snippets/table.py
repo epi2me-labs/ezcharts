@@ -27,6 +27,7 @@ class DataTable(Snippet):
         headers: Optional[List[str]] = None,
         page_length: Optional[int] = 10,
         paging: Optional[bool] = True,
+        searchable: Optional[bool] = True,
         file_name: Optional[str] = 'datatable-export',
         export: Optional[bool] = False,
         classes: ITableClasses = ITableClasses(),
@@ -71,7 +72,7 @@ class DataTable(Snippet):
             datatable_render = """
                 var {{ id }}_table = new simpleDatatables.DataTable( \
                     '#{{ id }}_inner', { \
-                    searchable: true, \
+                    searchable: {{ searchable }}, \
                     pageLength: {{ page_length }}, \
                     paging: {{ paging }} \
                 })"""
@@ -83,7 +84,8 @@ class DataTable(Snippet):
 
             script(raw(render_template(
                 datatable_render,
-                id=self.uid, paging=str(paging).lower(), page_length=page_length,
+                id=self.uid, paging=str(paging).lower(),
+                searchable=str(searchable).lower(), page_length=page_length,
                 button_id=exportCSVButton, file_name=file_name)))
 
     def _is_multilevel_header(self, headers: list) -> bool:
