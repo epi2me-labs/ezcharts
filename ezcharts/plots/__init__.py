@@ -88,7 +88,6 @@ class Plot(EChartsOption):
                 "saveAsImage": {}
             }
         }
-        self.color = util.choose_palette()
 
     @property
     def logger(self):

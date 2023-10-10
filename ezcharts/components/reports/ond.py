@@ -9,7 +9,7 @@ from ezcharts.components.params import ParamsTable
 from ezcharts.components.reports import Report
 from ezcharts.components.theme import (
     OND_body_resources, OND_head_resources, ONDLogo)
-from ezcharts.components.versions import VersionsTable
+from ezcharts.components.versions import VersionsList
 from ezcharts.layout.base import IClasses, Snippet
 from ezcharts.layout.resource import Resource
 from ezcharts.layout.snippets.banner import Banner
@@ -154,13 +154,17 @@ class BasicReport(Report):
         self,
         title: str,
         link: str,
-        overflow: bool = False
+        overflow: bool = False,
+        display_link: bool = True,
+        transparent: bool = False,
     ) -> Section:
         """Add a section to the main_content region."""
         href = link.lower().replace(' ', '_')
-        self.nav.add_link('main', link, f'#{href}')
+        if display_link is True:
+            self.nav.add_link('main', link, f'#{href}')
+
         with self.main_content:
-            return Section(href, title, overflow=overflow)
+            return Section(href, title, overflow=overflow, transparent=transparent)
 
 
 class ONDReport(BasicReport):
@@ -175,7 +179,8 @@ class ONDReport(BasicReport):
         logo: Type[html_tag] = ONDLogo,
         head_resources: List[Resource] = OND_head_resources,
         body_resources: List[Resource] = OND_body_resources,
-        created_date: Optional[str] = None
+        created_date: Optional[str] = None,
+        default_content: bool = True
     ) -> None:
         """Create tag."""
         super().__init__(
@@ -183,36 +188,37 @@ class ONDReport(BasicReport):
             head_resources=head_resources,
             body_resources=body_resources)
 
-        with self.header:
-            self.nav.add_link('meta', 'Versions', '#versions')
-            self.nav.add_link('meta', 'Parameters', '#parameters')
-            self.intro_content = section(id="intro-content", role="region")
-            with self.intro_content:
-                self.banner = Banner(report_title, workflow_name)
-                self.banner.add_badge("Research use only", bg_class='bg-danger')
-                if not created_date:
-                    created_date = datetime.today().strftime('%Y-%m-%d')
-                self.banner.add_badge(created_date, bg_class="bg-secondary")
+        if default_content is True:
+            with self.header:
+                self.nav.add_link('meta', 'Versions', '#versions')
+                self.nav.add_link('meta', 'Parameters', '#parameters')
+                self.intro_content = section(id="intro-content", role="region")
+                with self.intro_content:
+                    self.banner = Banner(report_title, workflow_name)
+                    self.banner.add_badge("Research use only", bg_class='bg-danger')
+                    if not created_date:
+                        created_date = datetime.today().strftime('%Y-%m-%d')
+                        self.banner.add_badge(created_date, bg_class="bg-secondary")
 
-        with self.main:
-            self.meta_content = section(id="meta-content", role="region")
-            with self.meta_content:
-                with Section(
-                    "versions",
-                    'Software versions',
-                    overflow=True
-                ):
-                    VersionsTable(workflow_versions_path)
+            with self.main:
+                self.meta_content = section(id="meta-content", role="region")
+                with self.meta_content:
+                    with Section(
+                        "versions",
+                        'Software versions',
+                        overflow=True
+                    ):
+                        VersionsList(workflow_versions_path)
 
-                with Section(
-                    "parameters",
-                    'Workflow parameters',
-                    overflow=True
-                ):
-                    ParamsTable(workflow_params_path)
+                    with Section(
+                        "parameters",
+                        'Workflow parameters',
+                        overflow=True
+                    ):
+                        ParamsTable(workflow_params_path)
 
-        with self.footer:
-            self.addendum = LabsAddendum(workflow_name=workflow_name)
+            with self.footer:
+                self.addendum = LabsAddendum(workflow_name=workflow_name)
 
     def add_badge(
         self,

@@ -77,6 +77,11 @@ def ImageResource(path=None, loader=inline, tag=None, func=None):
     return Resource(path=path, loader=loader, func=func, tag=tag)
 
 
+def IconResource(path, loader=inline, tag=None):
+    """Fetch an icon resource."""
+    return Resource(f'icons/{path}', loader, tag)
+
+
 def StyleResource(path=None, loader=inline, tag=None, func=None):
     """Fetch a style resource."""
     if path is not None:

@@ -13,6 +13,7 @@ class ISectionClasses(IClasses):
     container: str = cls(
         "shadow-sm", "container", "p-4", "mb-5",
         "bg-white", "border", "rounded")
+    container_trans: str = cls("container", "py-1", "mb-5")
     title: str = cls("h5", "mb-0", "pb-3")
 
 
@@ -34,13 +35,14 @@ class Section(Snippet):
         section_title_tag: Type[html_tag] = h2,
         styles: ISectionStyles = ISectionStyles(),
         classes: ISectionClasses = ISectionClasses(),
-        overflow: bool = False
+        overflow: bool = False,
+        transparent: bool = False
     ) -> None:
         """Create styled section."""
         super().__init__(
             styles=styles,
             classes=classes,
-            className=classes.container,
+            className=classes.container_trans if transparent else classes.container,
             style=styles.overflow if overflow else None,
             id=section_id)
 
