@@ -378,11 +378,11 @@ hr {
 
 .list-foot-fail {
     color: white;
-    background-color: var(-red-1000);
+    background-color: var(--red-1000);
     border-top: var(--red-400) !important;
     border-top-width: 4px !important;
     border-top-style: solid !important;
-    border: 1px solid var(--green-sage-1000);
+    border: 1px solid var(--red-1000);
 }
 
 .list-foot-pass {
