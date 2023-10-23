@@ -31,13 +31,13 @@ class _ReportChart(ABC, Snippet):
     TAG = 'div'
 
     @abstractmethod
-    def __init__(self, width, height):
+    def __init__(self, width, height, class_name):
         """Set width and height of plot."""
         Snippet.__init__(
             self,
             styles=None,
             classes=None,
-            className="chart-container",
+            className=class_name,
             style=f"width:{width}; height:{height};")
 
 
@@ -56,7 +56,7 @@ class _BokehChart(_ReportChart):
         The JS for all Bokeh plots will be added at report generation; no need to do
         anything besides keeping a ref to the plot at this point.
         """
-        super().__init__(width, height)
+        super().__init__(width, height, class_name="bokeh-chart-container")
         self.plot = plot
 
 
@@ -71,7 +71,10 @@ class _EChart(_ReportChart):
         height: str = '500px',
     ) -> None:
         """Create a div and script tag for initialising the plot."""
-        super().__init__(width, height)
+        # `class_name="echarts-chart-container"` here is required for resizing the chart
+        # when a different tab is selected (c.f. `update_charts_on_tab_change()` in
+        # `data/scripts/epi2melabs.js`)
+        super().__init__(width, height, class_name="echarts-chart-container")
 
         with self:
             script(raw(render_template(
