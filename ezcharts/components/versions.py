@@ -1,8 +1,6 @@
 """A reusable software versions table."""
 import os
 
-from dominate.tags import div, p
-
 from ezcharts.layout.snippets.table import DataTable
 
 
@@ -49,7 +47,7 @@ class VersionsList():
         versions_path: str,
         **kwargs
     ) -> None:
-        """Create table."""
+        """Create string list."""
         if os.path.isdir(versions_path):
             version_files = [
                 os.path.join(versions_path, x)
@@ -58,14 +56,17 @@ class VersionsList():
             version_files = [versions_path]
         else:
             raise IOError('`versions` should be a file or directory.')
+        result = []
         for fname in version_files:
             try:
                 with open(fname, 'r', encoding='utf-8') as fh:
-                    result = []
                     for line in fh.readlines():
                         name, version = line.strip().split(',')
                         result.append(f"{name} ({version})")
-                    with div():
-                        p(", ".join(result))
             except FileNotFoundError:
                 pass
+        self.ver_string = ",".join(result)
+
+    def __repl__(self):
+        """Return version list."""
+        return self.ver_string
