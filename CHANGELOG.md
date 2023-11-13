@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.7.5]
+### Fixed
+- Font family declaration for Ubuntu
+- VersionList output
+
 ## [v0.7.4]
 ### Fixed
 - Regression squishing ECharts plots when a different tab is selected.
@@ -13,7 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - List group colour
 
 ## [v0.7.2]
-### Changed
+### Changed
 - OND styling
 - `"epi2melabs"` is now the default `theme` for `EZChart()`.
 
