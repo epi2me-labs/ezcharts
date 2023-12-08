@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 from pandas.api import types as pd_types
 from pkg_resources import resource_filename
+import sigfig
 
 import ezcharts as ezc
 from ezcharts.components.ezchart import EZChart
@@ -166,7 +167,10 @@ def base_yield_plot(
 
     plt = ezc.lineplot(data=df, x=xlab, y=ylab, hue=None)
     plt.series[0].showSymbol = False
-    plt.title = dict(text=title)
+    plt.title = dict(
+        text=title,
+        subtext=f"Total yield: {sigfig.round(df.iloc[0][ylab], sigfigs=3)} Gb"
+    )
     return plt
 
 
