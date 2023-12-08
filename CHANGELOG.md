@@ -4,7 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [unreleased]
+## [v0.7.6]
+### Fixed
+- Spuriously scrolling to top of page when clicking on ellipsis in pagination links below data tables.
+
 ### Added
 - Total yield as additional metric below title in `fastcat.SeqSummary.base_yield_plot()`.
 
