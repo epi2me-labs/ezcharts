@@ -53,8 +53,11 @@ class Mixin:
 
         for series_index, series_name in enumerate(
                 data['hue'].unique(), start=1):
+            # `series_name` (i.e. the value in the hue column) might be a number, which
+            # will trip pydantic validation. We thus convert to `str`.
+            series_name = str(series_name)
             plt.add_dataset({
-                'id': str(series_name),
+                'id': series_name,
                 'fromDatasetId': 'raw',
                 'transform': [{
                     'type': 'filter',
