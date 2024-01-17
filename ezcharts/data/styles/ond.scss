@@ -206,7 +206,23 @@ $success:       #197270 !default;
 $body-bg: #f9f9f9 !default;
 
 @import "data/vendor/bootstrap-5.3.0/scss/bootstrap.scss";
-@page { size: auto; margin : 0px; }
+
+@page { min-width: 768px; margin: 0px }
+
+@media print {
+    .pagebreak { page-break-before: always; margin-top: 5rem !important; }
+    .mb-5 { margin-bottom: 1rem !important; }
+    body {
+      margin: 0;
+      padding: 0 !important;
+      min-width: 768px;
+      zoom: 0.7;
+    }
+    .container {
+      width: auto;
+      min-width: 768px;
+    }
+}
 
 .container {
     max-width: 95% !important;
