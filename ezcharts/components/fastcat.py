@@ -393,7 +393,12 @@ def load_stats(stat, format=None):
             if 'read_id' not in df.columns and 'name' in df.columns:
                 df.rename(columns={'name': 'read_id'}, inplace=True)
             if format == 'fastcat':
-                df['start_time'] = df.start_time.dt.tz_localize(None)
+                # Ensure we have datetime format
+                # Use utc=true to account for mixed time offsets.
+                # This converts dates to UTC.
+                # https://pandas.pydata.org/docs/reference/api/pandas.to_datetime.html
+                df['start_time'] = pd.to_datetime(
+                    df.start_time, utc=True).dt.tz_localize(None)
             # Append processed DF
             dfs.append(df)
         except pd.errors.EmptyDataError:
