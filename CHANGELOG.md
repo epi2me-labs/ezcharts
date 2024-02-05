@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 ### Fixed
+- Regression causing empty line or scatter plots when no `hue` variable was provided.
+- `lineplot()` and `scatterplot()` not handling the `palette` argument correctly.
 - Mixed `start_time` offset bug in SeqSummary.
 
 ## [v0.7.7]
