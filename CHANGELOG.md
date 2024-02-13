@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [unreleased]
+### Added
+- Nested bar charts by setting `nested_x=True` in `barplot()`.
+
 ### Fixed
 - Regression causing empty line or scatter plots when no `hue` variable was provided.
 - `lineplot()` and `scatterplot()` not handling the `palette` argument correctly.

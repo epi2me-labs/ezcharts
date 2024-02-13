@@ -1,10 +1,12 @@
 """Categorical plots."""
 
-from bokeh.models import ColumnDataSource
+from bokeh.models import ColumnDataSource, FactorRange
 import bokeh.transform as bkt
+import numpy as np
 from seaborn.categorical import _BarPlotter
 
 from ezcharts.plots import BokehPlot
+
 
 __all__ = [
     "catplot", "stripplot", "swarmplot", "boxplot", "violinplot",
@@ -52,17 +54,32 @@ def barplot(
     estimator='mean', errorbar=('ci', 95), n_boot=1000, units=None, seed=None,
     orient=None, color=None, palette=None, saturation=1.0, width=0.8,
     errcolor='.26', errwidth=None, capsize=None, dodge=True, ci='deprecated',
-    ax=None, **kwargs,
+    ax=None, nested_x=False, **kwargs,
 ):
     """Show point estimates as rectangular bars.
 
     Contrary to the seaborn implementation, setting `dodge=False` does not
     result in overlaying the bars, but rather stacking them.
+
+    nested_x: create a nested plot instead of a grouped plot, which has two X
+    axis grouping (hue as outer group)
     """
     # use our default palette if no colour options were provided
     if palette is None and color is None:
         palette = BokehPlot.colors
 
+    # A plot can either be nested or stacked, not both
+    if nested_x:
+        if hue is None or not dodge:
+            raise ValueError(
+                "`hue` and `dodge` need to be set when passing `nested_x=True`"
+            )
+        if orient == "h":
+            raise ValueError(
+                "`nested_x=True` can only work with `orient='v'`"
+            )
+
+    # Create bar plot with seaborn
     plotter = _BarPlotter(
         x,
         y,
@@ -86,94 +103,125 @@ def barplot(
         dodge,
     )
 
-    plotter.group_names = [str(x) for x in plotter.group_names]
+    # Nested X labeling requires the factors to be provided as a list of
+    # tuples with the hue and x levels for each value in the dataframe:
+    # factors = [
+    #   ("hue1", "x1"),
+    #   ("hue1", "x2"),
+    #   ("hue2", "x1"),
+    #   ("hue2", "x2"),
+    # ]
+    if nested_x:
+        factors = [
+            (str(x0), str(x1)) for x0 in plotter.hue_names for x1 in plotter.group_names
+        ]
+        group_names = FactorRange(*factors)
+    else:
+        group_names = [str(x) for x in plotter.group_names]
 
     if plotter.orient == "v":
-        plt = BokehPlot(x_range=plotter.group_names)
+        plt = BokehPlot(x_range=group_names)
     else:
-        plt = BokehPlot(y_range=plotter.group_names)
+        plt = BokehPlot(y_range=group_names)
 
     p = plt._fig
+
+    # Define plot orientation
+    if plotter.orient == "v":
+        plot_bars_func = p.vbar if dodge else p.vbar_stack
+    else:
+        plot_bars_func = p.hbar if dodge else p.hbar_stack
 
     if plotter.plot_hues is None:
         # simple barplot (i.e. only a single group of bars)
         if plotter.orient == "v":
-            p.vbar(
-                x=plotter.group_names,
+            plot_bars_func(
+                x=group_names,
                 top=plotter.statistic,
                 width=0.9,
                 color=plotter.colors.as_hex(),
-                **kwargs,
+                **kwargs
             )
         else:
-            p.hbar(
-                y=plotter.group_names,
+            plot_bars_func(
+                y=group_names,
                 right=plotter.statistic,
                 height=0.9,
                 color=plotter.colors.as_hex(),
-                **kwargs,
+                **kwargs
             )
+    elif nested_x:
+        # Nested X uses different labelling of the input values
+        # x: list of factors described above
+        # y: values in a single list/vector
+        # legend_name: point to to the legend labelling
+        # Create the legend labels
+        dual_legend_label = [
+            str(x0) for x0 in plotter.hue_names for _ in plotter.group_names
+        ]
+        # Create the data structure
+        data = dict(
+            x=factors, y=np.hstack(plotter.statistic.T), legend_name=dual_legend_label
+        )
+        # Convert to ColumnDataSource
+        data = ColumnDataSource(data)
+        plot_bars_func(
+            x="x",
+            top="y",
+            source=data,
+            line_color="white",
+            legend_field="legend_name",
+            color=bkt.factor_cmap(
+                "x", palette=plotter.colors.as_hex(), factors=plotter.hue_names, end=1
+            ),
+            **kwargs,
+        )
     else:
-        # groups of bars (either stacked or grouped)
         data = dict(groups=plotter.group_names)
         data.update(dict(zip(plotter.hue_names, plotter.statistic.T)))
         data = ColumnDataSource(data)
-
         if not dodge:
+            # stacked bars (define orientation-specific kwargs first)
             if plotter.orient == "v":
-                # stacked vertical bars
-                p.vbar_stack(
-                    plotter.hue_names,
-                    x="groups",
-                    width=0.95,
-                    color=plotter.colors.as_hex(),
-                    source=data,
-                    legend_label=plotter.hue_names,
-                    **kwargs
-                )
+                extra_kwargs = dict(x="groups", width=0.95)
             else:
-                # stacked horizontal bars
-                p.hbar_stack(
-                    plotter.hue_names,
-                    y="groups",
-                    height=0.95,
-                    color=plotter.colors.as_hex(),
-                    source=data,
-                    legend_label=plotter.hue_names,
-                    **kwargs
-                )
+                extra_kwargs = dict(y="groups", height=0.95)
+            plot_bars_func(
+                plotter.hue_names,
+                color=plotter.colors.as_hex(),
+                source=data,
+                legend_label=plotter.hue_names,
+                **extra_kwargs,
+                **kwargs,
+            )
         else:
-            # grouped plots (we need to add a series for each hue level)
+            # grouped bars (we need to add a series for each hue level)
             for hue_level, offset, color in zip(
                 plotter.hue_names,
                 plotter.hue_offsets,
                 plotter.colors.as_hex(),
             ):
-                plot_bars_kwargs = dict(
+                # define orientation-specific kwargs
+                if plotter.orient == "v":
+                    extra_kwargs = dict(
+                        x=bkt.dodge("groups", offset, range=p.x_range),
+                        top=hue_level,
+                        width=plotter.nested_width,
+                    )
+                else:
+                    extra_kwargs = dict(
+                        y=bkt.dodge("groups", offset, range=p.y_range),
+                        right=hue_level,
+                        height=plotter.nested_width,
+                    )
+                plot_bars_func(
                     source=data,
                     color=color,
                     line_color="white",
                     legend_label=hue_level,
+                    **extra_kwargs,
+                    **kwargs,
                 )
-                if plotter.orient == "v":
-                    plot_bars_func = p.vbar
-                    plot_bars_kwargs.update(
-                        dict(
-                            x=bkt.dodge("groups", offset, range=p.x_range),
-                            top=hue_level,
-                            width=plotter.nested_width,
-                        )
-                    )
-                else:
-                    plot_bars_func = p.hbar
-                    plot_bars_kwargs.update(
-                        dict(
-                            y=bkt.dodge("groups", offset, range=p.y_range),
-                            right=hue_level,
-                            height=plotter.nested_width,
-                        )
-                    )
-                plot_bars_func(**plot_bars_kwargs, **kwargs)
 
         p.legend.orientation = "horizontal"
         # even though we call `add_layout()` to pull the legend outside of the plot area
