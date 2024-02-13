@@ -175,14 +175,35 @@ def main(args):
             p('Testing, testing, 1 2 3')
 
         # Dropdowns are nested one more level
-        with tabs.add_dropdown_menu('Example', change_header=False):
-            with tabs.add_dropdown_tab('First'):
-                EZChart(example_plot())
-            with tabs.add_dropdown_tab('Second'):
-                p("This is the second dropdown item.")
+        with tabs.add_dropdown_menu('Bar charts', change_header=False):
+            with tabs.add_dropdown_tab('Simple'):
+                # the simplest barplot
+                plot = ezc.barplot(
+                    data=example_df, x='year', y='sales'
+                )
+                EZChart(plot)
+            with tabs.add_dropdown_tab('Simple - single colour'):
+                # set color=grey for a uniform colouring
+                plot = ezc.barplot(
+                    data=example_df, x='year', y='sales', color='grey'
+                )
+                EZChart(plot)
+            with tabs.add_dropdown_tab('Grouped'):
+                # set dodge=True for a grouped barplot
+                plot = ezc.barplot(
+                    data=example_df, x='year', y='sales', hue='product', dodge=True
+                )
+                EZChart(plot)
+            with tabs.add_dropdown_tab('Stacked'):
                 # set dodge=False for a stacked barplot
                 plot = ezc.barplot(
                     data=example_df, x='year', y='sales', hue='product', dodge=False
+                )
+                EZChart(plot)
+            with tabs.add_dropdown_tab('Nested'):
+                # set nested_x=True for a nested barplot
+                plot = ezc.barplot(
+                    data=example_df, x='year', y='sales', hue='product', nested_x=True
                 )
                 EZChart(plot)
 
