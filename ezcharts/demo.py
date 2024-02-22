@@ -94,8 +94,8 @@ def main(args):
     params = resource_filename('ezcharts', "data/test/params.json")
     versions = resource_filename('ezcharts', "data/test/versions.txt")
     nxt_json = resource_filename('ezcharts', "data/test/nextclade.json")
-    fastcat_results = resource_filename(
-        'ezcharts', "data/test/fastcat.stats.gz")
+    histogram_stats_dir = resource_filename(
+        'ezcharts', "data/test/histogram_stats")
 
     # Create report
     # Note we need to add nextclade as a resource
@@ -131,7 +131,7 @@ def main(args):
 
     # Add sequence summary component
     with report.add_section('Sequence summaries', 'Summaries'):
-        SeqSummary(fastcat_results)
+        SeqSummary(histogram_stats_dir=histogram_stats_dir)
 
     # This also adds to main_content, but provides a nice
     # container snippet as a starting context.

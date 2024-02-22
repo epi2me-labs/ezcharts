@@ -1,6 +1,7 @@
 """An ezcharts component for plotting sequence summaries."""
 import argparse
 import os
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -22,18 +23,23 @@ CATEGORICAL = pd_types.CategoricalDtype(ordered=True)
 class SeqSummary(Snippet):
     """Generate sequence summary plots."""
 
-    def __init__(self, seq_summary, theme='epi2melabs', **kwargs):
-        """Create sequence summary componet.
+    def __init__(
+            self,
+            seq_summary=None,
+            histogram_stats_dir=None,
+            theme='epi2melabs',
+            **kwargs):
+        """Create sequence summary component.
 
         If seq_summary contains results from multiple samples, each will be
         plotted in its own tab.
 
         :param seq_summary: A path to a fastcat read stats output file or
-            DataFrame
-        :param bam_summary: A path to a bamstats read stats output file or
-            DataFrame
-        :param flagstat: A path to a bamstats flagstat output file or
-            DataFrame
+            DataFrame.
+        :param histogram_stats_dir: A path to a directory with fastcat stats histograms
+            in per-sample subdirectories.
+        :param theme: EPI2ME theme.
+        :param kwargs:  options are 'flagstat' and 'bam_summary'.
         """
         super().__init__(styles=None, classes=None)
 
@@ -73,6 +79,19 @@ class SeqSummary(Snippet):
                         for sample_id, df_sample in df_all.groupby('sample_name'):
                             with tabs.add_dropdown_tab(sample_id):
                                 draw_all_plots(df_sample, theme)
+            else:
+                if not histogram_stats_dir:
+                    raise ValueError(
+                        "If seq_summary is not provided, a histogram stats directory"
+                        " path must be provided")
+                tabs = Tabs()
+                with tabs.add_dropdown_menu():
+                    for hist_sample_dir in Path(histogram_stats_dir).iterdir():
+                        if not hist_sample_dir.is_dir():
+                            continue
+                        with tabs.add_dropdown_tab(hist_sample_dir.name):
+                            draw_all_plots_precomputed(hist_sample_dir, theme)
+
             # Create flagstat tables
             if "flagstat" in kwargs:
                 if isinstance(kwargs["flagstat"], pd.DataFrame):
@@ -131,17 +150,43 @@ class SeqSummary(Snippet):
 
 
 def draw_all_plots(seq_summary, theme):
-    """Draw all three plots."""
+    """Draw all three plots using raw data.
+
+    :param seq_summary: pd.DataFrame containing per-sequence summary information.
+    :param theme: EPI2ME theme.
+    """
     with Grid(columns=3):
         EZChart(read_quality_plot(seq_summary), theme)
         EZChart(read_length_plot(seq_summary), theme)
         EZChart(base_yield_plot(seq_summary), theme)
 
 
+def draw_all_plots_precomputed(hist_dir, theme):
+    """Draw all three plots using pre-computed histograms.
+
+    :param hist_dir: path to fastcat sample histogram directory.
+    :param theme: EPI2ME theme.
+    """
+    length_hist = pd.read_csv(
+        hist_dir / 'length.hist', sep='\t',
+        dtype=np.uint64, names=['start', 'end', 'count'])
+    quality_hist = pd.read_csv(
+        hist_dir / 'quality.hist', sep='\t',
+        dtype=np.float64, names=['start', 'end', 'count'])
+    with Grid(columns=3):
+        EZChart(precomputed_read_quality_plot(quality_hist), theme)
+        EZChart(precomputed_read_length_plot(length_hist), theme)
+        EZChart(precomputed_base_yield_plot(length_hist), theme)
+
+
 def base_yield_plot(
         seq_summary,
         title='Base yield above read length'):
-    """Create base yield plot."""
+    """Create yield plot by plotting total yield above read length.
+
+    :param seq_summary: pd.DataFrame containing per-sequence summary information.
+    :param title: Plot title.
+    """
     if not isinstance(seq_summary, pd.DataFrame):
         df = util.read_files(seq_summary)[['read_length']]
     else:
@@ -174,10 +219,75 @@ def base_yield_plot(
     return plt
 
 
+def histogram_median(hist, x='start', y='count'):
+    """Calculate the median value from histogram data.
+
+    :param hist: pd.DataFrame with columns [start, end, count].
+    :param x: the x-axis variable.
+    :param y: the y-axis variable.
+    """
+    cumsum = np.cumsum(hist[y]).to_numpy()
+    mid = cumsum[-1] / 2
+    pos = np.searchsorted(cumsum, mid)
+    return hist[x][pos]
+
+
+def precomputed_base_yield_plot(
+        hist,
+        title='Base yield above read length'):
+    """
+    Create yield above read length plot from pre-computed histogram data.
+
+    :param hist: pd.DataFrame with columns [start, end, count].
+    :param title: plot title.
+    """
+    # reverse the histogram to so that the longest reads come first
+    hist = hist[::-1]
+
+    xlab = 'Read length / kb'
+    ylab = 'Yield above length / Gbases'
+
+    # Get read length cumulative sum
+    cs = np.cumsum(hist['start'] * hist['count']).to_numpy()
+    hist[ylab] = cs / 1e+9
+    hist = hist.rename(columns={'start': xlab})
+    hist[xlab] = hist[xlab] / 1000
+
+    mid = cs[-1] / 2
+    n50_index = np.searchsorted(cs, mid)
+    n50 = hist.iat[n50_index, hist.columns.get_loc(xlab)]
+
+    # no need to plot all the points
+    if len(hist) > 100:
+        step = len(hist) // 100
+        # thin the data while keeping the last data point
+        subsampled = hist[::step]
+        if subsampled.iloc[-1][xlab] != hist.iloc[-1][xlab]:
+            subsampled = subsampled.append(hist.iloc[-1])
+        hist = subsampled
+
+    plt = ezc.lineplot(x=hist[xlab], y=hist[ylab], hue=None)
+    plt.series[0].showSymbol = False
+    plt.title = dict(
+        text=title,
+        subtext=(
+            f"Total yield: {sigfig.round(hist[ylab].iloc[0])} "
+            f"Gb. N50: {sigfig.round(n50, 3)}kb")
+    )
+    return plt
+
+
 def read_quality_plot(
         seq_summary, binwidth=0.2,
         min_qual=4, max_qual=30, title='Read quality'):
-    """Create read quality summary plot."""
+    """Create read quality summary plot.
+
+    :param seq_summary: pd.DataFrame containing per-sequence summary information.
+    :param binwidth: width of each bin.
+    :param min_qual: the minimum quality value to plot.
+    :param max_qual: the maximum quality value to plot.
+    :param title: title of the plot.
+    """
     if not isinstance(seq_summary, pd.DataFrame):
         df = util.read_files(seq_summary)[['mean_quality']]
     else:
@@ -196,6 +306,31 @@ def read_quality_plot(
     return plt
 
 
+def precomputed_read_quality_plot(
+        hist, binwidth=0.2,
+        min_qual=4, max_qual=30, title='Read quality'):
+    """Create read quality summary plot from pre-computed histograms.
+
+    :param hist: pd.DataFrame with columns [start, end, count].
+    :param binwidth: width of each bin.
+    :param min_qual: the minimum quality value to plot.
+    :param max_qual: the maximum quality value to plot.
+    :param title: title of the plot.
+    """
+    median = histogram_median(hist)
+    mean_q = np.average(0.5*(hist["start"] + hist["end"]), weights=hist['count'])
+    plt = ezc.histplot(
+        data=hist['start'], weights=hist['count'],
+        binwidth=binwidth, binrange=(min_qual, max_qual))
+    plt.title = dict(
+        text=title,
+        subtext=f"Mean: {mean_q:.1f}. Median: {median:.1f}")
+    plt.xAxis.name = 'Quality score'
+    plt.xAxis.min, plt.xAxis.max = min_qual, max_qual
+    plt.yAxis.name = 'Number of reads'
+    return plt
+
+
 def read_length_plot(
     seq_summary,
     xlim=(0, None),
@@ -206,13 +341,13 @@ def read_length_plot(
 ):
     """Create a read length plot.
 
-    :param seq_summary: summary data from fastcat
-    :param xlim: viewable read length limits
+    :param seq_summary: pd.DataFrame containing per-sequence summary information.
+    :param xlim: viewable read length limits.
     :param quantile_limits: if True, xlim is interpreted as quantiles of the data rather
         than absolute values.
-    :param bins: number of bins
-    :param bin_width: bin width
-    :param title: plot title
+    :param bins: number of bins.
+    :param bin_width: bin width.
+    :param title: plot title.
 
     The reads will be filtered with `min_len` and `max_len` before calculating the
     histogram. The subtext of the plot title will still show the mean / median / maximum
@@ -268,8 +403,73 @@ def read_length_plot(
     return plt
 
 
+def precomputed_read_length_plot(
+        hist,
+        xlim=(0, None),
+        quantile_limits=False,
+        bins=100,
+        bin_width=None,
+        title="Read length"):
+    """Create a read length plot from pre-computed histogram data.
+
+    :param hist: pd.DataFrame with columns [start, end, count].
+    :param xlim: viewable read length limits.
+    :param quantile_limits: if True, xlim is interpreted as quantiles of the data
+        rather than absolute values.
+    :param bins: number of bins.
+    :param bin_width: bin width.
+    :param title: plot title.
+
+    The reads will be filtered with `min_len` and `max_len` before calculating the
+    histogram. The subtext of the plot title will still show the mean / median / maximum
+    of the full data.
+    """
+    min_len, max_len = xlim
+
+    if min_len is None:
+        min_len = 0
+    if max_len is None:
+        max_len = 1 if quantile_limits else hist.iloc[-1]['end']
+
+    if quantile_limits:
+        cs = np.cumsum(hist['count'])
+        lower_idx, upper_idx = np.searchsorted(
+            cs, np.quantile(cs, quantile_limits))
+        min_len, max_len = (hist['start'][lower_idx], hist['end'][upper_idx])
+        xlim = (min_len, max_len)
+
+    median_length = histogram_median(hist)
+    mean_length = np.average(hist['start'], weights=hist['count'])
+    max_ = hist.iloc[-1]['end']
+    min_ = hist.iloc[0]['start']
+
+    hist = hist[(hist['start'] >= min_len) & (hist['end'] <= max_len)]
+
+    plt = ezc.histplot(
+        data=hist['start'] / 1000, bins=bins, binwidth=bin_width, weights=hist['count'])
+    plt.title = dict(
+        text=title,
+        subtext=(
+            f"Mean: {mean_length:.1f}. Median: {median_length:.1f}. "
+            f"Min: {min_:,d}. Max: {max_:,d}"
+        )
+    )
+    plt.xAxis.name = 'Read length / kb'
+    plt.yAxis.name = 'Number of reads'
+
+    if xlim[0] is not None:
+        plt.xAxis.min = xlim[0] / 1000
+    if xlim[1] is not None:
+        plt.xAxis.max = xlim[1] / 1000
+    return plt
+
+
 def load_bamstats_flagstat(flagstat):
-    """Load and prepare bamstats flagstat output."""
+    """Load and prepare bamstats flagstat output.
+
+    :param flagstat: path to file(s) containing bamstats flagstat output. Either a
+        path to a single file or a path to a directory containing stats files.
+    """
     relevant_stats_cols_dtypes = {
         "ref": CATEGORICAL,
         "sample_name": CATEGORICAL,
@@ -321,7 +521,13 @@ def load_bamstats_flagstat(flagstat):
 
 
 def load_stats(stat, format=None):
-    """Load and prepare bamstats flagstat."""
+    """Load and prepare bamstats flagstat.
+
+    :param stat: flagstat file paths. Either a single path to a file, a list/tuple of
+        paths, or a path to a directory containing files.
+    :param format: stats source: bamstats/fastcat.
+
+    """
     # Input columns for bamstats
     bamstats_cols_dtypes = {
         "name": str,
@@ -410,7 +616,7 @@ def load_stats(stat, format=None):
 
 
 def main(args):
-    """Entry point to demonstrate a sequence summmary component."""
+    """Entry point to demonstrate a sequence summary component."""
     comp_title = 'Sequence Summary'
     # Define inputs.
     # If seq_summary is not passed, then use bam_readstats
