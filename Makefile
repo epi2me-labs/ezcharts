@@ -14,14 +14,15 @@ develop: venv/bin/activate
 	${IN_VENV} && python setup.py develop
 
 test: venv/bin/activate
-	${IN_VENV} && pip install 'flake8<6.0.0' flake8-rst-docstrings flake8-docstrings flake8-import-order flake8-forbid-visual-indent
+	${IN_VENV} && pip install 'flake8<6.0.0' flake8-rst-docstrings flake8-docstrings flake8-import-order flake8-forbid-visual-indent pytest pytest-cov
 	${IN_VENV} && flake8 ${PROJECT} \
 		--import-order-style google --application-import-names ${PROJECT} \
 		--statistics --max-line-length 88
 	# demo should run without error
 	${IN_VENV} && python check_deps.py
 	${IN_VENV} && python setup.py install
-	${IN_VENV} && ${PROJECT} demo
+	${IN_VENV} && pytest tests --cov ${PROJECT} \
+		--cov-report html --cov-report term --cov-report term-missing
 
 IN_BUILD=. ./pypi_build/bin/activate
 pypi_build/bin/activate:

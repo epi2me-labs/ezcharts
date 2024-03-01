@@ -1,0 +1,8 @@
+[run]
+omit = ezcharts/plots/_model.py
+
+[report]
+exclude_lines =
+    pragma: no cover
+    raise NotImplementedError
+fail_under = 63
