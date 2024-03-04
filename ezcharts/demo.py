@@ -2,7 +2,7 @@
 import argparse
 import json
 
-from dominate.tags import p
+from dominate.tags import div, h4, p
 import numpy as np
 import pandas as pd
 from pkg_resources import resource_filename
@@ -21,18 +21,19 @@ from ezcharts.components.reports.labs import LabsReport
 from ezcharts.components.theme import LAB_head_resources
 from ezcharts.layout.snippets import DataTable
 from ezcharts.layout.snippets import Grid
-from ezcharts.layout.snippets import OffCanvas
 from ezcharts.layout.snippets import Progress
 from ezcharts.layout.snippets import Stats
 from ezcharts.layout.snippets import Tabs
 from ezcharts.layout.snippets.cards import Cards
 from ezcharts.layout.snippets.cards import ICard
+from ezcharts.layout.snippets.offcanvas import IOffCanvasClasses, OffCanvas
 from ezcharts.plots import BokehPlot, Plot
 from ezcharts.plots.ideogram import ideogram
 from ezcharts.plots.karyomap import karyomap
 
+
 # Setup simple globals
-WORKFLOW_NAME = 'wf-template'
+WORKFLOW_NAME = 'wf-template2'
 REPORT_TITLE = f'{WORKFLOW_NAME}-report'
 
 
@@ -135,6 +136,7 @@ def main(args):
 
     # This also adds to main_content, but provides a nice
     # container snippet as a starting context.
+
     with report.add_section('Controls', 'Controls'):
         # This is an example of how to use bootstrap cards
         Cards(
@@ -154,6 +156,53 @@ def main(args):
             label="More details (Offcanvas demo)",
             title="Details of Controls",
             body="You can put more details here....")
+
+    # Add sample QC cards
+    with report.add_section('QC', 'QC'):
+        body_content = div(
+            div("Column 1 Text", _class="col"),
+            div("Column 2 Text", _class="col"),
+            div("Column 3 Text", _class="col"),
+            _class="row",
+        )
+        offcanvas_classes = IOffCanvasClasses()
+        offcanvas_classes.offcanvas_button = "btn btn-detail float-end"
+
+        sample_body = div(
+            div(
+                h4("Sample1"),
+                p("This is a sample body.")
+            )
+        )
+        ocps = {
+            'label': "View details",
+            'title': 'Sample detail',
+            'body': sample_body,
+            'classes': offcanvas_classes
+        }
+        Cards(
+            columns=1,
+            items=[
+                ICard(
+                    alias="Sample1",
+                    barcode="barcode01",
+                    body=body_content,
+                    footer="All postive controls within threshold",
+                    status='pass',
+                    offcanvas_params=ocps),
+                ICard(
+                    alias="Sample2",
+                    barcode="barcode02",
+                    body="Test string",
+                    status='warn',
+                    offcanvas_params=ocps),
+                ICard(
+                    alias="Sample3",
+                    barcode="barcode03",
+                    body=body_content,
+                    footer="NTC outside set thresholds.",
+                    status='fail')
+                    ])
 
     # This also adds to main_content, but provides a nice
     # container snippet as a starting context.
@@ -310,6 +359,7 @@ def main(args):
         )
         plot._fig.title = "Bokeh plot title"
         EZChart(plot)
+
     logger.info('Reticulating splines')
     report.write(args.output)
 

@@ -297,7 +297,7 @@ hr {
 }
 
 .badge-unknown-solid {
-    background-color: var(-neutral-cool-1100) !important;
+    background-color: var(--orange-700) !important;
     background-image: var(--circle-minus-solid-white) !important;
 }
 
@@ -312,7 +312,7 @@ hr {
 }
 
 .badge-unknown {
-    color: var(-neutral-cool-1100) !important;
+    color: var(--orange-700) !important;
     background-image: var(--circle-minus-solid-neutral-cool) !important;
 }
 
