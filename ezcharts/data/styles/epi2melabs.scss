@@ -1,3 +1,12 @@
+:root {
+    --circle-check-solid-sage: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGZpbGw9IiMx OTcyNzAiIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48IS0tISBGb250IEF3ZXNvbWUg UHJvIDYuNC4yIGJ5IEBmb250YXdlc29tZSAtIGh0dHBzOi8vZm9udGF3ZXNvbWUu Y29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21lLmNvbS9saWNlbnNlIChD b21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIzIEZvbnRpY29ucywgSW5j LiAtLT48cGF0aCBkPSJNMjU2IDUxMkEyNTYgMjU2IDAgMSAwIDI1NiAwYTI1NiAy NTYgMCAxIDAgMCA1MTJ6TTM2OSAyMDlMMjQxIDMzN2MtOS40IDkuNC0yNC42IDku NC0zMy45IDBsLTY0LTY0Yy05LjQtOS40LTkuNC0yNC42IDAtMzMuOXMyNC42LTku NCAzMy45IDBsNDcgNDdMMzM1IDE3NWM5LjQtOS40IDI0LjYtOS40IDMzLjkgMHM5 LjQgMjQuNiAwIDMzLjl6Ii8+PC9zdmc+Cg==');
+    --circle-check-solid-white: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGZpbGw9IiNm ZmZmZmYiIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48IS0tISBGb250IEF3ZXNvbWUg UHJvIDYuNC4yIGJ5IEBmb250YXdlc29tZSAtIGh0dHBzOi8vZm9udGF3ZXNvbWUu Y29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21lLmNvbS9saWNlbnNlIChD b21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIzIEZvbnRpY29ucywgSW5j LiAtLT48cGF0aCBkPSJNMjU2IDUxMkEyNTYgMjU2IDAgMSAwIDI1NiAwYTI1NiAy NTYgMCAxIDAgMCA1MTJ6TTM2OSAyMDlMMjQxIDMzN2MtOS40IDkuNC0yNC42IDku NC0zMy45IDBsLTY0LTY0Yy05LjQtOS40LTkuNC0yNC42IDAtMzMuOXMyNC42LTku NCAzMy45IDBsNDcgNDdMMzM1IDE3NWM5LjQtOS40IDI0LjYtOS40IDMzLjkgMHM5 LjQgMjQuNiAwIDMzLjl6Ii8+PC9zdmc+Cg==');
+    --circle-exclamation-solid-red: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGZpbGw9IiNj MjI5MzIiIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48IS0tISBGb250IEF3ZXNvbWUg UHJvIDYuNC4yIGJ5IEBmb250YXdlc29tZSAtIGh0dHBzOi8vZm9udGF3ZXNvbWUu Y29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21lLmNvbS9saWNlbnNlIChD b21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIzIEZvbnRpY29ucywgSW5j LiAtLT48cGF0aCBkPSJNMjU2IDUxMkEyNTYgMjU2IDAgMSAwIDI1NiAwYTI1NiAy NTYgMCAxIDAgMCA1MTJ6bTAtMzg0YzEzLjMgMCAyNCAxMC43IDI0IDI0VjI2NGMw IDEzLjMtMTAuNyAyNC0yNCAyNHMtMjQtMTAuNy0yNC0yNFYxNTJjMC0xMy4zIDEw LjctMjQgMjQtMjR6TTIyNCAzNTJhMzIgMzIgMCAxIDEgNjQgMCAzMiAzMiAwIDEg MSAtNjQgMHoiLz48L3N2Zz4=');
+    --circle-exclamation-solid-white: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGZpbGw9IiNm ZmZmZmYiIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48IS0tISBGb250IEF3ZXNvbWUg UHJvIDYuNC4yIGJ5IEBmb250YXdlc29tZSAtIGh0dHBzOi8vZm9udGF3ZXNvbWUu Y29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21lLmNvbS9saWNlbnNlIChD b21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIzIEZvbnRpY29ucywgSW5j LiAtLT48cGF0aCBkPSJNMjU2IDUxMkEyNTYgMjU2IDAgMSAwIDI1NiAwYTI1NiAy NTYgMCAxIDAgMCA1MTJ6bTAtMzg0YzEzLjMgMCAyNCAxMC43IDI0IDI0VjI2NGMw IDEzLjMtMTAuNyAyNC0yNCAyNHMtMjQtMTAuNy0yNC0yNFYxNTJjMC0xMy4zIDEw LjctMjQgMjQtMjR6TTIyNCAzNTJhMzIgMzIgMCAxIDEgNjQgMCAzMiAzMiAwIDEg MSAtNjQgMHoiLz48L3N2Zz4=');
+    --circle-minus-solid-neutral-cool: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGZpbGw9IiM0 YjViNjciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48IS0tISBGb250IEF3ZXNvbWUg UHJvIDYuNC4yIGJ5IEBmb250YXdlc29tZSAtIGh0dHBzOi8vZm9udGF3ZXNvbWUu Y29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21lLmNvbS9saWNlbnNlIChD b21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIzIEZvbnRpY29ucywgSW5j LiAtLT48cGF0aCBkPSJNMjU2IDUxMkEyNTYgMjU2IDAgMSAwIDI1NiAwYTI1NiAy NTYgMCAxIDAgMCA1MTJ6TTE4NCAyMzJIMzI4YzEzLjMgMCAyNCAxMC43IDI0IDI0 cy0xMC43IDI0LTI0IDI0SDE4NGMtMTMuMyAwLTI0LTEwLjctMjQtMjRzMTAuNy0y NCAyNC0yNHoiLz48L3N2Zz4K');
+    --circle-minus-solid-white: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGZpbGw9IiNm ZmZmZmYiIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48IS0tISBGb250IEF3ZXNvbWUg UHJvIDYuNC4yIGJ5IEBmb250YXdlc29tZSAtIGh0dHBzOi8vZm9udGF3ZXNvbWUu Y29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21lLmNvbS9saWNlbnNlIChD b21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIzIEZvbnRpY29ucywgSW5j LiAtLT48cGF0aCBkPSJNMjU2IDUxMkEyNTYgMjU2IDAgMSAwIDI1NiAwYTI1NiAy NTYgMCAxIDAgMCA1MTJ6TTE4NCAyMzJIMzI4YzEzLjMgMCAyNCAxMC43IDI0IDI0 cy0xMC43IDI0LTI0IDI0SDE4NGMtMTMuMyAwLTI0LTEwLjctMjQtMjRzMTAuNy0y NCAyNC0yNHoiLz48L3N2Zz4=');
+}
+
 // EPI2ME Labs brand colours
 $brand-primary: #0079a4;
 $brand-primary-m: #0084a9a6;
@@ -13,6 +22,9 @@ $brand-red: #BC4B51;
 $brand-red-m: #BC4B51a6;
 $brand-green: #8CB369;
 $brand-pink: #A60067;
+
+// additional colours
+$orange-700: #eb872c;
 
 // Override bootstrap defaults
 $primary:       $brand-primary !default;
@@ -36,8 +48,61 @@ $enable-negative-margins: true;
     @extend .btn-primary;
 }
 
+.btn-detail {
+    color: $brand-primary;
+    background-color: white;
+    font-weight: bold;
+    font-size: 0.8em;
+    border: 1px solid $brand-light-grey !important;
+}
+
+
 // Logo sizing
 #logo {
     width: 100%;
     height: auto;
+}
+
+// Badges
+
+.badge-icon-solid {
+    background-position: 12% !important;
+    background-repeat: no-repeat !important;
+    color: white !important;
+    padding-left: 2em !important;
+    background-size: 1.2em !important;
+}
+
+.badge-fail-solid {
+    background-color: $brand-red !important;
+    background-image: var(--circle-exclamation-solid-white) !important;
+}
+
+.badge-unknown-solid {
+    background-color: $orange-700 !important;
+    background-image: var(--circle-minus-solid-white) !important;
+}
+
+.badge-pass-solid {
+    background-color: $brand-green !important;
+    background-image: var(--circle-check-solid-white) !important;
+}
+
+
+// Off canvas
+
+.offcanvas-header{
+    background-color: $brand-tertiary !important;
+    color: white !important;
+    border-bottom: $brand-primary !important;
+    border-bottom-width: 4px !important;
+    border-bottom-style: solid !important;
+    padding-left: 2em;
+    padding-right: 2em;
+}
+
+.offcanvas-body{
+    background-repeat: no-repeat;
+    background-attachment: inherit;
+    background-color: white !important;
 }

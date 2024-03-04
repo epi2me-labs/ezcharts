@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Nested bar charts by setting `nested_x=True` in `barplot()`.
 - SeqSummary ability to read precomputed fastcat histogram data.
+- Upgraded sample card functionality.
 
 ### Fixed
 - Regression causing empty line or scatter plots when no `hue` variable was provided.
