@@ -503,7 +503,7 @@ def load_bamstats_flagstat(flagstat):
             # If it's empty, add an empty DF
             if df.empty:
                 cols = relevant_stats_cols_dtypes.update(
-                    {'Status': str, 'filename': int})
+                    {'Status': str, 'filename': str})
                 dfs.append(pd.DataFrame(columns=cols))
                 continue
             # Add mapped/unmapped status
@@ -588,7 +588,7 @@ def load_stats(stat, format=None):
             # If it's empty, add an empty DF
             if df.empty:
                 cols = relevant_stats_cols_dtypes.update(
-                    {'filename': int})
+                    {'filename': str})
                 dfs.append(
                     pd.DataFrame(columns=cols).rename(columns={'name': 'read_id'}))
                 continue
