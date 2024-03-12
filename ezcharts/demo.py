@@ -237,6 +237,13 @@ def main(args):
                     data=example_df, x='year', y='sales', color='grey'
                 )
                 EZChart(plot)
+            with tabs.add_dropdown_tab('Simple - single colour, ignore stacking'):
+                # set color=grey for a uniform colouring
+                # try setting also dodge=False, to check it doesn't break
+                plot = ezc.barplot(
+                    data=example_df, x='year', y='sales', color='grey', dodge=False
+                )
+                EZChart(plot)
             with tabs.add_dropdown_tab('Grouped'):
                 # set dodge=True for a grouped barplot
                 plot = ezc.barplot(
