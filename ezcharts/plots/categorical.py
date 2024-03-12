@@ -127,10 +127,11 @@ def barplot(
     p = plt._fig
 
     # Define plot orientation
+    # If both hue and dodge=False are provided, make a stacked bar chart
     if plotter.orient == "v":
-        plot_bars_func = p.vbar if dodge else p.vbar_stack
+        plot_bars_func = p.vbar_stack if not dodge and hue else p.vbar
     else:
-        plot_bars_func = p.hbar if dodge else p.hbar_stack
+        plot_bars_func = p.hbar_stack if not dodge and hue else p.hbar
 
     if plotter.plot_hues is None:
         # simple barplot (i.e. only a single group of bars)
