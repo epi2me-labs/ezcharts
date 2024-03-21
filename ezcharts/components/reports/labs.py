@@ -47,12 +47,11 @@ class LabsAddendum(Snippet):
         if use_defaults:
             with self.container:
                 h4('About this report', className="pb-3")
-                with p(
-                    "This report was produced using the "
-                    f"epi2me-labs/{workflow_name}. The workflow "
-                    "can be run using"
-                ):
-                    code(f"nextflow run epi2me-labs/{workflow_name} --help")
+                p(
+                    "This report was produced using the ",
+                    code(f"epi2me-labs/{workflow_name}"),
+                    " nextflow workflow."
+                )
                 p(
                     "Oxford Nanopore Technologies products are not "
                     "intended for use for health assessment or to "
