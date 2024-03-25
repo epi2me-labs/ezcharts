@@ -95,8 +95,12 @@ def main(args):
     params = resource_filename('ezcharts', "data/test/params.json")
     versions = resource_filename('ezcharts', "data/test/versions.txt")
     nxt_json = resource_filename('ezcharts', "data/test/nextclade.json")
-    histogram_stats_dir = resource_filename(
-        'ezcharts', "data/test/histogram_stats")
+    histogram_stats_dir = tuple(
+        [
+            resource_filename("ezcharts", "data/test/histogram_stats/sample_1"),
+            resource_filename("ezcharts", "data/test/histogram_stats/sample_2"),
+        ]
+    )
 
     # Create report
     # Note we need to add nextclade as a resource
@@ -132,7 +136,9 @@ def main(args):
 
     # Add sequence summary component
     with report.add_section('Sequence summaries', 'Summaries'):
-        SeqSummary(histogram_stats_dir=histogram_stats_dir)
+        SeqSummary(
+            seq_summary=histogram_stats_dir,
+            sample_names=tuple(['sample_1', 'sample_2']))
 
     # This also adds to main_content, but provides a nice
     # container snippet as a starting context.
@@ -322,9 +328,11 @@ def main(args):
 
     dataset_examples = {
         'fastcat': load_stats(resource_filename(
-            'ezcharts', "data/test/fastcat.stats.gz"), format='fastcat'),
+            'ezcharts',
+            "data/test/fastcat/f1.tsv.gz")),
         'bamstats': load_stats(resource_filename(
-            'ezcharts', "data/test/bamstats.readstats.tsv.gz"), format='bamstats'),
+            'ezcharts',
+            "data/test/bamstats/bamstats.readstats.tsv.gz")),
         'flagstat': load_bamstats_flagstat(resource_filename(
             'ezcharts', "data/test/bamstats.flagstat.tsv")),
         'modkit summary': load_modkit_summary(resource_filename(

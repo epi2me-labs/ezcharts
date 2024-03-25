@@ -1,0 +1,3 @@
+filename	sample_name	n_seqs	n_bases	min_length	max_length	mean_quality
+input/reads.fastq.gz	barcode01	1000	1595455	351	4807	14.34
+input/reads1.fastq.gz	barcode01	1000	1594840	234	3281	14.33

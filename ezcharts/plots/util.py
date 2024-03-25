@@ -54,6 +54,53 @@ def read_files(summaries, sep="\t"):
     return pd.concat(dfs)
 
 
+def concat_dfs_with_categorical_columns(dfs):
+    """Concatenate collection of dataframes while maintaining categorical dtypes.
+
+    :param dfs: Collection of input dataframes
+    :raises ValueError: Raised when columns in all the dataframes don't match
+    :return: concatenated dataframe with categorical columns
+
+    `pd.concat` will revert the `dtype` of categorical columns to `object` if the
+    columns don't contain the same categories in all dataframes. We use
+    `union_categoricals` to avoid this.
+
+    Note: This will also change the categories of the categorical dtypes in the input
+    dataframes.
+    """
+    # if there is only one df in the list, return it
+    if len(dfs) == 1:
+        return dfs[0]
+    # make sure all dfs contain the same columns and dtypes
+    cols_dtypes = {col: dtype.name for col, dtype in dfs[0].dtypes.items()}
+    for df in dfs[1:]:
+        if cols_dtypes != {col: dtype.name for col, dtype in df.dtypes.items()}:
+            raise ValueError("All DataFrames need to have the same columns and dtypes.")
+    # find the categorical columns
+    cat_cols = []
+    non_cat_cols = []
+    for colname, coltype in dfs[0].dtypes.items():
+        if isinstance(coltype, pd.api.types.CategoricalDtype):
+            cat_cols.append(colname)
+        else:
+            non_cat_cols.append(colname)
+    # concat the non-categorical columns first
+    res_df = pd.concat((df[non_cat_cols]) for df in dfs)
+    # separately concat the categorical columns in a way that preserves the categories
+    # and add them to the results df
+    for col in cat_cols:
+        res_df[col] = pd.api.types.union_categoricals(
+            [df[col] for df in dfs], sort_categories=True
+        )
+    # make sure that the dtypes of the concatenated df are the same as the input dfs
+    if cols_dtypes != {col: dtype.name for col, dtype in res_df.dtypes.items()}:
+        raise ValueError(
+            "Concatenated DataFrame has different dtypes from input DataFrames."
+        )
+    # return (with the initial column order)
+    return res_df[dfs[0].columns].reset_index(drop=True)
+
+
 class _colors:
     """Some colours that someone thought were nice."""
 

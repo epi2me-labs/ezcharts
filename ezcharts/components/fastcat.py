@@ -1,11 +1,10 @@
 """An ezcharts component for plotting sequence summaries."""
 import argparse
+import copy
 import os
-from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from pandas.api import types as pd_types
 from pkg_resources import resource_filename
 import sigfig
 
@@ -14,330 +13,276 @@ from ezcharts.components.ezchart import EZChart
 from ezcharts.components.reports.comp import ComponentReport
 from ezcharts.layout.base import Snippet
 from ezcharts.layout.snippets import DataTable, Grid, Tabs
-from ezcharts.plots import util
 
-# Categorical types
-CATEGORICAL = pd_types.CategoricalDtype(ordered=True)
+
+FASTCAT_COLS_DTYPES = {
+    "read_id": str,
+    "filename": "category",
+    "sample_name": "category",
+    "read_length": int,
+    "mean_quality": float,
+    "channel": int,
+    "read_number": int,
+    "start_time": str,
+}
+
+BAMSTATS_COLS_DTYPES = {
+    "name": str,
+    "sample_name": "category",
+    "ref": "category",
+    "coverage": float,
+    "ref_coverage": float,
+    "qstart": "Int64",
+    "qend": "Int64",
+    "rstart": "Int64",
+    "rend": "Int64",
+    "aligned_ref_len": "Int64",
+    "direction": "category",
+    "length": int,
+    "read_length": int,
+    "mean_quality": float,
+    "start_time": str,
+    "match": int,
+    "ins": int,
+    "del": int,
+    "sub": int,
+    "iden": float,
+    "acc": float,
+    "duplex": int,
+}
+
+BAMSTATS_FLAGSTAT_COLS_DTYPES = {
+    "ref": "category",
+    "sample_name": "category",
+    "total": int,
+    "primary": int,
+    "secondary": int,
+    "supplementary": int,
+    "unmapped": int,
+    "qcfail": int,
+    "duplicate": int,
+    "duplex": int,
+    "duplex_forming": int,
+}
+
+TIMES = ["start_time"]
+
+
+def _intersect_columns(base, requested=None):
+    # Take one of the dtype dictionaries and intersect with a list
+    cols = base
+    if requested is not None:
+        if invalid_cols := set(requested) - set(base.keys()):
+            raise ValueError(f"Found unexpected columns {invalid_cols}.")
+        cols = {col: base[col] for col in requested}
+    times = [t for t in TIMES if t in cols]
+    if len(times) == 0:
+        times = None
+    return cols, times
+
+
+def _localize_time(df):
+    # ensure we have datetime format, convert to utc
+    for t in TIMES:
+        if t in df.columns:
+            df[t] = pd.to_datetime(df.start_time, utc=True).dt.tz_localize(None)
+    return df
 
 
 class SeqSummary(Snippet):
     """Generate sequence summary plots."""
 
     def __init__(
-            self,
-            seq_summary=None,
-            histogram_stats_dir=None,
-            theme='epi2melabs',
-            **kwargs):
+        self,
+        seq_summary,
+        flagstat=None,
+        sample_names=None,
+        theme="epi2melabs",
+    ):
         """Create sequence summary component.
 
-        If seq_summary contains results from multiple samples, each will be
-        plotted in its own tab.
-
-        :param seq_summary: A path to a fastcat read stats output file or
-            DataFrame.
-        :param histogram_stats_dir: A path to a directory with fastcat stats histograms
-            in per-sample subdirectories.
-        :param theme: EPI2ME theme.
-        :param kwargs:  options are 'flagstat' and 'bam_summary'.
+        :param seq_summary: a path to a fastcat/bamstats read stats output file
+            or dataframe (or a tuple of such).
+        :param flagstat: a path to a bamstats flagstat output file or dataframe
+            (or tuple of such).
+        :sample_names: tuple of sample names. Required when other input arguments
+            are tuples.
+        :param theme: String defining the visual theme for the plots.
         """
         super().__init__(styles=None, classes=None)
+        self.theme = theme
+
+        # we need at least seq_summary or histograms
+        if not (
+                isinstance(seq_summary, pd.DataFrame)
+                or isinstance(seq_summary, str)
+                or isinstance(seq_summary, tuple)):
+            raise ValueError(
+                "`seq_summary` must be a path to a fastcat/bamstats read stats output "
+                "file or dataframe, or histogram directories (or a tuple of such).")
+
+        # check sample_names is a tuple if files are provided in tuples.
+        if (isinstance(seq_summary, tuple)) and not isinstance(sample_names, tuple):
+            raise ValueError(
+                "`sample_names` must be provided as a tuple "
+                "when more than one input provided.")
+
+        # check tuples are all the same length
+        if isinstance(sample_names, tuple) and (len(sample_names) != len(seq_summary)):
+            raise ValueError(
+                "`sample_names` must have the same length as `seq_summary`.")
+        if (
+                (flagstat is not None)
+                and isinstance(flagstat, tuple)
+                and (len(sample_names) != len(flagstat))):
+            raise ValueError(
+                "`sample_names` must have the same length as `flagstat`.")
 
         with self:
-            if seq_summary is not None:
-                # Assume the input is in fastcat format. If not, try to import as
-                # bamstats format.
-                if isinstance(seq_summary, pd.DataFrame):
-                    df_all = seq_summary
-                else:
-                    try:
-                        df_all = load_stats(seq_summary, format='fastcat')
-                    except ValueError:
-                        df_all = load_stats(seq_summary, format='bamstats')
-                # Check that the file is not empty
-                if df_all.empty:
-                    raise pd.errors.EmptyDataError('seq_summary is empty')
-                # Out of the intersection of columns between `fastcat` and
-                # `bamstats` output, only the column with the read IDs has a
-                # different name (`read_id` in `fastcat` and `name` in `bamstats`).
-                # Rename to ensure the dataframes produced from either `fastcat` or
-                # `bamstats` are consistent.
-                if df_all.columns[0] == "name":
-                    df_all.rename(columns={"name": "read_id"}, inplace=True)
-                # the following assumes that `fastcat` / `bamstats` has been run
-                # with `-s` which is not necessarily the case (if there was only
-                # one sample) --> create a dummy 'sample_name' column if missing
-                if 'sample_name' not in df_all.columns:
-                    df_all['sample_name'] = 'sample'
-                if len(df_all['sample_name'].unique()) == 1:
-                    # we only got a single sample --> no dropdown
-                    draw_all_plots(df_all, theme)
-                else:
-                    # several samples --> use a dropdown menu
-                    tabs = Tabs()
-                    with tabs.add_dropdown_menu():
-                        for sample_id, df_sample in df_all.groupby('sample_name'):
-                            with tabs.add_dropdown_tab(sample_id):
-                                draw_all_plots(df_sample, theme)
-            else:
-                if not histogram_stats_dir:
-                    raise ValueError(
-                        "If seq_summary is not provided, a histogram stats directory"
-                        " path must be provided")
+            if isinstance(seq_summary, tuple):
+                # several samples => use a dropdown
                 tabs = Tabs()
                 with tabs.add_dropdown_menu():
-                    for hist_sample_dir in Path(histogram_stats_dir).iterdir():
-                        if not hist_sample_dir.is_dir():
-                            continue
-                        with tabs.add_dropdown_tab(hist_sample_dir.name):
-                            draw_all_plots_precomputed(hist_sample_dir, theme)
+                    for sample_name, data in zip(sample_names, seq_summary):
+                        with tabs.add_dropdown_tab(sample_name):
+                            self._draw_summary_plots(data)
+            else:
+                # single sample
+                self._draw_summary_plots(seq_summary)
 
-            # Create flagstat tables
-            if "flagstat" in kwargs:
-                if isinstance(kwargs["flagstat"], pd.DataFrame):
-                    flagstat = kwargs["flagstat"]
-                else:
-                    flagstat = load_bamstats_flagstat(kwargs["flagstat"])
-                # Check that the file is not empty
-                if flagstat.empty:
-                    raise pd.errors.EmptyDataError('flagstat is empty')
-                # the following assumes that `fastcat` / `bamstats` has been run
-                # with `-s` which is not necessarily the case (if there was only
-                # one sample) --> create a dummy 'sample_name' column if missing
-                if 'sample_name' not in df_all.columns:
-                    flagstat['sample_name'] = 'sample'
-                if len(flagstat['sample_name'].unique()) == 1:
-                    # we only got a single sample --> no dropdown
-                    DataTable.from_pandas(flagstat, use_index=False)
-                else:
-                    # several samples --> use a dropdown menu
+            # same again for flagstat
+            if flagstat is not None:
+                if isinstance(flagstat, tuple):
                     tabs = Tabs()
                     with tabs.add_dropdown_menu():
-                        for sample_id, df_sample in flagstat.groupby('sample_name'):
-                            with tabs.add_dropdown_tab(sample_id):
-                                DataTable.from_pandas(df_sample, use_index=False)
-            # Create bamstats metrics
-            if "bam_summary" in kwargs:
-                if isinstance(kwargs["bam_summary"], pd.DataFrame):
-                    df_all = kwargs["bam_summary"]
+                        for sample_name, data in zip(sample_names, flagstat):
+                            with tabs.add_dropdown_tab(sample_name):
+                                self._draw_flagstat_table(data)
                 else:
-                    df_all = load_stats(kwargs["bam_summary"], format='bamstats')
-                # Check that the file is not empty
-                if df_all.empty:
-                    raise pd.errors.EmptyDataError('seq_summary is empty')
-                # Out of the intersection of columns between `fastcat` and
-                # `bamstats` output, only the column with the read IDs has a
-                # different name (`read_id` in `fastcat` and `name` in `bamstats`).
-                # Rename to ensure the dataframes produced from either `fastcat` or
-                # `bamstats` are consistent.
-                if df_all.columns[0] == "name":
-                    df_all.rename(columns={"name": "read_id"}, inplace=True)
-                # the following assumes that `fastcat` / `bamstats` has been run
-                # with `-s` which is not necessarily the case (if there was only
-                # one sample) --> create a dummy 'sample_name' column if missing
-                if 'sample_name' not in df_all.columns:
-                    df_all['sample_name'] = 'sample'
-                if len(df_all['sample_name'].unique()) == 1:
-                    # we only got a single sample --> no dropdown
-                    draw_all_plots(df_all, theme)
-                else:
-                    # several samples --> use a dropdown menu
-                    tabs = Tabs()
-                    with tabs.add_dropdown_menu():
-                        for sample_id, df_sample in df_all.groupby('sample_name'):
-                            with tabs.add_dropdown_tab(sample_id):
-                                draw_all_plots(df_sample, theme)
+                    self._draw_flagstat_table(flagstat)
+
+    def _draw_summary_plots(self, data):
+        """Draw quality, read_length, yield plots using raw data.
+
+        :param seq_summary: pd.DataFrame containing per-sequence summary information.
+        :param theme: EPI2ME theme.
+        """
+        # data is either a summary file, a dataframe (of a summary file),
+        # or a directory (of histogram files).
+        qdata, ldata = None, None
+        if isinstance(data, pd.DataFrame):
+            qdata, ldata = data, data
+        else:
+            try:
+                df = load_stats(data)
+                qdata, ldata = df, df
+            except Exception:
+                try:
+                    qdata = load_histogram(data, "quality")
+                    ldata = load_histogram(data, "length")
+                except Exception:
+                    raise ValueError("Could not load input data.")
+
+        with Grid(columns=3):
+            EZChart(read_quality_plot(qdata), self.theme)
+            EZChart(read_length_plot(ldata), self.theme)
+            EZChart(base_yield_plot(ldata), self.theme)
+
+    def _draw_bamstat_table(self, data):
+        if not isinstance(data, pd.DataFrame):
+            data = load_bamstats_flagstat(data)
+        DataTable.from_pandas(data, use_index=False)
 
 
-def draw_all_plots(seq_summary, theme):
-    """Draw all three plots using raw data.
-
-    :param seq_summary: pd.DataFrame containing per-sequence summary information.
-    :param theme: EPI2ME theme.
-    """
-    with Grid(columns=3):
-        EZChart(read_quality_plot(seq_summary), theme)
-        EZChart(read_length_plot(seq_summary), theme)
-        EZChart(base_yield_plot(seq_summary), theme)
-
-
-def draw_all_plots_precomputed(hist_dir, theme):
-    """Draw all three plots using pre-computed histograms.
-
-    :param hist_dir: path to fastcat sample histogram directory.
-    :param theme: EPI2ME theme.
-    """
-    length_hist = pd.read_csv(
-        hist_dir / 'length.hist', sep='\t',
-        dtype=np.uint64, names=['start', 'end', 'count'])
-    quality_hist = pd.read_csv(
-        hist_dir / 'quality.hist', sep='\t',
-        dtype=np.float64, names=['start', 'end', 'count'])
-    with Grid(columns=3):
-        EZChart(precomputed_read_quality_plot(quality_hist), theme)
-        EZChart(precomputed_read_length_plot(length_hist), theme)
-        EZChart(precomputed_base_yield_plot(length_hist), theme)
-
-
-def base_yield_plot(
-        seq_summary,
-        title='Base yield above read length'):
+def base_yield_plot(data):
     """Create yield plot by plotting total yield above read length.
 
-    :param seq_summary: pd.DataFrame containing per-sequence summary information.
-    :param title: Plot title.
+    :param data: fastcat/bamstats summary data or read-length histogram data.
     """
-    if not isinstance(seq_summary, pd.DataFrame):
-        df = util.read_files(seq_summary)[['read_length']]
+    xlab = "Read length / kb"
+    ylab = "Yield above length / Gbases"
+    thinning = None  # don't really know why this is different
+
+    # note: we want an anticumulative sum, hence all the [::-1]
+    if "read_length" in data.columns:
+        # need to create the data
+        thinning = 1000
+        length = np.concatenate(([0], np.sort(data["read_length"])), dtype="int")
+        cumsum = np.cumsum(length[::-1])[::-1]
     else:
-        df = seq_summary
-    df = df.sort_values('read_length', ascending=True)
-    df = pd.concat(
-        (pd.DataFrame.from_dict({'read_length': 0}, orient='index').T, df))
+        # assume histogram
+        # TODO: this assumes even bins
+        thinning = 100
+        length = data["start"]
+        cumsum = np.cumsum(
+            data["start"][::-1].to_numpy() * data["count"][::-1].to_numpy()
+        )[::-1]
 
-    ylab = 'Yield above length / Gbases'
-    xlab = 'Read length / kb'
+    mid = cumsum[-1] / 2
+    n50_index = np.searchsorted(cumsum, mid)
+    n50 = length[n50_index]
 
-    # If we have u/int8 or u/int16 cast to float to prevent overflow
-    df.read_length = df.read_length.astype('uint64')
-    df[ylab] = \
-        df.read_length.cumsum()[::-1].values / 1e+9
-    df[xlab] = df['read_length'] / 1000
+    # TODO: we needn't create this only to thin it immediately
+    df = pd.DataFrame({xlab: length / 1000, ylab: cumsum / 1e9}, copy=False)
 
-    # No need plot all the points
-    if len(df) > 1000:
-        step = len(df) // 1000
-        # thin the data while keeping the last data point
+    # thin the data while keeping last
+    if len(df) > thinning:
+        step = len(df) // thinning
         df = pd.concat((df.loc[::step, :], df.iloc[[-1]]), axis=0)
 
     plt = ezc.lineplot(data=df, x=xlab, y=ylab, hue=None)
     plt.series[0].showSymbol = False
     plt.title = dict(
-        text=title,
-        subtext=f"Total yield: {sigfig.round(df.iloc[0][ylab], sigfigs=3)} Gb"
-    )
-    return plt
-
-
-def histogram_median(hist, x='start', y='count'):
-    """Calculate the median value from histogram data.
-
-    :param hist: pd.DataFrame with columns [start, end, count].
-    :param x: the x-axis variable.
-    :param y: the y-axis variable.
-    """
-    cumsum = np.cumsum(hist[y]).to_numpy()
-    mid = cumsum[-1] / 2
-    pos = np.searchsorted(cumsum, mid)
-    return hist[x][pos]
-
-
-def precomputed_base_yield_plot(
-        hist,
-        title='Base yield above read length'):
-    """
-    Create yield above read length plot from pre-computed histogram data.
-
-    :param hist: pd.DataFrame with columns [start, end, count].
-    :param title: plot title.
-    """
-    # reverse the histogram to so that the longest reads come first
-    hist = hist[::-1]
-
-    xlab = 'Read length / kb'
-    ylab = 'Yield above length / Gbases'
-
-    # Get read length cumulative sum
-    cs = np.cumsum(hist['start'] * hist['count']).to_numpy()
-    hist[ylab] = cs / 1e+9
-    hist = hist.rename(columns={'start': xlab})
-    hist[xlab] = hist[xlab] / 1000
-
-    mid = cs[-1] / 2
-    n50_index = np.searchsorted(cs, mid)
-    n50 = hist.iat[n50_index, hist.columns.get_loc(xlab)]
-
-    # no need to plot all the points
-    if len(hist) > 100:
-        step = len(hist) // 100
-        # thin the data while keeping the last data point
-        subsampled = hist[::step]
-        if subsampled.iloc[-1][xlab] != hist.iloc[-1][xlab]:
-            subsampled = subsampled.append(hist.iloc[-1])
-        hist = subsampled
-
-    plt = ezc.lineplot(x=hist[xlab], y=hist[ylab], hue=None)
-    plt.series[0].showSymbol = False
-    plt.title = dict(
-        text=title,
+        text="Base yield above read length",
         subtext=(
-            f"Total yield: {sigfig.round(hist[ylab].iloc[0])} "
-            f"Gb. N50: {sigfig.round(n50, 3)}kb")
+            f"Total yield: {sigfig.round(df.iloc[0][ylab], sigfigs=3)} Gb "
+            f"Gb. N50: {sigfig.round(n50, 3)}kb"
+        ),
     )
     return plt
 
 
-def read_quality_plot(
-        seq_summary, binwidth=0.2,
-        min_qual=4, max_qual=30, title='Read quality'):
+def read_quality_plot(data, binwidth=0.2, min_qual=4, max_qual=30):
     """Create read quality summary plot.
 
-    :param seq_summary: pd.DataFrame containing per-sequence summary information.
+    :param data: fastcat/bamstats summary data or read-length histogram data.
     :param binwidth: width of each bin.
     :param min_qual: the minimum quality value to plot.
     :param max_qual: the maximum quality value to plot.
     :param title: title of the plot.
     """
-    if not isinstance(seq_summary, pd.DataFrame):
-        df = util.read_files(seq_summary)[['mean_quality']]
+    plt, mean_q, median_q = None, None, None
+    if "read_length" in data.columns:
+        # fastcat/bamstats
+        mean_q = np.round(data.mean_quality.mean(), 1)
+        median_q = int(data.mean_quality.median())
+        plt = ezc.histplot(
+            data=data.mean_quality, binwidth=binwidth, binrange=(min_qual, max_qual)
+        )
     else:
-        df = seq_summary
-    mean_q = np.round(df.mean_quality.mean(), 1)
-    median_q = int(df.mean_quality.median())
+        # histogram
+        mean_q = np.round(
+            np.average(0.5 * (data["start"] + data["end"]), weights=data["count"]), 1
+        )
+        median_q = int(histogram_median(data))
+        plt = ezc.histplot(
+            data=data["start"],
+            weights=data["count"],
+            binwidth=binwidth,
+            binrange=(min_qual, max_qual),
+        )
 
-    plt = ezc.histplot(
-        data=df.mean_quality, binwidth=binwidth, binrange=(min_qual, max_qual))
     plt.title = dict(
-        text=title,
-        subtext=f"Mean: {mean_q}. Median: {median_q}")
-    plt.xAxis.name = 'Quality score'
+        text="Read quality", subtext=f"Mean: {mean_q:.1f}. Median: {median_q:.1f}"
+    )
+    plt.xAxis.name = "Quality score"
     plt.xAxis.min, plt.xAxis.max = min_qual, max_qual
-    plt.yAxis.name = 'Number of reads'
-    return plt
-
-
-def precomputed_read_quality_plot(
-        hist, binwidth=0.2,
-        min_qual=4, max_qual=30, title='Read quality'):
-    """Create read quality summary plot from pre-computed histograms.
-
-    :param hist: pd.DataFrame with columns [start, end, count].
-    :param binwidth: width of each bin.
-    :param min_qual: the minimum quality value to plot.
-    :param max_qual: the maximum quality value to plot.
-    :param title: title of the plot.
-    """
-    median = histogram_median(hist)
-    mean_q = np.average(0.5*(hist["start"] + hist["end"]), weights=hist['count'])
-    plt = ezc.histplot(
-        data=hist['start'], weights=hist['count'],
-        binwidth=binwidth, binrange=(min_qual, max_qual))
-    plt.title = dict(
-        text=title,
-        subtext=f"Mean: {mean_q:.1f}. Median: {median:.1f}")
-    plt.xAxis.name = 'Quality score'
-    plt.xAxis.min, plt.xAxis.max = min_qual, max_qual
-    plt.yAxis.name = 'Number of reads'
+    plt.yAxis.name = "Number of reads"
     return plt
 
 
 def read_length_plot(
-    seq_summary,
-    xlim=(0, None),
-    quantile_limits=False,
-    bins=100,
-    bin_width=None,
-    title="Read length",
+    data, xlim=(0, None), quantile_limits=False, bins=100, binwidth=None
 ):
     """Create a read length plot.
 
@@ -346,116 +291,74 @@ def read_length_plot(
     :param quantile_limits: if True, xlim is interpreted as quantiles of the data rather
         than absolute values.
     :param bins: number of bins.
-    :param bin_width: bin width.
+    :param binwidth: bin width.
     :param title: plot title.
 
     The reads will be filtered with `min_len` and `max_len` before calculating the
     histogram. The subtext of the plot title will still show the mean / median / maximum
     of the full data.
     """
-    if not isinstance(seq_summary, pd.DataFrame):
-        df = util.read_files(seq_summary)[['read_length']]
+    plt, mean_length, median_length = None, None, None
+    min_len, max_len = xlim
+    if min_len is None:
+        min_len = 0
+    # create data to plot depending on input type.
+    if "read_length" in data.columns:
+        # fastcat/bamstats
+        mean_length = np.round(data.read_length.mean(), 1)
+        median_length = int(data.read_length.median())
+        max_ = int(np.max(data["read_length"]))
+        min_ = int(np.min(data["read_length"]))
+        read_lengths = data["read_length"].values
+
+        if max_len is None:
+            max_len = 1 if quantile_limits else read_lengths.max()
+
+        if quantile_limits:
+            min_len, max_len = np.quantile(read_lengths, [min_len, max_len])
+            # set `xlim` so that we can use it to set the x-axis limits below
+            xlim = (min_len, max_len)
+
+        read_lengths = read_lengths[
+            (read_lengths >= min_len) & (read_lengths <= max_len)
+        ]
+
+        read_lengths = read_lengths / 1000
+        if binwidth is not None:
+            binwidth /= 1000
+        plt = ezc.histplot(data=read_lengths, bins=bins, binwidth=binwidth)
     else:
-        df = seq_summary
+        # histogram
+        if max_len is None:
+            max_len = 1 if quantile_limits else data.iloc[-1]["end"]
+        if quantile_limits:
+            cs = np.cumsum(data["count"])
+            lower_idx, upper_idx = np.searchsorted(cs, np.quantile(cs, quantile_limits))
+            min_len, max_len = (data["start"][lower_idx], data["end"][upper_idx])
+            xlim = (min_len, max_len)
 
-    mean_length = int(df['read_length'].mean())
-    median_length = int(np.median(df['read_length']))
-    max_ = int(np.max(df['read_length']))
-    min_ = int(np.min(df['read_length']))
-
-    read_lengths = df['read_length'].values
-
-    min_len, max_len = xlim
-
-    if min_len is None:
-        min_len = 0
-    if max_len is None:
-        max_len = 1 if quantile_limits else read_lengths.max()
-
-    if quantile_limits:
-        min_len, max_len = np.quantile(read_lengths, [min_len, max_len])
-        # set `xlim` so that we can use it to set the x-axis limits below
-        xlim = (min_len, max_len)
-
-    read_lengths = read_lengths[
-        (read_lengths >= min_len) & (read_lengths <= max_len)
-    ]
-
-    read_lengths = read_lengths / 1000
-    if bin_width is not None:
-        bin_width /= 1000
-
-    plt = ezc.histplot(data=read_lengths, bins=bins, binwidth=bin_width)
-    plt.title = dict(
-        text=title,
-        subtext=(
-            f"Mean: {mean_length:,d}. Median: {median_length:,d}. "
-            f"Min: {min_:,d}. Max: {max_:,d}"
+        median_length = histogram_median(data)
+        mean_length = np.average(data["start"], weights=data["count"])
+        max_ = data.iloc[-1]["end"]
+        min_ = data.iloc[0]["start"]
+        data = data[(data["start"] >= min_len) & (data["end"] <= max_len)]
+        plt = ezc.histplot(
+            data=data["start"] / 1000,
+            bins=bins,
+            binwidth=binwidth,
+            weights=data["count"],
         )
-    )
-    plt.xAxis.name = 'Read length / kb'
-    plt.yAxis.name = 'Number of reads'
 
-    if xlim[0] is not None:
-        plt.xAxis.min = xlim[0] / 1000
-    if xlim[1] is not None:
-        plt.xAxis.max = xlim[1] / 1000
-    return plt
-
-
-def precomputed_read_length_plot(
-        hist,
-        xlim=(0, None),
-        quantile_limits=False,
-        bins=100,
-        bin_width=None,
-        title="Read length"):
-    """Create a read length plot from pre-computed histogram data.
-
-    :param hist: pd.DataFrame with columns [start, end, count].
-    :param xlim: viewable read length limits.
-    :param quantile_limits: if True, xlim is interpreted as quantiles of the data
-        rather than absolute values.
-    :param bins: number of bins.
-    :param bin_width: bin width.
-    :param title: plot title.
-
-    The reads will be filtered with `min_len` and `max_len` before calculating the
-    histogram. The subtext of the plot title will still show the mean / median / maximum
-    of the full data.
-    """
-    min_len, max_len = xlim
-
-    if min_len is None:
-        min_len = 0
-    if max_len is None:
-        max_len = 1 if quantile_limits else hist.iloc[-1]['end']
-
-    if quantile_limits:
-        cs = np.cumsum(hist['count'])
-        lower_idx, upper_idx = np.searchsorted(
-            cs, np.quantile(cs, quantile_limits))
-        min_len, max_len = (hist['start'][lower_idx], hist['end'][upper_idx])
-        xlim = (min_len, max_len)
-
-    median_length = histogram_median(hist)
-    mean_length = np.average(hist['start'], weights=hist['count'])
-    max_ = hist.iloc[-1]['end']
-    min_ = hist.iloc[0]['start']
-
-    hist = hist[(hist['start'] >= min_len) & (hist['end'] <= max_len)]
-
-    plt = ezc.histplot(
-        data=hist['start'] / 1000, bins=bins, binwidth=bin_width, weights=hist['count'])
+    # customize the plot
     plt.title = dict(
-        text=title,
+        text="Read Length",
         subtext=(
             f"Mean: {mean_length:.1f}. Median: {median_length:.1f}. "
             f"Min: {min_:,d}. Max: {max_:,d}"
-        )
+        ),
     )
-    plt.xAxis.name = 'Read length / kb'
-    plt.yAxis.name = 'Number of reads'
+    plt.xAxis.name = "Read length / kb"
+    plt.yAxis.name = "Number of reads"
 
     if xlim[0] is not None:
         plt.xAxis.min = xlim[0] / 1000
@@ -464,160 +367,133 @@ def precomputed_read_length_plot(
     return plt
 
 
-def load_bamstats_flagstat(flagstat):
+def load_fastcat(fpath, target_cols=None):
+    """Load and prepare fastcat per-read stats.
+
+    :param fpath: path to a fastcat stats file.
+    :target_cols: columns to be loaded in the dataframe.
+
+    :returns: a dataframe
+    """
+    cols, time_cols = _intersect_columns(copy.copy(FASTCAT_COLS_DTYPES), target_cols)
+    try:
+        df = pd.read_csv(
+            fpath, sep="\t", usecols=cols.keys(), dtype=cols, parse_dates=time_cols
+        )
+    except pd.errors.EmptyDataError:
+        raise Exception(f"Empty input: {fpath}")
+    df = _localize_time(df)
+    return df
+
+
+def load_bamstats(fpath, target_cols=None):
+    """Load and prepare bamstats per-read stats.
+
+    :param fpath: path to a bamstats stats file.
+    :target_cols: columns to be loaded in the dataframe.
+
+    :returns: a dataframe
+    """
+    cols, time_cols = _intersect_columns(copy.copy(BAMSTATS_COLS_DTYPES), target_cols)
+    try:
+        df = pd.read_csv(
+            fpath, sep="\t", usecols=cols.keys(), dtype=cols, parse_dates=time_cols
+        )
+    except pd.errors.EmptyDataError:
+        raise Exception(f"Empty input: {fpath}")
+    df = _localize_time(df)
+    # to be consistent with fastcat
+    df.rename(columns={"name": "read_id"}, inplace=True)
+    return df
+
+
+def load_bamstats_flagstat(fpath):
     """Load and prepare bamstats flagstat output.
 
-    :param flagstat: path to file(s) containing bamstats flagstat output. Either a
-        path to a single file or a path to a directory containing stats files.
+    :param fpath: path to a bamstats flagstat file.
+
+    :returns: a dataframe
     """
-    relevant_stats_cols_dtypes = {
-        "ref": CATEGORICAL,
-        "sample_name": CATEGORICAL,
-        "total": int,
-        "primary": int,
-        "secondary": int,
-        "supplementary": int,
-        "unmapped": int,
-        "qcfail": int,
-        "duplicate": int,
-    }
-    # Prepare input files
-    dfs = []
-    if os.path.isdir(flagstat):
-        input_files = [(flagstat, i) for i in os.listdir(flagstat)]
-    elif os.path.isfile(flagstat):
-        input_files = [(None, flagstat)]
-    else:
-        raise Exception(f'No valid input: {flagstat}')
-    # If no files, throw error
-    if len(input_files) == 0:
-        raise FileNotFoundError(f'No valid input found in {flagstat}')
-    # Start processing file
-    for inpath, fname in input_files:
-        try:
-            flagstat_file = fname if inpath is None else f'{inpath}/{fname}'
-            df = pd.read_csv(
-                flagstat_file, sep="\t",
-                usecols=relevant_stats_cols_dtypes.keys(),
-                dtype=relevant_stats_cols_dtypes)
-            # If it's empty, add an empty DF
-            if df.empty:
-                cols = relevant_stats_cols_dtypes.update(
-                    {'Status': str, 'filename': str})
-                dfs.append(pd.DataFrame(columns=cols))
-                continue
-            # Add mapped/unmapped status
-            df["Status"] = df["ref"].apply(
-                lambda x: "Unmapped" if x == "*" else "Mapped"
-            )
-            # Add file name
-            df['filename'] = fname.split('/')[-1]
-            # Append processed DF
-            dfs.append(df)
-        except pd.errors.EmptyDataError:
-            cols = relevant_stats_cols_dtypes.update({'filename': str})
-            dfs.append(pd.DataFrame(columns=cols.keys()).astype(cols))
-    return pd.concat(dfs).reset_index(drop=True)
+    try:
+        df = pd.read_csv(
+            fpath,
+            sep="\t",
+            usecols=BAMSTATS_FLAGSTAT_COLS_DTYPES.keys(),
+            dtype=BAMSTATS_FLAGSTAT_COLS_DTYPES,
+        )
+    except pd.errors.EmptyDataError:
+        raise Exception(f"Empty input: {fpath}")
+    df["status"] = df["ref"].apply(lambda x: "Unmapped" if x == "*" else "Mapped")
+    return df
 
 
-def load_stats(stat, format=None):
-    """Load and prepare bamstats flagstat.
+def load_histogram(hist_dir, dtype="quality"):
+    """Load fastcat/bamstats histograms.
 
-    :param stat: flagstat file paths. Either a single path to a file, a list/tuple of
-        paths, or a path to a directory containing files.
-    :param format: stats source: bamstats/fastcat.
-
+    :param hist_dir: pathname to input directory.
+    :param dtype: histogram datatype to load.
     """
-    # Input columns for bamstats
-    bamstats_cols_dtypes = {
-        "name": str,
-        "sample_name": CATEGORICAL,
-        "ref": CATEGORICAL,
-        "coverage": float,
-        "ref_coverage": float,
-        "read_length": int,
-        "mean_quality": float,
-        "acc": float,
+    allowed = {
+        "quality",
+        "length",
+        "quality.unmap",
+        "length.unmap",
+        "accuracy",
+        "coverage",
     }
-    # Input columns for fastcat
-    fastcat_cols_dtypes = {
-        "read_id": str,
-        "filename": CATEGORICAL,
-        "sample_name": CATEGORICAL,
-        "read_length": int,
-        "mean_quality": float,
-        "channel": int,
-        "read_number": int,
-        "start_time": str,
-    }
-    # Infer format
-    if format == 'bamstats':
-        relevant_stats_cols_dtypes = bamstats_cols_dtypes
-        time_cols = None
-    elif format == 'fastcat':
-        relevant_stats_cols_dtypes = fastcat_cols_dtypes
-        time_cols = ['start_time']
-    else:
-        raise ValueError(f"{format} not valid file type")
-    # Prepare input files
-    dfs = []
-    if isinstance(stat, (list, tuple)) and all([os.path.isfile(path) for path in stat]):
-        # got a list of files
-        input_files = [(None, file) for file in stat]
-    elif os.path.isdir(stat):
-        input_files = [(stat, i) for i in os.listdir(stat)]
-    elif os.path.isfile(stat):
-        input_files = [(None, stat)]
-    else:
-        raise Exception(f'No valid input: {stat}')
-    # If no files, throw error
-    if len(input_files) == 0:
-        raise FileNotFoundError(f'No valid input found in {stat}')
-    # Start processing
-    for (inpath, fname) in input_files:
-        try:
-            fastcat_file = fname if not inpath else f'{inpath}/{fname}'
-            df = pd.read_csv(
-                fastcat_file,
-                sep="\t",
-                header=0,
-                usecols=relevant_stats_cols_dtypes.keys(),
-                dtype=relevant_stats_cols_dtypes,
-                parse_dates=time_cols
-                )
-            # If it's empty, add an empty DF
-            if df.empty:
-                cols = relevant_stats_cols_dtypes.update(
-                    {'filename': str})
-                dfs.append(
-                    pd.DataFrame(columns=cols).rename(columns={'name': 'read_id'}))
-                continue
-            # Add file name if missing
-            if 'filename' not in df.columns:
-                df['filename'] = fname.split('/')[-1]
-            # Rename "name" to "read_id"
-            if 'read_id' not in df.columns and 'name' in df.columns:
-                df.rename(columns={'name': 'read_id'}, inplace=True)
-            if format == 'fastcat':
-                # Ensure we have datetime format
-                # Use utc=true to account for mixed time offsets.
-                # This converts dates to UTC.
-                # https://pandas.pydata.org/docs/reference/api/pandas.to_datetime.html
-                df['start_time'] = pd.to_datetime(
-                    df.start_time, utc=True).dt.tz_localize(None)
-            # Append processed DF
-            dfs.append(df)
-        except pd.errors.EmptyDataError:
-            cols = relevant_stats_cols_dtypes.update({'filename': str})
-            dfs.append(
-                pd.DataFrame(columns=cols.keys()).astype(cols))
-    # concatenate and emit
-    return pd.concat(dfs).reset_index(drop=True)
+    if dtype not in allowed:
+        raise ValueError(f"`dtype` must be one of {allowed}.")
+    dt = float
+    if "length" in dtype:
+        dt = int
+
+    hist = pd.read_csv(
+        os.path.join(hist_dir, f"{dtype}.hist"),
+        sep="\t",
+        names=["start", "end", "count"],
+        dtype={"start": dt, "end": dt, "count": int},
+    )
+    return hist
+
+
+def load_stats(fpath, target_cols=None):
+    """Load and prepare fastcat or bamstats per-read stats.
+
+    This function is intended to be used when the caller does not know (and care)
+    the origin of the input file, but wishes to load the common columns.
+
+    :params fpath: path to a fastcat or bamstats stats file.
+    :param target_cols: list of columns to read from file.
+
+    :returns: a dataframe
+    """
+    if target_cols is None:
+        target_cols = ["sample_name", "read_length", "mean_quality"]
+    df = None
+    try:
+        df = load_fastcat(fpath, target_cols=target_cols)
+    except ValueError:
+        df = load_bamstats(fpath, target_cols=target_cols)
+    return df
+
+
+def histogram_median(hist, x="start", y="count"):
+    """Calculate the median value from histogram data.
+
+    :param hist: pd.DataFrame with columns [start, end, count].
+    :param x: the x-axis variable.
+    :param y: the y-axis variable.
+    """
+    # TODO: start and end may not be end = start + 1
+    cumsum = np.cumsum(hist[y]).to_numpy()
+    mid = cumsum[-1] / 2
+    pos = np.searchsorted(cumsum, mid)
+    return hist[x][pos]
 
 
 def main(args):
     """Entry point to demonstrate a sequence summary component."""
-    comp_title = 'Sequence Summary'
+    comp_title = "Sequence Summary"
     # Define inputs.
     # If seq_summary is not passed, then use bam_readstats
     if args.seq_summary:
@@ -625,17 +501,9 @@ def main(args):
     elif args.seq_summary is None and args.bam_readstats is not None:
         seq_summary = args.bam_readstats
     else:
-        raise ValueError('No valid input for seq_summary/bam_readstats.')
-    if args.seq_summary is not None and args.bam_readstats is not None:
-        bam_summary = args.bam_readstats
-    else:
-        bam_summary = None
+        raise ValueError("No valid input for seq_summary/bam_readstats.")
     # Create summary
-    seq_sum = SeqSummary(
-        seq_summary,
-        bam_summary=bam_summary,
-        flagstat=args.bam_flagstat
-        )
+    seq_sum = SeqSummary(seq_summary, flagstat=args.bam_flagstat)
     # Write report
     report = ComponentReport(comp_title, seq_sum)
     report.write(args.output)
@@ -644,23 +512,28 @@ def main(args):
 def argparser():
     """Argument parser for entrypoint."""
     parser = argparse.ArgumentParser(
-        'Sequence summary',
+        "Sequence summary",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-        add_help=False)
+        add_help=False,
+    )
     parser.add_argument(
         "--seq_summary",
-        default=resource_filename('ezcharts', "data/test/fastcat.stats.gz"),
-        help="Sequence summary TSV from fastcat.")
+        default=resource_filename("ezcharts", "data/test/fastcat"),
+        help="Sequence summary TSV from fastcat.",
+    )
     parser.add_argument(
         "--bam_flagstat",
-        default=resource_filename('ezcharts', "data/test/bamstats.flagstat.tsv"),
-        help="Bam flagstats TSV from bamstats.")
+        default=resource_filename(
+            "ezcharts", "data/test/bamstats/bamstats.flagstat.tsv"
+        ),
+        help="Bam flagstats TSV from bamstats.",
+    )
     parser.add_argument(
         "--bam_readstats",
-        default=resource_filename('ezcharts', "data/test/bamstats.readstats.tsv.gz"),
-        help="Read statistics TSV from bamstats.")
+        default=resource_filename("ezcharts", "data/test/bamstats/"),
+        help="Read statistics TSV from bamstats.",
+    )
     parser.add_argument(
-        "--output",
-        default="seq_summary_report.html",
-        help="Output HTML file.")
+        "--output", default="seq_summary_report.html", help="Output HTML file."
+    )
     return parser
