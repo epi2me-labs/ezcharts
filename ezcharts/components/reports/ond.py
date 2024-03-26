@@ -32,6 +32,7 @@ class LabsAddendum(Snippet):
     def __init__(
         self,
         workflow_name: str,
+        workflow_version: str,
         classes: ILabsAddendumClasses = ILabsAddendumClasses(),
         use_defaults: bool = True
     ) -> None:
@@ -50,7 +51,7 @@ class LabsAddendum(Snippet):
                 p(
                     "This report was produced using the ",
                     code(f"epi2me-labs/{workflow_name}"),
-                    " nextflow workflow."
+                    f" nextflow workflow ({workflow_version})."
                 )
                 p(
                     "Oxford Nanopore Technologies products are not "
@@ -175,6 +176,7 @@ class ONDReport(BasicReport):
         workflow_name,
         workflow_params_path: str,
         workflow_versions_path: str,
+        workflow_version: str,
         logo: Type[html_tag] = ONDLogo,
         head_resources: List[Resource] = OND_head_resources,
         body_resources: List[Resource] = OND_body_resources,
@@ -198,6 +200,7 @@ class ONDReport(BasicReport):
                     if not created_date:
                         created_date = datetime.today().strftime('%Y-%m-%d')
                         self.banner.add_badge(created_date, bg_class="bg-secondary")
+                    self.banner.add_badge(workflow_version)
 
             with self.main:
                 self.meta_content = section(id="meta-content", role="region")
@@ -217,7 +220,9 @@ class ONDReport(BasicReport):
                         ParamsTable(workflow_params_path)
 
             with self.footer:
-                self.addendum = LabsAddendum(workflow_name=workflow_name)
+                self.addendum = LabsAddendum(
+                    workflow_name=workflow_name, workflow_version=workflow_version
+                )
 
     def add_badge(
         self,
