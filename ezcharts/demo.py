@@ -33,7 +33,8 @@ from ezcharts.plots.karyomap import karyomap
 
 
 # Setup simple globals
-WORKFLOW_NAME = 'wf-template2'
+WORKFLOW_NAME = 'wf-template'
+WORKFLOW_VERSION = "v1.0.0"
 REPORT_TITLE = f'{WORKFLOW_NAME}-report'
 
 
@@ -106,6 +107,7 @@ def main(args):
     # Note we need to add nextclade as a resource
     report = LabsReport(
         REPORT_TITLE, WORKFLOW_NAME, params, versions,
+        workflow_version=WORKFLOW_VERSION,
         head_resources=[*LAB_head_resources, NXTComponent])
 
     # Add a header badge via a method on the report element.
