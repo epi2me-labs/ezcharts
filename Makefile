@@ -5,6 +5,8 @@ PYTHON ?= python3
 IN_VENV=. ./venv/bin/activate
 PROJECT=ezcharts
 
+FLAKEPIN=$(shell $(PYTHON) -c "import sys; print('<6.0.0' if sys.version_info[1] < 12 else '')")
+
 venv/bin/activate:
 	test -d venv || $(PYTHON) -m venv venv
 	${IN_VENV} && pip install pip --upgrade
@@ -14,7 +16,8 @@ develop: venv/bin/activate
 	${IN_VENV} && python setup.py develop
 
 test: venv/bin/activate
-	${IN_VENV} && pip install 'flake8<6.0.0' flake8-rst-docstrings flake8-docstrings flake8-import-order flake8-forbid-visual-indent pytest pytest-cov pytest-xdist
+	@echo "FLAKEPIN=${FLAKEPIN}"
+	${IN_VENV} && pip install "flake8$(FLAKEPIN)" flake8-rst-docstrings flake8-docstrings flake8-import-order flake8-forbid-visual-indent pytest pytest-cov pytest-xdist
 	${IN_VENV} && flake8 ${PROJECT} tests \
 		--import-order-style google --application-import-names ${PROJECT} \
 		--statistics --max-line-length 88
