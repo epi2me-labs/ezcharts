@@ -296,8 +296,6 @@ def test_103_pass_lists():
         [  # more than 1 sample
             "data/test/fastcat/f1.tsv.gz",
             "data/test/fastcat/f2.tsv.gz",
-            # TODO: 0-length data
-            # "data/test/fastcat/empty.tsv",
         ],
         [  # more than 1 sample from histograms
             "data/test/histogram_stats/sample_1",
@@ -305,8 +303,8 @@ def test_103_pass_lists():
         ],
     ],
 )
-def test_104_SummarySeq(input):
-    """Create the SummarySeq component with various inputs."""
+def test_104_SeqSummary(input):
+    """Create the SeqSummary component with various inputs."""
     if not isinstance(input, list):
         fastcat.SeqSummary(seq_summary=resource_filename("ezcharts", input))
     else:
@@ -314,3 +312,18 @@ def test_104_SummarySeq(input):
             seq_summary=tuple([resource_filename("ezcharts", i) for i in input]),
             sample_names=tuple(["S" + i for i in input]),
         )
+
+
+def test_105_SeqSummary_empty_file():
+    """Create the SeqSummary component with an empty file (summaries)."""
+    with _empty_file(dtype=fastcat.FASTCAT_COLS_DTYPES) as fname:
+        fastcat.SeqSummary(seq_summary=fname)
+
+
+def test_106_SeqSummary_empty_histogram_files():
+    """Create the SeqSummary component with an histograms dir with empty files."""
+    fastcat.SeqSummary(
+        seq_summary=resource_filename(
+            "ezcharts", "data/test/histogram_stats/empty_sample/"
+        )
+    )

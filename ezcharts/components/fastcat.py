@@ -194,6 +194,7 @@ class SeqSummary(Snippet):
         DataTable.from_pandas(data, use_index=False)
 
 
+@ezc.plots.util.plot_wrapper
 def base_yield_plot(data):
     """Create yield plot by plotting total yield above read length.
 
@@ -202,7 +203,6 @@ def base_yield_plot(data):
     xlab = "Read length / kb"
     ylab = "Yield above length / Gbases"
     thinning = None  # don't really know why this is different
-
     # note: we want an anticumulative sum, hence all the [::-1]
     if "read_length" in data.columns:
         # need to create the data
@@ -242,6 +242,7 @@ def base_yield_plot(data):
     return plt
 
 
+@ezc.plots.util.plot_wrapper
 def read_quality_plot(data, binwidth=0.2, min_qual=4, max_qual=30):
     """Create read quality summary plot.
 
@@ -281,6 +282,7 @@ def read_quality_plot(data, binwidth=0.2, min_qual=4, max_qual=30):
     return plt
 
 
+@ezc.plots.util.plot_wrapper
 def read_length_plot(
     data, xlim=(0, None), quantile_limits=False, bins=100, binwidth=None
 ):

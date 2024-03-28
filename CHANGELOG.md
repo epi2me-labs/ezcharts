@@ -7,8 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [unreleased]
 ### Added
 - Required argument `workflow_version` to `LabsReport` and `ONDReport`.
+- Argument to `fastcat.load_stats()` to select target columns to load.
+- Two different functions: `load_fastcat()` and `load_bamstats()` to load per-read-stats.
+- A function to concatenate categorical columns: `concat_dfs_with_categorical_columns()`.
+- Tests for functions related with `SeqSummary`.
+- Decorator for plotting a message when the plot fails.
+### Changed
+- Refactor `SeqSummary`.
 ### Removed
 - Mention of the `nextflow run ... --help` command from the report footer.
+- `histogram_stats_dir` in `SeqSummary`. Histograms data is input using `seq_summary`.
+
 
 ## [v0.7.10]
 ### Fixed

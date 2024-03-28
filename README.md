@@ -200,6 +200,9 @@ report.write("tmp.html")
 Note that `EZChart()` is required to add the plot to the enclosing `dominate`
 context.
 
+### Debug mode
+Decorator for plotting a message when the plot fails can be skipped by setting the env variable EZCHARTS_DEBUG=1.
+
 **Components**
 
 Components provide higher level application-specific layouts (a table for

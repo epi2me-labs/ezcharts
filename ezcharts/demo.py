@@ -100,6 +100,7 @@ def main(args):
         [
             resource_filename("ezcharts", "data/test/histogram_stats/sample_1"),
             resource_filename("ezcharts", "data/test/histogram_stats/sample_2"),
+            resource_filename("ezcharts", "data/test/histogram_stats/empty_sample/"),
         ]
     )
 
@@ -140,7 +141,7 @@ def main(args):
     with report.add_section('Sequence summaries', 'Summaries'):
         SeqSummary(
             seq_summary=histogram_stats_dir,
-            sample_names=tuple(['sample_1', 'sample_2']))
+            sample_names=tuple(['sample_1', 'sample_2', 'sample_3']))
 
     # This also adds to main_content, but provides a nice
     # container snippet as a starting context.
@@ -270,6 +271,9 @@ def main(args):
                     data=example_df, x='year', y='sales', hue='product', nested_x=True
                 )
                 EZChart(plot)
+        with tabs.add_tab('Plotting Failed'):
+            # Force fail in plotting
+            EZChart(ezc.sunburst([], label_rotate="tangential", label_minAngle=100))
 
     with report.add_section('Nextclade results', 'Nextclade', True):
         NextClade(nxt_json)
