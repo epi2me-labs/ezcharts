@@ -6,6 +6,7 @@ from ezcharts.plots import _NoAxisFixPlot, util
 __all__ = ["sunburst"]
 
 
+@util.plot_wrapper
 def sunburst(
     data, tooltip=True, visualMap=True, min_value=0, max_value=None,
     color_scale=None, label_rotate="radial", label_minAngle=0, show_label=True

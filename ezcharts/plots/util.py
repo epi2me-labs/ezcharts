@@ -1,12 +1,13 @@
 """Utility functions for aiding plotting."""
 from itertools import cycle, islice
+import os
 
 import numpy as np
 import pandas as pd
 import pkg_resources
 from scipy import stats as sp_stats
 
-from ezcharts import util
+from ezcharts import plots, util
 
 sns_type_to_echarts = {
     "categorical": "category",
@@ -259,20 +260,31 @@ def choose_palette(name='colorblind', ncolours=None):
     return [c for c in islice(cycler, ncolours)]
 
 
-def emptyPlot(**kwargs):
+def empty_plot(**kwargs):
     """Empty plot for when all else fails.
 
     :param kwargs: kwargs for bokeh figure.
 
-    :returns: a bokeh plot.
+    :returns: a eChart empty plot.
+
     """
-    raise NotImplementedError
+    plt = plots._NoAxisFixPlot()
+    plt.title = {
+        "text": "Plotting Failed",
+        "subtext": "Oops! Something went wrong in plotting your data.",
+        "subtextStyle": {
+            "fontStyle": "italic",
+            "color": "#0084A9",
+        },
+        "itemGap": 30,
+    }
+    return plt
 
 
 def plot_wrapper(func):
-    """Test for function and output empty graph if fails.
+    """Decorate plotting functions to ignore exceptions.
 
-    :param func:  name of plotting function from aplanat.
+    :param func: plotting function.
     :param args: the arguments provided.
     :param kwargs: other optional key word arguments.
 
@@ -281,21 +293,29 @@ def plot_wrapper(func):
     """
     def wrapper_accepting_arguments(*args, **kwargs):
         """Argument wrapper for decorator."""
-        logger = util.get_named_logger('PlotWrap')
+        logger = util.get_named_logger("PlotWrap")
         try:
-            p = (func(*args, **kwargs))
+            p = func(*args, **kwargs)
             return p
         except Exception as e:
-
-            try:
-                p = emptyPlot(**kwargs)
-                logger.exception('Plotting user plot failed with: '+str(e))
-                return p
-
-            except Exception as f:
-                p = emptyPlot()
-                logger.exception(
-                    'Plotting templated Empty plot failed with: ' + str(f))
-                return p
+            # check is debug mode is enabled:
+            if (
+                "EZCHARTS_DEBUG" in os.environ
+                and os.environ.get("EZCHARTS_DEBUG") == "1"
+            ):
+                return func(*args, **kwargs)
+            else:
+                # plot empty
+                try:
+                    p = empty_plot(**kwargs)
+                    logger.exception("Plotting user plot failed with: " + str(e))
+                    return p
+                # if empty plot fails
+                except Exception as f:
+                    p = empty_plot()
+                    logger.exception(
+                        "Plotting templated Empty plot failed with: " + str(f)
+                    )
+                    return p
 
     return wrapper_accepting_arguments
