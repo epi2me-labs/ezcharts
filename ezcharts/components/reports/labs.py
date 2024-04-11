@@ -104,7 +104,7 @@ class LabsNavigation(Snippet):
         spacer.add(self)
         with self:
             with div(className=self.classes.inner):
-                with a(href="/", className=self.classes.logo):
+                with a(href="https://labs.epi2me.io/", className=self.classes.logo):
                     logo()
                 for group in groups:
                     setattr(
