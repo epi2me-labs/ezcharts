@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [unreleased]
+## [v0.8.0]
 ### Added
 - Required argument `workflow_version` to `LabsReport` and `ONDReport`.
 - Argument to `fastcat.load_stats()` to select target columns to load.
@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A function to concatenate categorical columns: `concat_dfs_with_categorical_columns()`.
 - Tests for functions related with `SeqSummary`.
 - Decorator for plotting a message when the plot fails.
+- `ezc.boxplot` is now implemented to produce boxplots.
 ### Changed
 - Refactor `SeqSummary`.
 ### Removed

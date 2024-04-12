@@ -233,6 +233,21 @@ class BokehPlot:
         self._fig = figure(*args, **defaults)
         # remove Bokeh logo
         self._fig.toolbar.logo = None
+        # axis lines
+        axis_color = "#677884"
+        axis_width = 1.2
+        axis_font = "normal"
+        self._fig.yaxis.axis_line_color = axis_color
+        self._fig.yaxis.axis_line_width = axis_width
+        self._fig.yaxis.axis_label_text_font_style = axis_font
+        self._fig.xaxis.axis_line_color = axis_color
+        self._fig.xaxis.axis_line_width = axis_width
+        self._fig.xaxis.axis_label_text_font_style = axis_font
+
+        self._fig.yaxis.minor_tick_line_color = None
+        self._fig.xaxis.major_tick_line_color = axis_color
+        self._fig.yaxis.major_tick_line_color = axis_color
+        self._fig.title.text_font_size = "18px"
 
     @property
     def logger(self):
