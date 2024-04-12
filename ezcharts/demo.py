@@ -84,9 +84,23 @@ def main(args):
             df = df.rename_axis("Product")
             df = df.rename_axis("Year", axis=1)
             plot = ezc.heatmap(data=df)
+        elif style == "boxplot":
+            # lets add some data to show off outliers
+            raw_df['2024'] = [10.1, 100.0, 101.1, 99.8]
+            df = pd.melt(raw_df, value_vars=['2015', '2016', '2017', '2024'])
+            plot = ezc.boxplot(
+                df, x="variable", y="value", order=['2024', '2017', '2015', '2016'])
         else:
             raise ValueError("Unknown plot style")
-        plot.title = {"text": f"Example {style} chart"}
+
+        title_text = f"Example {style} chart"
+
+        # adding a title is different for echarts and bokeh
+        if isinstance(plot, BokehPlot):
+            plot._fig.title.text = title_text
+        else:
+            plot.title = {"text": title_text}
+
         return plot
 
     # Then, time to construct a report
@@ -226,6 +240,7 @@ def main(args):
                 EZChart(example_plot("scatter"))
                 EZChart(example_plot("bar"))
                 EZChart(example_plot("histogram"))
+                EZChart(example_plot("boxplot"))
         with tabs.add_tab('Accuracy'):
             p("This is a mixed tab!")
             EZChart(example_plot())
