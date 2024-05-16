@@ -1,5 +1,5 @@
 """Re-usable external resources."""
-from dominate.tags import div, img, script, style
+from dominate.tags import div, script, style
 
 from ezcharts.components.ezchart import EZChartTheme
 from ezcharts.layout.resource import (
@@ -75,27 +75,27 @@ OND_head_resources = [OND_CSS, *base_head_resources, OND_CHART_THEME]
 OND_body_resources = [OND_JS, *base_body_resources]
 
 
-class ONTLogo(img):
+class ONTLogo(div):
     """ONT logo element."""
 
     def __init__(self) -> None:
         """Create an img with the data URI logo."""
         super().__init__(
-            inline(ImageResource('ONT_logo.txt').data_file),
-            tagname='img',
-            style="height: 35px;",
+            inline(ImageResource('OND_logo.svg').data_file),
+            tagname='div',
+            style="width: 35px; height: 35px;",
             className="d-flex",
             alt="ONT Logo")
 
 
 # TODO: Create
 ONT_CSS = StyleResource(
-    path='epi2melabs.scss',
+    path='ont.scss',
     tag=style,
     loader=transpile)
 
 ONT_JS = ScriptResource(
-    path='epi2melabs.js',
+    path='ont.js',
     tag=script,
     loader=inline)
 

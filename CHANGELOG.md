@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [unreleased]
 ### Added
 - Allow color override for fastcat standard plots.
+- ONT skin.
 
 ## [v0.8.0]
 ### Added
