@@ -98,6 +98,7 @@ class SeqSummary(Snippet):
         flagstat=None,
         sample_names=None,
         theme="epi2melabs",
+        color=None,
     ):
         """Create sequence summary component.
 
@@ -145,10 +146,10 @@ class SeqSummary(Snippet):
                 with tabs.add_dropdown_menu():
                     for sample_name, data in zip(sample_names, seq_summary):
                         with tabs.add_dropdown_tab(sample_name):
-                            self._draw_summary_plots(data)
+                            self._draw_summary_plots(data, color)
             else:
                 # single sample
-                self._draw_summary_plots(seq_summary)
+                self._draw_summary_plots(seq_summary, color)
 
             # same again for flagstat
             if flagstat is not None:
@@ -161,7 +162,7 @@ class SeqSummary(Snippet):
                 else:
                     self._draw_flagstat_table(flagstat)
 
-    def _draw_summary_plots(self, data):
+    def _draw_summary_plots(self, data, color):
         """Draw quality, read_length, yield plots using raw data.
 
         :param seq_summary: pd.DataFrame containing per-sequence summary information.
@@ -184,9 +185,9 @@ class SeqSummary(Snippet):
                     raise ValueError("Could not load input data.")
 
         with Grid(columns=3):
-            EZChart(read_quality_plot(qdata), self.theme)
-            EZChart(read_length_plot(ldata), self.theme)
-            EZChart(base_yield_plot(ldata), self.theme)
+            EZChart(read_quality_plot(qdata, color=color), self.theme)
+            EZChart(read_length_plot(ldata, color=color), self.theme)
+            EZChart(base_yield_plot(ldata, color=color), self.theme)
 
     def _draw_bamstat_table(self, data):
         if not isinstance(data, pd.DataFrame):
@@ -195,7 +196,7 @@ class SeqSummary(Snippet):
 
 
 @ezc.plots.util.plot_wrapper
-def base_yield_plot(data):
+def base_yield_plot(data, color=None):
     """Create yield plot by plotting total yield above read length.
 
     :param data: fastcat/bamstats summary data or read-length histogram data.
@@ -230,7 +231,7 @@ def base_yield_plot(data):
         step = len(df) // thinning
         df = pd.concat((df.loc[::step, :], df.iloc[[-1]]), axis=0)
 
-    plt = ezc.lineplot(data=df, x=xlab, y=ylab, hue=None)
+    plt = ezc.lineplot(data=df, x=xlab, y=ylab, hue=None, color=color)
     plt.series[0].showSymbol = False
     plt.title = dict(
         text="Base yield above read length",
@@ -243,7 +244,7 @@ def base_yield_plot(data):
 
 
 @ezc.plots.util.plot_wrapper
-def read_quality_plot(data, binwidth=0.2, min_qual=4, max_qual=30):
+def read_quality_plot(data, binwidth=0.2, min_qual=4, max_qual=30, color=None):
     """Create read quality summary plot.
 
     :param data: fastcat/bamstats summary data or read-length histogram data.
@@ -258,7 +259,10 @@ def read_quality_plot(data, binwidth=0.2, min_qual=4, max_qual=30):
         mean_q = np.round(data.mean_quality.mean(), 1)
         median_q = int(data.mean_quality.median())
         plt = ezc.histplot(
-            data=data.mean_quality, binwidth=binwidth, binrange=(min_qual, max_qual)
+            data=data.mean_quality,
+            binwidth=binwidth,
+            binrange=(min_qual, max_qual),
+            color=color
         )
     else:
         # histogram
@@ -271,6 +275,7 @@ def read_quality_plot(data, binwidth=0.2, min_qual=4, max_qual=30):
             weights=data["count"],
             binwidth=binwidth,
             binrange=(min_qual, max_qual),
+            color=color
         )
 
     plt.title = dict(
@@ -284,7 +289,7 @@ def read_quality_plot(data, binwidth=0.2, min_qual=4, max_qual=30):
 
 @ezc.plots.util.plot_wrapper
 def read_length_plot(
-    data, xlim=(0, None), quantile_limits=False, bins=100, binwidth=None
+    data, xlim=(0, None), quantile_limits=False, bins=100, binwidth=None, color=None
 ):
     """Create a read length plot.
 
@@ -328,7 +333,7 @@ def read_length_plot(
         read_lengths = read_lengths / 1000
         if binwidth is not None:
             binwidth /= 1000
-        plt = ezc.histplot(data=read_lengths, bins=bins, binwidth=binwidth)
+        plt = ezc.histplot(data=read_lengths, bins=bins, binwidth=binwidth, color=color)
     else:
         # histogram
         if max_len is None:
@@ -349,6 +354,7 @@ def read_length_plot(
             bins=bins,
             binwidth=binwidth,
             weights=data["count"],
+            color=color
         )
 
     # customize the plot
