@@ -94,7 +94,7 @@ class SeqSummary(Snippet):
 
     def __init__(
         self,
-        seq_summary,
+        seq_summary=None,
         flagstat=None,
         sample_names=None,
         theme="epi2melabs",
@@ -114,13 +114,17 @@ class SeqSummary(Snippet):
         self.theme = theme
 
         # we need at least seq_summary or histograms
+        if seq_summary is None:
+            raise ValueError("One of `seq_summary` must be provided.")
         if not (
-                isinstance(seq_summary, pd.DataFrame)
-                or isinstance(seq_summary, str)
-                or isinstance(seq_summary, tuple)):
+            isinstance(seq_summary, pd.DataFrame)
+            or isinstance(seq_summary, str)
+            or isinstance(seq_summary, tuple)
+        ):
             raise ValueError(
                 "`seq_summary` must be a path to a fastcat/bamstats read stats output "
-                "file or dataframe, or histogram directories (or a tuple of such).")
+                "file or dataframe (or a tuple of such)."
+            )
 
         # check sample_names is a tuple if files are provided in tuples.
         if (isinstance(seq_summary, tuple)) and not isinstance(sample_names, tuple):
@@ -158,29 +162,56 @@ class SeqSummary(Snippet):
                     with tabs.add_dropdown_menu():
                         for sample_name, data in zip(sample_names, flagstat):
                             with tabs.add_dropdown_tab(sample_name):
-                                self._draw_flagstat_table(data)
+                                self._draw_bamstat_table(data)
                 else:
-                    self._draw_flagstat_table(flagstat)
+                    self._draw_bamstat_table(flagstat)
 
-    def _draw_summary_plots(self, data, color):
-        """Draw quality, read_length, yield plots using raw data.
+    def _draw_summary_plots(
+        self,
+        data,
+        color
+    ):
+        """Draw quality, read_length, yield, accuracy and coverage plots using raw data.
 
         :param seq_summary: pd.DataFrame containing per-sequence summary information.
         :param theme: EPI2ME theme.
         """
         # data is either a summary file, a dataframe (of a summary file),
         # or a directory (of histogram files).
-        qdata, ldata = None, None
+        adata, cdata, qdata, ldata = None, None, None, None
         if isinstance(data, pd.DataFrame):
             qdata, ldata = data, data
+            adata = data if 'acc' in data.columns else None
+            cdata = data if 'coverage' in data.columns else None
         else:
             try:
                 df = load_stats(data)
                 qdata, ldata = df, df
+                adata = df if 'acc' in df.columns else None
+                cdata = df if 'coverage' in df.columns else None
             except Exception:
                 try:
                     qdata = load_histogram(data, "quality")
                     ldata = load_histogram(data, "length")
+                    # Try loading BAMstats files
+                    try:
+                        adata = load_histogram(data, "accuracy")
+                        cdata = load_histogram(data, "coverage")
+                    except Exception:
+                        adata, cdata = None, None
+                    # Try loading unmapped files
+                    try:
+                        qdata = sum_hists((
+                            qdata,
+                            load_histogram(data, "quality.unmap")
+                        ))
+                        ldata = sum_hists((
+                            ldata,
+                            load_histogram(data, "length.unmap")
+                        ))
+                    except Exception:
+                        qdata, ldata
+
                 except Exception:
                     raise ValueError("Could not load input data.")
 
@@ -188,6 +219,243 @@ class SeqSummary(Snippet):
             EZChart(read_quality_plot(qdata, color=color), self.theme)
             EZChart(read_length_plot(ldata, color=color), self.theme)
             EZChart(base_yield_plot(ldata, color=color), self.theme)
+            if adata is not None:
+                try:
+                    EZChart(mapping_accuracy_plot(adata, color=color), self.theme)
+                except Exception:
+                    pass
+            if cdata is not None:
+                try:
+                    EZChart(read_coverage_plot(cdata, color=color), self.theme)
+                except Exception:
+                    pass
+
+    def _draw_bamstat_table(self, data):
+        if not isinstance(data, pd.DataFrame):
+            data = load_bamstats_flagstat(data)
+        DataTable.from_pandas(data, use_index=False)
+
+
+class SeqCompare(Snippet):
+    """Generate sequence comparison plots."""
+
+    def __init__(
+        self,
+        seq_summary=None,
+        flagstat=None,
+        sample_names=None,
+        theme="epi2melabs",
+        color=None
+    ):
+        """Create sequence summary component.
+
+        :param seq_summary: a path to a fastcat/bamstats read stats output file
+            or dataframe (or a tuple of such).
+        :param flagstat: a path to a bamstats flagstat output file or dataframe
+            (or tuple of such).
+        :sample_names: tuple of sample names. Required when other input arguments
+            are tuples.
+        :param theme: String defining the visual theme for the plots.
+        """
+        super().__init__(styles=None, classes=None)
+        self.theme = theme
+        self.metrics = [
+            'length',
+            'yield',
+            'quality',
+            'accuracy',
+            'coverage'
+        ]
+        self.columns = [
+            'read_length',
+            'read_length',
+            'mean_quality',
+            'acc',
+            'coverage'
+        ]
+        self.plot_functions = [
+            read_length_plot,
+            base_yield_plot,
+            read_quality_plot,
+            mapping_accuracy_plot,
+            read_coverage_plot
+        ]
+
+        # we need at least seq_summary or histograms
+        if seq_summary is None:
+            raise ValueError("One of `seq_summary` must be provided.")
+        if not (
+            isinstance(seq_summary, pd.DataFrame)
+            or isinstance(seq_summary, str)
+            or isinstance(seq_summary, tuple)
+        ):
+            raise ValueError(
+                "`seq_summary` must be a path to a fastcat/bamstats read stats output "
+                "file or dataframe (or a tuple of such)."
+            )
+
+        # check sample_names is a tuple if files are provided in tuples.
+        if (isinstance(seq_summary, tuple)) and not isinstance(sample_names, tuple):
+            raise ValueError(
+                "`sample_names` must be provided as a tuple "
+                "when more than one input provided.")
+
+        # check tuples are all the same length
+        if isinstance(sample_names, tuple) and (len(sample_names) != len(seq_summary)):
+            raise ValueError(
+                "`sample_names` must have the same length as `seq_summary`.")
+        if (
+                (flagstat is not None)
+                and isinstance(flagstat, tuple)
+                and (len(sample_names) != len(flagstat))):
+            raise ValueError(
+                "`sample_names` must have the same length as `flagstat`.")
+
+        with self:
+            if isinstance(seq_summary, tuple):
+                self._compare_summary_plots(
+                    sample_names, seq_summary, color=color)
+            else:
+                # single sample
+                self._compare_summary_plots(
+                    tuple('Sample'), tuple(seq_summary), color=color)
+
+            # same again for flagstat
+            if flagstat is not None:
+                if isinstance(flagstat, tuple):
+                    tabs = Tabs()
+                    with tabs.add_dropdown_menu():
+                        for sample_name, data in zip(sample_names, flagstat):
+                            with tabs.add_dropdown_tab(sample_name):
+                                self._draw_bamstat_table(data)
+                else:
+                    self._draw_bamstat_table(flagstat)
+
+    def _compare_summary_plots(self, samples, datasets, color=None):
+        """Draw quality, read_length, yield, accuracy and coverage plots using raw data.
+
+        :param samples: tuple of sample names to process.
+        :param datasets: data to process, in the same order as the samples.
+        """
+        # data is either a summary file, a dataframe (of a summary file),
+        # or a directory (of histogram files).
+        qdata, ldata = [], []
+        all_plots = {
+            'length': [],
+            'yield': [],
+            'quality': [],
+            'accuracy': [],
+            'coverage': []
+
+        }
+        # For each metric and each sample, create the plot
+        if not isinstance(datasets, tuple):
+            raise ValueError(
+                "SeqSummary by `metric` only Tuples as input."
+            )
+        else:
+            # TODO: test with one DF directly
+            if isinstance(datasets, pd.DataFrame):
+                for (metric, col, plot_function) in zip(
+                        self.metrics, self.columns, self.plot_functions):
+                    if col in datasets.columns:
+                        all_plots[metric] += [plot_function(datasets, color=color)]
+                    else:
+                        all_plots[metric] += [None]
+            for (sample, data) in zip(samples, datasets):
+                try:
+                    df = load_stats(data)
+                    for (metric, col, plot_function) in zip(
+                            self.metrics, self.columns, self.plot_functions):
+                        if col in df.columns:
+                            all_plots[metric] += [plot_function(df, color=color)]
+                        else:
+                            all_plots[metric] += [None]
+
+                except Exception:
+                    # Bare minimum, should always be there
+                    try:
+                        qdata = load_histogram(data, "quality")
+                        ldata = load_histogram(data, "length")
+                    except Exception:
+                        raise ValueError("Could not load input data.")
+                    # Try loading and adding unmapped hists, if available
+                    try:
+                        qdata = sum_hists((
+                            load_histogram(data, "quality"),
+                            load_histogram(data, "quality.unmap")
+                        ))
+                        ldata = sum_hists((
+                            load_histogram(data, "length"),
+                            load_histogram(data, "length.unmap")
+                        ))
+                    except Exception:
+                        qdata, ldata
+                    all_plots['length'] += [read_length_plot(ldata, color=color)]
+                    all_plots['yield'] += [base_yield_plot(ldata, color=color)]
+                    all_plots['quality'] += [read_quality_plot(qdata, color=color)]
+                    # Try loading BAMstats-specific hists and add their plots
+                    try:
+                        all_plots['accuracy'] += [
+                            mapping_accuracy_plot(
+                                load_histogram(data, "accuracy"),
+                                color=color
+                            )
+                        ]
+                    except Exception:
+                        all_plots['accuracy'] += [None]
+                    try:
+                        all_plots['coverage'] += [
+                            read_coverage_plot(
+                                load_histogram(data, "coverage"),
+                                color=color
+                            )
+                        ]
+                    except Exception:
+                        all_plots['coverage'] += [None]
+
+        # Create tabs
+        tabs = Tabs()
+        for metric in self.metrics:
+            pairs = [(p, s) for p, s in zip(all_plots[metric], samples) if p]
+            if len(pairs) == 0:
+                continue
+            with tabs.add_tab(metric):
+                with Grid(columns=min(len(pairs), 3)):
+                    plots, samps = zip(*pairs)
+                    self._coordinate_plots(plots, labels=samps)
+                    for plot in plots:
+                        EZChart(plot, self.theme)
+
+    def _is_empty_plot(self, plot):
+        """Check if the plot is empty."""
+        if not plot:
+            return True
+        if not plot.dataset:
+            return True
+        return False
+
+    def _coordinate_plots(self, plots, labels=None):
+        """Coordinate the axes between the plots."""
+        max_by_plot = []
+        for plot in plots:
+            if not self._is_empty_plot(plot):
+                dimensions = np.array(plot.dataset[0].dimensions)
+                if 'y' in dimensions:
+                    y_col = np.where(dimensions == 'y')[0]
+                else:
+                    y_col = np.where(dimensions == 'height')[0]
+                max_by_plot.append(np.max(plot.dataset[0].source, axis=0)[y_col])
+        # Set new values
+        if labels:
+            inputs = zip(plots, labels)
+        else:
+            inputs = zip(plots, [None] * len(plots))
+        for (plot, label) in inputs:
+            if not self._is_empty_plot(plot):
+                plot.yAxis.max = max(max_by_plot)
+            if label:
+                plot.title.text = label
 
     def _draw_bamstat_table(self, data):
         if not isinstance(data, pd.DataFrame):
@@ -244,6 +512,60 @@ def base_yield_plot(data, color=None):
 
 
 @ezc.plots.util.plot_wrapper
+def histogram_plot(
+    data, col="count", binwidth=None, min_val=None,
+    max_val=None, title="Histogram",
+    xaxis_label=None, color=None
+):
+    """Create histogram summary plot.
+
+    :param data: fastcat/bamstats summary data or read-length histogram data.
+    :param binwidth: width of each bin.
+    :param min_val: the minimum value to plot.
+    :param max_val: the maximum value to plot.
+    :param title: title of the plot.
+    """
+    plt, mean_val, median_val = None, None, None
+    if "read_length" in data.columns:
+        if not min_val:
+            min_val = data[col].min()
+        if not max_val:
+            max_val = data[col].max()
+        # fastcat/bamstats
+        mean_val = np.round(data[col].mean(), 1)
+        median_val = int(data[col].median())
+        plt = ezc.histplot(
+            data=data[col], binwidth=binwidth, binrange=(min_val, max_val)
+        )
+    else:
+        if not min_val:
+            min_val = data.end.min()
+        if not max_val:
+            max_val = data.end.max()
+        # histogram
+        mean_val = np.round(
+            np.average(0.5 * (data["start"] + data["end"]), weights=data["count"]), 1
+        )
+        median_val = int(histogram_median(data))
+        plt = ezc.histplot(
+            data=data["start"],
+            weights=data["count"],
+            binwidth=binwidth,
+            binrange=(min_val, max_val),
+            color=color
+        )
+
+    plt.title = dict(
+        text=title, subtext=f"Mean: {mean_val:.1f}. Median: {median_val:.1f}"
+    )
+    if xaxis_label:
+        plt.xAxis.name = xaxis_label
+    plt.xAxis.min, plt.xAxis.max = min_val, max_val
+    plt.yAxis.name = "Number of reads"
+    return plt
+
+
+@ezc.plots.util.plot_wrapper
 def read_quality_plot(data, binwidth=0.2, min_qual=4, max_qual=30, color=None):
     """Create read quality summary plot.
 
@@ -251,45 +573,59 @@ def read_quality_plot(data, binwidth=0.2, min_qual=4, max_qual=30, color=None):
     :param binwidth: width of each bin.
     :param min_qual: the minimum quality value to plot.
     :param max_qual: the maximum quality value to plot.
-    :param title: title of the plot.
     """
-    plt, mean_q, median_q = None, None, None
-    if "read_length" in data.columns:
-        # fastcat/bamstats
-        mean_q = np.round(data.mean_quality.mean(), 1)
-        median_q = int(data.mean_quality.median())
-        plt = ezc.histplot(
-            data=data.mean_quality,
-            binwidth=binwidth,
-            binrange=(min_qual, max_qual),
-            color=color
-        )
-    else:
-        # histogram
-        mean_q = np.round(
-            np.average(0.5 * (data["start"] + data["end"]), weights=data["count"]), 1
-        )
-        median_q = int(histogram_median(data))
-        plt = ezc.histplot(
-            data=data["start"],
-            weights=data["count"],
-            binwidth=binwidth,
-            binrange=(min_qual, max_qual),
-            color=color
-        )
-
-    plt.title = dict(
-        text="Read quality", subtext=f"Mean: {mean_q:.1f}. Median: {median_q:.1f}"
+    plt = histogram_plot(
+        data, col='mean_quality', binwidth=0.2, min_val=min_qual,
+        max_val=max_qual, title="Read quality",
+        xaxis_label="Quality", color=color
     )
-    plt.xAxis.name = "Quality score"
-    plt.xAxis.min, plt.xAxis.max = min_qual, max_qual
-    plt.yAxis.name = "Number of reads"
+    return plt
+
+
+@ezc.plots.util.plot_wrapper
+def mapping_accuracy_plot(
+    data, binwidth=1.0, min_acc=80,
+    max_acc=101, color=None
+):
+    """Create read quality summary plot.
+
+    :param data: fastcat/bamstats summary data or read-length histogram data.
+    :param binwidth: width of each bin.
+    :param min_acc: the minimum quality value to plot.
+    :param max_acc: the maximum quality value to plot.
+    """
+    plt = histogram_plot(
+        data, col='acc', binwidth=0.2, min_val=min_acc,
+        max_val=max_acc, title="Accuracy",
+        xaxis_label="Accuracy", color=color
+    )
+    return plt
+
+
+@ezc.plots.util.plot_wrapper
+def read_coverage_plot(
+    data, binwidth=1.0, min_cov=0,
+    max_cov=None, color=None
+):
+    """Create read quality summary plot.
+
+    :param data: fastcat/bamstats summary data or read-length histogram data.
+    :param binwidth: width of each bin.
+    :param min_cov: the minimum coverage value to plot.
+    :param max_cov: the maximum coverage value to plot.
+    """
+    plt = histogram_plot(
+        data, col='coverage', binwidth=0.2, min_val=min_cov,
+        max_val=max_cov, title="Coverage",
+        xaxis_label="Coverage", color=color
+    )
     return plt
 
 
 @ezc.plots.util.plot_wrapper
 def read_length_plot(
-    data, xlim=(0, None), quantile_limits=False, bins=100, binwidth=None, color=None
+    data, xlim=(0, None), quantile_limits=False,
+    bins=100, binwidth=None, title="Read Length", color=None
 ):
     """Create a read length plot.
 
@@ -359,7 +695,7 @@ def read_length_plot(
 
     # customize the plot
     plt.title = dict(
-        text="Read Length",
+        text=title,
         subtext=(
             f"Mean: {mean_length:.1f}. Median: {median_length:.1f}. "
             f"Min: {min_:,d}. Max: {max_:,d}"
@@ -373,6 +709,19 @@ def read_length_plot(
     if xlim[1] is not None:
         plt.xAxis.max = xlim[1] / 1000
     return plt
+
+
+def sum_hists(hists):
+    """Sum two histogram dataframes based on the intervals."""
+    if not isinstance(hists, tuple):
+        raise ValueError("Input is not a tuple of dataframes.")
+    return pd.concat(
+        hists
+    )\
+        .reset_index(drop=True)\
+        .sort_values(by='start')\
+        .groupby(['start', 'end'])\
+        .sum().reset_index()
 
 
 def load_fastcat(fpath, target_cols=None):
@@ -475,13 +824,16 @@ def load_stats(fpath, target_cols=None):
 
     :returns: a dataframe
     """
+    target_cols_fastcat, target_cols_bamstats = target_cols, target_cols
     if target_cols is None:
-        target_cols = ["sample_name", "read_length", "mean_quality"]
+        target_cols_fastcat = ["sample_name", "read_length", "mean_quality"]
+        target_cols_bamstats = [
+            "sample_name", "read_length", "mean_quality", "acc", "coverage"]
     df = None
     try:
-        df = load_fastcat(fpath, target_cols=target_cols)
+        df = load_bamstats(fpath, target_cols=target_cols_bamstats)
     except ValueError:
-        df = load_bamstats(fpath, target_cols=target_cols)
+        df = load_fastcat(fpath, target_cols=target_cols_fastcat)
     return df
 
 
@@ -509,9 +861,27 @@ def main(args):
     elif args.seq_summary is None and args.bam_readstats is not None:
         seq_summary = args.bam_readstats
     else:
-        raise ValueError("No valid input for seq_summary/bam_readstats.")
+        raise ValueError('No valid input for seq_summary/bam_readstats.')
+    bam_flagstat = tuple(args.bam_flagstat) \
+        if isinstance(args.bam_flagstat, list) \
+        else args.bam_flagstat
+    sample = tuple(args.sample) \
+        if isinstance(args.sample, list) \
+        else args.sample
     # Create summary
-    seq_sum = SeqSummary(seq_summary, flagstat=args.bam_flagstat)
+    if args.by == 'sample':
+        seq_sum = SeqSummary(
+            tuple(seq_summary),
+            flagstat=bam_flagstat,
+            sample_names=sample
+        )
+    else:
+        seq_sum = SeqCompare(
+            tuple(seq_summary),
+            flagstat=bam_flagstat,
+            sample_names=sample
+        )
+
     # Write report
     report = ComponentReport(comp_title, seq_sum)
     report.write(args.output)
@@ -528,6 +898,7 @@ def argparser():
         "--seq_summary",
         default=resource_filename("ezcharts", "data/test/fastcat"),
         help="Sequence summary TSV from fastcat.",
+        nargs='+'
     )
     parser.add_argument(
         "--bam_flagstat",
@@ -535,11 +906,25 @@ def argparser():
             "ezcharts", "data/test/bamstats/bamstats.flagstat.tsv"
         ),
         help="Bam flagstats TSV from bamstats.",
+        nargs='+'
+    )
+    parser.add_argument(
+        "--sample",
+        default='sample',
+        help="Sample name.",
+        nargs='+'
+    )
+    parser.add_argument(
+        "--by",
+        default='sample',
+        choices=['sample', 'metric'],
+        help="Create SeqSummary by sample or by metric.",
     )
     parser.add_argument(
         "--bam_readstats",
         default=resource_filename("ezcharts", "data/test/bamstats/"),
         help="Read statistics TSV from bamstats.",
+        nargs='+'
     )
     parser.add_argument(
         "--output", default="seq_summary_report.html", help="Output HTML file."

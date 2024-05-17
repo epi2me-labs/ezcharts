@@ -4,10 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [unreleased]
+## [v0.9.0]
 ### Added
+- `SeqCompare` function to compare individual metrics across samples.
+### Changed
 - Allow color override for fastcat standard plots.
 - ONT skin.
+- `SeqSummary` can display the histograms for accuracy and coverage, if available in the histogram directory.
+### Fixed
+- `bcfstats` component crashing when the `bcftools stats` output has missing sections.
 
 ## [v0.8.0]
 ### Added
