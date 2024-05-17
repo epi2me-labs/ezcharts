@@ -99,6 +99,7 @@ class SeqSummary(Snippet):
         sample_names=None,
         theme="epi2melabs",
         color=None,
+        height="500px",
     ):
         """Create sequence summary component.
 
@@ -150,10 +151,10 @@ class SeqSummary(Snippet):
                 with tabs.add_dropdown_menu():
                     for sample_name, data in zip(sample_names, seq_summary):
                         with tabs.add_dropdown_tab(sample_name):
-                            self._draw_summary_plots(data, color)
+                            self._draw_summary_plots(data, color, height)
             else:
                 # single sample
-                self._draw_summary_plots(seq_summary, color)
+                self._draw_summary_plots(seq_summary, color, height)
 
             # same again for flagstat
             if flagstat is not None:
@@ -169,7 +170,8 @@ class SeqSummary(Snippet):
     def _draw_summary_plots(
         self,
         data,
-        color
+        color,
+        height,
     ):
         """Draw quality, read_length, yield, accuracy and coverage plots using raw data.
 
@@ -216,17 +218,27 @@ class SeqSummary(Snippet):
                     raise ValueError("Could not load input data.")
 
         with Grid(columns=3):
-            EZChart(read_quality_plot(qdata, color=color), self.theme)
-            EZChart(read_length_plot(ldata, color=color), self.theme)
-            EZChart(base_yield_plot(ldata, color=color), self.theme)
+            EZChart(
+                read_quality_plot(
+                    qdata, color=color), theme=self.theme, height=height)
+            EZChart(
+                read_length_plot(
+                    ldata, color=color), theme=self.theme, height=height)
+            EZChart(
+                base_yield_plot(
+                    ldata, color=color), theme=self.theme, height=height)
             if adata is not None:
                 try:
-                    EZChart(mapping_accuracy_plot(adata, color=color), self.theme)
+                    EZChart(
+                        mapping_accuracy_plot(
+                            adata, color=color), theme=self.theme, height=height)
                 except Exception:
                     pass
             if cdata is not None:
                 try:
-                    EZChart(read_coverage_plot(cdata, color=color), self.theme)
+                    EZChart(
+                        read_coverage_plot(
+                            cdata, color=color), theme=self.theme, height=height)
                 except Exception:
                     pass
 
