@@ -155,6 +155,7 @@ def main(args):
     with report.add_section('Sequence summaries', 'Summaries'):
         SeqSummary(
             seq_summary=histogram_stats_dir,
+            color="#2a98b7",
             sample_names=tuple(['sample_1', 'sample_2', 'sample_3']))
 
     # This also adds to main_content, but provides a nice
