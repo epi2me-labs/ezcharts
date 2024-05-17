@@ -153,15 +153,23 @@ def split_blocks(fname):
     comment = list()
     data = list()
     state = None
+    two_line_comments = ('IDD', 'TSTV', 'SiS', 'AF', 'QUAL', 'ST')
     with open(fname, 'r') as fh:
-        # TODO: handle empty tables
-        for line in fh.readlines():
+        lines = fh.readlines()
+        for line_num, line in enumerate(lines):
             if line.startswith('#'):
                 if state != 'comment' and state is not None:
                     yield comment, data
                     comment, data = list(), list()
                 state = 'comment'
                 comment.append(line.strip('# ').rstrip())
+                # if there are two comments appended and it's a special comment
+                # check the next line, if it's another comment, yield the comment
+                # and empty data
+                if len(comment) == 2 and comment[-1].startswith(two_line_comments):
+                    if lines[line_num + 1].startswith('#'):
+                        yield comment, []
+                        comment, data = list(), list()
             else:
                 state = 'data'
                 data.append(line.rstrip())
