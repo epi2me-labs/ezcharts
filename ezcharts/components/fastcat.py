@@ -100,6 +100,7 @@ class SeqSummary(Snippet):
         theme="epi2melabs",
         color=None,
         height="500px",
+        alignment_stats=True,
     ):
         """Create sequence summary component.
 
@@ -110,9 +111,14 @@ class SeqSummary(Snippet):
         :sample_names: tuple of sample names. Required when other input arguments
             are tuples.
         :param theme: String defining the visual theme for the plots.
+        :param color: String defining the color for the plots.
+        :param height: String defining the height of the plots.
+        :param alignment_stats: Boolean defining whether to display the alignments
+         stats.
         """
         super().__init__(styles=None, classes=None)
         self.theme = theme
+        self.color = color
 
         # we need at least seq_summary or histograms
         if seq_summary is None:
@@ -151,10 +157,16 @@ class SeqSummary(Snippet):
                 with tabs.add_dropdown_menu():
                     for sample_name, data in zip(sample_names, seq_summary):
                         with tabs.add_dropdown_tab(sample_name):
-                            self._draw_summary_plots(data, color, height)
+                            ldata, qdata, adata, cdata = self._load_summary_data(data)
+                            self._draw_summary_plots(ldata, qdata, height)
+                            if alignment_stats:
+                                self._draw_alignment_plots(adata, cdata, height)
             else:
                 # single sample
-                self._draw_summary_plots(seq_summary, color, height)
+                ldata, qdata, adata, cdata = self._load_summary_data(seq_summary)
+                self._draw_summary_plots(ldata, qdata, height)
+                if alignment_stats:
+                    self._draw_alignment_plots(adata, cdata, height)
 
             # same again for flagstat
             if flagstat is not None:
@@ -167,11 +179,9 @@ class SeqSummary(Snippet):
                 else:
                     self._draw_bamstat_table(flagstat)
 
-    def _draw_summary_plots(
+    def _load_summary_data(
         self,
-        data,
-        color,
-        height,
+        data
     ):
         """Draw quality, read_length, yield, accuracy and coverage plots using raw data.
 
@@ -216,31 +226,56 @@ class SeqSummary(Snippet):
 
                 except Exception:
                     raise ValueError("Could not load input data.")
+        return ldata, qdata, adata, cdata
 
+    def _draw_summary_plots(
+        self,
+        ldata,
+        qdata,
+        height,
+    ):
+        """Draw quality, read_length and yield plots using raw data.
+
+        :param ldata: pd.DataFrame containing length values.
+        :param qdata: pd.DataFrame containing quality values.
+        :param color: color for the plots.
+        :param height: height of the plot
+        """
         with Grid(columns=3):
             EZChart(
-                read_quality_plot(
-                    qdata, color=color), theme=self.theme, height=height)
+                read_quality_plot(qdata, color=self.color), self.theme, height=height)
             EZChart(
-                read_length_plot(
-                    ldata, color=color), theme=self.theme, height=height)
+                read_length_plot(ldata, color=self.color), self.theme, height=height)
             EZChart(
-                base_yield_plot(
-                    ldata, color=color), theme=self.theme, height=height)
-            if adata is not None:
-                try:
-                    EZChart(
-                        mapping_accuracy_plot(
-                            adata, color=color), theme=self.theme, height=height)
-                except Exception:
-                    pass
-            if cdata is not None:
-                try:
-                    EZChart(
-                        read_coverage_plot(
-                            cdata, color=color), theme=self.theme, height=height)
-                except Exception:
-                    pass
+                base_yield_plot(ldata, color=self.color), self.theme, height=height)
+
+    def _draw_alignment_plots(
+        self,
+        adata,
+        cdata,
+        height,
+    ):
+        """Draw accuracy and coverage plots using raw data.
+
+        :param adata: pd.DataFrame containing accuracy values.
+        :param cdata: pd.DataFrame containing coverage values.
+        """
+        if adata is not None or cdata is not None:
+            with Grid(columns=2):
+                if adata is not None:
+                    try:
+                        EZChart(
+                            mapping_accuracy_plot(adata, color=self.color),
+                            self.theme, height=height)
+                    except Exception:
+                        pass
+                if cdata is not None:
+                    try:
+                        EZChart(
+                            read_coverage_plot(cdata, color=self.color),
+                            self.theme, height=height)
+                    except Exception:
+                        pass
 
     def _draw_bamstat_table(self, data):
         if not isinstance(data, pd.DataFrame):
@@ -257,7 +292,9 @@ class SeqCompare(Snippet):
         flagstat=None,
         sample_names=None,
         theme="epi2melabs",
-        color=None
+        color=None,
+        height="500px",
+        alignment_stats=True,
     ):
         """Create sequence summary component.
 
@@ -271,6 +308,8 @@ class SeqCompare(Snippet):
         """
         super().__init__(styles=None, classes=None)
         self.theme = theme
+        self.color = color
+        self.alignment_stats = alignment_stats
         self.metrics = [
             'length',
             'yield',
@@ -326,11 +365,11 @@ class SeqCompare(Snippet):
         with self:
             if isinstance(seq_summary, tuple):
                 self._compare_summary_plots(
-                    sample_names, seq_summary, color=color)
+                    sample_names, seq_summary, height=height)
             else:
                 # single sample
                 self._compare_summary_plots(
-                    tuple('Sample'), tuple(seq_summary), color=color)
+                    tuple('Sample'), tuple(seq_summary), height=height)
 
             # same again for flagstat
             if flagstat is not None:
@@ -343,7 +382,7 @@ class SeqCompare(Snippet):
                 else:
                     self._draw_bamstat_table(flagstat)
 
-    def _compare_summary_plots(self, samples, datasets, color=None):
+    def _compare_summary_plots(self, samples, datasets, height):
         """Draw quality, read_length, yield, accuracy and coverage plots using raw data.
 
         :param samples: tuple of sample names to process.
@@ -371,7 +410,7 @@ class SeqCompare(Snippet):
                 for (metric, col, plot_function) in zip(
                         self.metrics, self.columns, self.plot_functions):
                     if col in datasets.columns:
-                        all_plots[metric] += [plot_function(datasets, color=color)]
+                        all_plots[metric] += [plot_function(datasets, color=self.color)]
                     else:
                         all_plots[metric] += [None]
             for (sample, data) in zip(samples, datasets):
@@ -380,7 +419,7 @@ class SeqCompare(Snippet):
                     for (metric, col, plot_function) in zip(
                             self.metrics, self.columns, self.plot_functions):
                         if col in df.columns:
-                            all_plots[metric] += [plot_function(df, color=color)]
+                            all_plots[metric] += [plot_function(df, color=self.color)]
                         else:
                             all_plots[metric] += [None]
 
@@ -403,28 +442,29 @@ class SeqCompare(Snippet):
                         ))
                     except Exception:
                         qdata, ldata
-                    all_plots['length'] += [read_length_plot(ldata, color=color)]
-                    all_plots['yield'] += [base_yield_plot(ldata, color=color)]
-                    all_plots['quality'] += [read_quality_plot(qdata, color=color)]
-                    # Try loading BAMstats-specific hists and add their plots
-                    try:
-                        all_plots['accuracy'] += [
-                            mapping_accuracy_plot(
-                                load_histogram(data, "accuracy"),
-                                color=color
-                            )
-                        ]
-                    except Exception:
-                        all_plots['accuracy'] += [None]
-                    try:
-                        all_plots['coverage'] += [
-                            read_coverage_plot(
-                                load_histogram(data, "coverage"),
-                                color=color
-                            )
-                        ]
-                    except Exception:
-                        all_plots['coverage'] += [None]
+                    all_plots['length'] += [read_length_plot(ldata, color=self.color)]
+                    all_plots['yield'] += [base_yield_plot(ldata, color=self.color)]
+                    all_plots['quality'] += [read_quality_plot(qdata, color=self.color)]
+                    # Try loading BAMstats-specific hists and add their plots, if needed
+                    if self.alignment_stats:
+                        try:
+                            all_plots['accuracy'] += [
+                                mapping_accuracy_plot(
+                                    load_histogram(data, "accuracy"),
+                                    color=self.color
+                                )
+                            ]
+                        except Exception:
+                            all_plots['accuracy'] += [None]
+                        try:
+                            all_plots['coverage'] += [
+                                read_coverage_plot(
+                                    load_histogram(data, "coverage"),
+                                    color=self.color
+                                )
+                            ]
+                        except Exception:
+                            all_plots['coverage'] += [None]
 
         # Create tabs
         tabs = Tabs()
@@ -437,7 +477,7 @@ class SeqCompare(Snippet):
                     plots, samps = zip(*pairs)
                     self._coordinate_plots(plots, labels=samps)
                     for plot in plots:
-                        EZChart(plot, self.theme)
+                        EZChart(plot, self.theme, height=height)
 
     def _is_empty_plot(self, plot):
         """Check if the plot is empty."""
@@ -547,7 +587,7 @@ def histogram_plot(
         mean_val = np.round(data[col].mean(), 1)
         median_val = int(data[col].median())
         plt = ezc.histplot(
-            data=data[col], binwidth=binwidth, binrange=(min_val, max_val)
+            data=data[col], binwidth=binwidth, binrange=(min_val, max_val), color=color
         )
     else:
         if not min_val:
@@ -885,13 +925,17 @@ def main(args):
         seq_sum = SeqSummary(
             tuple(seq_summary),
             flagstat=bam_flagstat,
-            sample_names=sample
+            sample_names=sample,
+            alignment_stats=False if args.skip_alignment_stats else True,
+            color=args.color,
         )
     else:
         seq_sum = SeqCompare(
             tuple(seq_summary),
             flagstat=bam_flagstat,
-            sample_names=sample
+            sample_names=sample,
+            alignment_stats=False if args.skip_alignment_stats else True,
+            color=args.color,
         )
 
     # Write report
@@ -937,6 +981,15 @@ def argparser():
         default=resource_filename("ezcharts", "data/test/bamstats/"),
         help="Read statistics TSV from bamstats.",
         nargs='+'
+    )
+    parser.add_argument(
+        "--skip_alignment_stats",
+        action="store_true",
+        help="Skip alignment statistics histograms (coverage and accuracy)."
+    )
+    parser.add_argument(
+        "--color",
+        help="Plot color."
     )
     parser.add_argument(
         "--output", default="seq_summary_report.html", help="Output HTML file."

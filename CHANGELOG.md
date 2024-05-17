@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [v0.9.1]
 ### Added
 - Ability to change height of seq summary plots.
+### Changed
+- Added argument to skip the plotting of accuracy and coverage histograms (`alignment_stats`) in `SeqSummary` and `SeqCompare`.
+### Fixed
+- `color` option not working in `SeqSummary`
+- Resizing behaving oddly in some cases
 
 ## [v0.9.0]
 ### Added
