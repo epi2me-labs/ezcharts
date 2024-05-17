@@ -265,7 +265,7 @@ def empty_plot(**kwargs):
 
     :param kwargs: kwargs for bokeh figure.
 
-    :returns: a eChart empty plot.
+    :returns: an eChart empty plot.
 
     """
     plt = plots._NoAxisFixPlot()
@@ -274,7 +274,7 @@ def empty_plot(**kwargs):
         "subtext": "Oops! Something went wrong in plotting your data.",
         "subtextStyle": {
             "fontStyle": "italic",
-            "color": "#0084A9",
+            "color": Colors.cerulean,
         },
         "itemGap": 30,
     }
@@ -298,12 +298,9 @@ def plot_wrapper(func):
             p = func(*args, **kwargs)
             return p
         except Exception as e:
-            # check is debug mode is enabled:
-            if (
-                "EZCHARTS_DEBUG" in os.environ
-                and os.environ.get("EZCHARTS_DEBUG") == "1"
-            ):
-                return func(*args, **kwargs)
+            # check if debug mode is enabled:
+            if os.environ.get("EZCHARTS_DEBUG") == "1":
+                raise e
             else:
                 # plot empty
                 try:

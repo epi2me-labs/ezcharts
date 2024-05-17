@@ -160,12 +160,14 @@ def test_021_read_either():
         "ezcharts",
         "data/test/real_data_test/bamstats/barcode01/bamstats.readstats.tsv.gz",
     )
-    target_cols = ["sample_name", "read_length", "mean_quality"]
+    target_cols_fastcat = ["sample_name", "read_length", "mean_quality"]
+    target_cols_bamstats = [
+        "sample_name", "coverage", "read_length", "mean_quality", "acc"]
     to_test = (
-        (per_read_stats_fastcat, fastcat.FASTCAT_COLS_DTYPES),
-        (per_read_stats_bamstats, fastcat.BAMSTATS_COLS_DTYPES),
+        (per_read_stats_fastcat, fastcat.FASTCAT_COLS_DTYPES, target_cols_fastcat),
+        (per_read_stats_bamstats, fastcat.BAMSTATS_COLS_DTYPES, target_cols_bamstats),
     )
-    for fname, TYPE in to_test:
+    for fname, TYPE, target_cols in to_test:
         actual = fastcat.load_stats(fname)
         expected = _read_pandas(fname, TYPE, target_cols=target_cols)
         _compare_frames(actual, expected)
@@ -180,13 +182,14 @@ def test_025_equality_of_result():
         "ezcharts",
         "data/test/real_data_test/bamstats/barcode01/bamstats.readstats.tsv.gz",
     )
+    target_cols = ["sample_name", "read_length", "mean_quality"]
     actual_fastcat = (
-        fastcat.load_stats(per_read_stats_fastcat)
+        fastcat.load_stats(per_read_stats_fastcat, target_cols=target_cols)
         .sort_values(["read_length", "mean_quality"])
         .reset_index(drop=True)
     )
     actual_bamstats = (
-        fastcat.load_stats(per_read_stats_bamstats)
+        fastcat.load_stats(per_read_stats_bamstats, target_cols=target_cols)
         .sort_values(["read_length", "mean_quality"])
         .reset_index(drop=True)
     )
@@ -314,13 +317,45 @@ def test_104_SeqSummary(input):
         )
 
 
-def test_105_SeqSummary_empty_file():
+def test_105_bamstats_inputs():
+    """Test if SeqSummary works with bam_flagstat inputs."""
+    # Create a couple of samples
+    seq_summary = resource_filename(
+        "ezcharts",
+        "data/test/real_data_test/bamstats/barcode01/bamstats.readstats.tsv.gz"
+    )
+    flagstats = resource_filename(
+        "ezcharts",
+        "data/test/real_data_test/bamstats/barcode01/bamstats.flagstat.tsv"
+    )
+    # pass just first sample
+    fastcat.SeqSummary(
+        seq_summary=seq_summary,
+        sample_names="barcode01",
+        flagstat=flagstats)
+
+
+def test_106_multi_sample_by_metric():
+    """Test if SeqCompare works."""
+    # Create a couple of samples
+    samples, files = _multisamples()
+    with pytest.raises(
+        ValueError,
+        match="`sample_names` must be provided as a tuple "
+        + "when more than one input provided.",
+    ):
+        # pass just first sample
+        fastcat.SeqCompare(
+            seq_summary=tuple(files), sample_names=samples[0])
+
+
+def test_107_SeqSummary_empty_file():
     """Create the SeqSummary component with an empty file (summaries)."""
     with _empty_file(dtype=fastcat.FASTCAT_COLS_DTYPES) as fname:
         fastcat.SeqSummary(seq_summary=fname)
 
 
-def test_106_SeqSummary_empty_histogram_files():
+def test_108_SeqSummary_empty_histogram_files():
     """Create the SeqSummary component with an histograms dir with empty files."""
     fastcat.SeqSummary(
         seq_summary=resource_filename(
