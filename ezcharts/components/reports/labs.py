@@ -3,7 +3,7 @@ from datetime import datetime
 from typing import List, Optional, Type
 
 from dominate.tags import (
-    a, code, div, h4, html_tag, li, p, section, ul)
+    a, button, code, div, h4, html_tag, p, section)
 
 from ezcharts.components.params import ParamsTable
 from ezcharts.components.reports import Report
@@ -73,9 +73,9 @@ class ILabsNavigationClasses(IClasses):
     logo: str = cls(
         "d-flex", "align-items-center", "pe-5", "mb-md-0",
         "me-md-auto", "text-decoration-none")
-    nav_list: str = cls("nav", "nav-pills", "flex-row")
-    nav_item: str = cls("nav-item")
-    nav_item_link: str = cls("nav-link", "text-white")
+    dropdown_btn: str = cls("btn", "btn-primary", "dropdown-toggle")
+    dropdown_menu: str = cls("dropdown-menu")
+    dropdown_item_link: str = cls("dropdown-item")
 
 
 class LabsNavigation(Snippet):
@@ -106,10 +106,24 @@ class LabsNavigation(Snippet):
             with div(className=self.classes.inner):
                 with a(href="https://labs.epi2me.io/", className=self.classes.logo):
                     logo()
-                for group in groups:
-                    setattr(
-                        self, group,
-                        ul(className=self.classes.nav_list, __pretty=False))
+
+                button(
+                    "Jump to section... ",
+                    cls=self.classes.dropdown_btn,
+                    type="button",
+                    id="dropdownMenuButton",
+                    data_bs_toggle="dropdown",
+                    aria_haspopup="true",
+                    aria_expanded="false")
+
+                ngroups = len(groups)
+                with div(className=self.classes.dropdown_menu):
+                    for count, group in enumerate(groups):
+                        setattr(
+                            self, group,
+                            div(className='', __pretty=False))
+                        if count != ngroups - 1:
+                            div(cls="dropdown-divider")
 
     def add_link(
         self,
@@ -120,11 +134,10 @@ class LabsNavigation(Snippet):
         """Add a header nav link to the header links list."""
         group_list = getattr(self, group)
         with group_list:
-            with li(className=self.classes.nav_item):
-                a(
-                    link_title,
-                    href=link_href,
-                    className=self.classes.nav_item_link)
+            a(
+                link_title,
+                href=link_href,
+                className=self.classes.dropdown_item_link)
 
 
 class BasicReport(Report):
