@@ -348,6 +348,10 @@ def main(args):
             sankey_dict = json.load(sfh)
             ezc.metagenomics_sankey(sankey_dict)
 
+    with report.add_section('Multiple sequence alignment', 'MSA'):
+        msa_file = resource_filename('ezcharts', "data/test/msa/HIGD2A.fa")
+        ezc.msa(msa_file, color_scheme="Blossom", identity=80)
+
     dataset_examples = {
         'fastcat': load_stats(resource_filename(
             'ezcharts',

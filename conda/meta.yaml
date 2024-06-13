@@ -30,6 +30,8 @@ requirements:
     - bokeh~=3.1.0
     - natsort==8.4.0
     - pysam
+    - pymsaviz==0.4.2
+    - biopython
 
 test:
   imports:

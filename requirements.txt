@@ -12,3 +12,5 @@ seaborn~=0.12.0
 sigfig
 natsort==8.4.0
 pysam
+pymsaviz==0.4.2
+biopython
