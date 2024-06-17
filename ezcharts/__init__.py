@@ -1,6 +1,6 @@
 """Simple eCharts API."""
 
-__version__ = "0.9.2"
+__version__ = "0.10.0"
 
 import argparse
 import importlib
@@ -15,6 +15,7 @@ from ezcharts.plots.metagenomics_sankey import *  # noqa: F401,F403
 from ezcharts.plots.msa import *  # noqa: F401,F403
 from ezcharts.plots.regression import *  # noqa: F401,F403
 from ezcharts.plots.relational import *  # noqa: F401,F403
+from ezcharts.plots.seqviz import *  # noqa: F401,F403
 from ezcharts.plots.sunburst import *  # noqa: F401,F403
 
 
