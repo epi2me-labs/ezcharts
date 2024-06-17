@@ -348,6 +348,13 @@ def main(args):
             sankey_dict = json.load(sfh)
             ezc.metagenomics_sankey(sankey_dict)
 
+    with report.add_section('Plasmid', 'Plasmid'):
+        plannotate_json = resource_filename(
+            'ezcharts', "data/test/seqviz/plannotate.json")
+        fasta = resource_filename(
+            'ezcharts', "data/test/seqviz/barcode01_q10.final.fasta")
+        ezc.seqviz(plannotate_json, fasta, "sample_1")
+
     with report.add_section('Multiple sequence alignment', 'MSA'):
         msa_file = resource_filename('ezcharts', "data/test/msa/HIGD2A.fa")
         ezc.msa(msa_file, color_scheme="Blossom", identity=80)
