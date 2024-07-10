@@ -734,7 +734,7 @@ def read_length_plot(
 
         median_length = histogram_median(data)
         mean_length = np.average(data["start"], weights=data["count"])
-        max_ = data.iloc[-1]["end"]
+        max_ = data.iloc[-1]["start"]
         min_ = data.iloc[0]["start"]
         data = data[(data["start"] >= min_len) & (data["end"] <= max_len)]
         plt = ezc.histplot(
