@@ -37,7 +37,9 @@ def msa(
         identity_color_min_thr=40,
         show_consensus=False,
         color_scheme="Identity",
-        identity=50):
+        identity=50,
+        start=1,
+        end=None):
     """
     Make a nice multiple sequence alignment with pymsaviz.
 
@@ -80,7 +82,9 @@ def msa(
         wrap_length=wrap_lengh,
         show_count=show_count,
         show_consensus=show_consensus,
-        color_scheme=color_scheme)
+        color_scheme=color_scheme,
+        start=start,
+        end=end)
 
     pos_ident = []
     ident_list = mv._get_consensus_identity_list()
