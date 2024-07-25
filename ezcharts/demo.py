@@ -357,7 +357,11 @@ def main(args):
 
     with report.add_section('Multiple sequence alignment', 'MSA'):
         msa_file = resource_filename('ezcharts', "data/test/msa/HIGD2A.fa")
-        ezc.msa(msa_file, color_scheme="Blossom", identity=80)
+        tabs = Tabs()
+        with tabs.add_tab('Full MSA'):
+            ezc.msa(msa_file, color_scheme="Blossom", identity=80)
+        with tabs.add_tab('Partial MSA'):
+            ezc.msa(msa_file, identity=50, start=30, end=80)
 
     dataset_examples = {
         'fastcat': load_stats(resource_filename(

@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [unreleased]
 ### Fixed
 - The maximum read length reported in the sub-title of `components.fastcat.read_length_plot()` being one bp too large.
+### Changed
+- MSA now accepts start and end co-ordinates for partial sequence visualisation.
 
 ## [v0.10.0]
 ### Added
