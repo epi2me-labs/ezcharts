@@ -392,14 +392,15 @@ def main(args):
             "The workflow comes with a range of data loaders, as shown in the",
             "tables below (10 rows max displayed).")
         tabs = Tabs()
-        for data_type in dataset_examples.keys():
-            df = dataset_examples[data_type]
-            with tabs.add_tab(data_type):
-                if isinstance(df, tuple) or isinstance(df, tuple):
-                    for d in df:
-                        DataTable.from_pandas(d.head(10))
-                else:
-                    DataTable.from_pandas(df.head(10))
+        with tabs.add_dropdown_menu():
+            for data_type in dataset_examples.keys():
+                df = dataset_examples[data_type]
+                with tabs.add_dropdown_tab(data_type):
+                    if isinstance(df, tuple) or isinstance(df, tuple):
+                        for d in df:
+                            DataTable.from_pandas(d.head(10))
+                    else:
+                        DataTable.from_pandas(df.head(10))
     with report.add_section("Bokeh", "Bokeh"):
         plot = BokehPlot()
         plot._fig.circle(
