@@ -73,33 +73,48 @@ const getTotalCount = (sample_data) =>
     * @param {object} sample_data
     */
 const getSankeyEdges = (sample_data) => {
-    const _getSankeyEdges = (entries, current) =>
+    const _getSankeyEdges = (entries, current, current_val) =>
         Object.entries(entries).reduce((arr, [key, val]) => [
             ...arr,
             {
                 source: current,
                 target: current === key ? `${key}_${val.rank}` : key,
+                // value is the value of the from source to target.
                 value: val.count,
+                // Add original value of source nodes to keep it
+                // after being filtered with the abundance cutoff
+                sourceValue: current_val,
                 targetRank: val.rank,
                 targetRankIdx: ranks.indexOf(val.rank)
             },
-            ..._getSankeyEdges(val.children, key)
+            ..._getSankeyEdges(val.children, key, val.count)
         ], [])
     return Object.entries(sample_data).map(([k, v]) =>
-        _getSankeyEdges(v.children, k)).flat()
+        _getSankeyEdges(v.children, k, v.count)).flat()
 }
 
 /**
     * Creates sankey input node list.
+    * Array of {name: taxon name, fixedValue: taxon counts}
     *
     * @param {object} edges.
     */
 const getSankeyNodes = (edges) => {
-    const unique = new Set(
-        edges.reduce((arr, Link) =>
-            [Link.source, Link.target, ...arr], [])
-    )
-    return [...unique].map(Item => ({ name: Item }))
+    // Nodes values can be different from links values, given that some links
+    // can be removed due to the abundance filter. We thus use the `fixedValue`
+    // d3-sankey property so that nodes will always show the value that was read
+    // from the sample data JSON.
+    const nodes_map = new Map()
+    edges.forEach((edge) => {
+        // we add both the target and source of each link as otherwise we might
+        // miss either the targets or sources of the first / last layer,
+        // respectively
+        nodes_map.set(edge.source, edge.sourceValue)
+        nodes_map.set(edge.target, edge.value)
+    })
+    nodes_fixed_counts = Array.from(nodes_map, ([name, value]) => ({ name: name, fixedValue: value }));
+
+    return nodes_fixed_counts
 }
 
 /**
@@ -128,11 +143,24 @@ const getSankeyGenerator = (width, height) =>
     */
 const getSankeyGraph = (sample_name, sample_data, generator, cutoff, total) => {
     const _cutoffVal = total / 100 * cutoff
-
+    // _edges: Array of {
+    //      source: parent taxon name,
+    //      target: child taxon name,
+    //      value: counts === link value === target value,
+    //      sourceValue: counts of the source taxa
+    // }
     const _edges = getSankeyEdges(sample_data)
+    // drop edges with target values below the abundance cutoff
     const _filteredEdges = _edges.filter(Link => Link.value >= _cutoffVal)
+    // _nodes: Array of {name: taxon name, fixedValue: counts from JSON}
     const _nodes = getSankeyNodes(_filteredEdges)
-
+    // d3-sankey takes a list of nodes (names) and edges. Per default, it sums
+    // up the value of the filtered edges to determine the value of the node.
+    // Because of this, however, source nodes that are not targets (superkingdom
+    // in our case) can show wrong counts if some of their children were removed
+    // by the filter. Therefore, we use the special `fixedValue` property which
+    // is not overridden by the filter (in other words, using `fixedValue` makes
+    // sure that we always show the count that was in the sample data JSON).
     return generator({
         nodes: _nodes.map(d => Object.assign({}, d)),
         links: _filteredEdges.map(d => Object.assign({}, d))
