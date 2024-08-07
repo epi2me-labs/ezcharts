@@ -24,6 +24,12 @@
         },
         "Unclassified": {"rank": "superkingdom", "count": 200, "children": {"Unknown": {"rank": "species", "count": 200, "children": {}}}}
     },
+    "barcode12":
+        {"Unclassified": {"rank": "superkingdom", "count": 200, "children": {"Unknown": {"rank": "species", "count": 200, "children": {}}}}
+    },
+    "randomSampleName":
+        {"Archaea": {"rank": "superkingdom", "count": 100, "children": {"Unknown": {"rank": "species", "count": 1, "children": {}}}}
+    },
     "barcode02":
         {"Bacteria": {"rank": "superkingdom", "count": 501, "children": {
             "Firmicutes": {"rank": "phylum", "count": 500, "children": {
