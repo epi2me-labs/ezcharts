@@ -32,7 +32,7 @@ const normaliseName = (name) =>
     * @param {object} data
     */
 const getSampleNames = (data) =>
-    [...Object.keys(data)]
+    [...Object.keys(data)].sort()
 
 /**
     * Calculates total observation counts per taxa for all samples.

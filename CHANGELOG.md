@@ -6,7 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ## [Unreleased]
+### Fixed
 - Sankey top rank (superkingdom) counts being affected by subrank filtering.
+- Sankey samples in dropdown now appear in alphabetical order.
 
 ## [v0.10.1]
 ### Fixed
