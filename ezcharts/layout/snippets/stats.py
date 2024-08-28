@@ -11,9 +11,9 @@ from ezcharts.layout.util import cls
 class IStatsClasses(IClasses):
     """Stats html classes."""
 
-    container: str = cls("container", "px-0", "mb-5")
+    container: str = cls("container", "px-0", "mb-4")
     item: str = cls(
-        "shadow-sm", "container", "p-4", "bg-white",
+        "container", "p-4", "bg-white",
         "border", "rounded")
     item_heading: str = cls("h5", "mb-0", "pb-3")
     item_value: str = cls("fs-2", "mb-0")

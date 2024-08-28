@@ -42,6 +42,12 @@ $enable-negative-margins: true;
     -moz-osx-font-smoothing: grayscale;
 }
 
+// [CW-4817]
+// Reduce gutters
+.container {
+    max-width: 95% !important;
+}
+
 // Allow use of an info button
 .btn-info {
     @extend .btn;
