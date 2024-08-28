@@ -20,7 +20,7 @@ from ezcharts.layout.util import cls
 class ILabsAddendumClasses(IClasses):
     """Section html classes."""
 
-    container: str = cls("py-5", "px-4", "border-top")
+    container: str = cls("py-5", "px-0", "border-top")
     inner: str = cls("container", "px-0")
 
 
@@ -69,7 +69,7 @@ class ILabsNavigationClasses(IClasses):
         "justify-content-center", "bg-dark")
     inner: str = cls(
         "container", "px-0", "d-flex", "flex-wrap",
-        "justify-content-center", "align-items-center", "py-3")
+        "justify-content-center", "align-items-center", "py-2")
     logo: str = cls(
         "d-flex", "align-items-center", "pe-5", "mb-md-0",
         "me-md-auto", "text-decoration-none")

@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ## [Unreleased]
+### Changed
+- Reduced some padding and margins to make the report more compact.
 ### Fixed
 - Sankey top rank (superkingdom) counts being affected by subrank filtering.
 - Sankey samples in dropdown now appear in alphabetical order.

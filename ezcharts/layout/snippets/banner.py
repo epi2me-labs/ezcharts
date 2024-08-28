@@ -9,7 +9,7 @@ class IBadgeClasses(IClasses):
     """Section html classes."""
 
     container: str = cls(
-        "badge", "px-3", "py-2", "mb-3", "me-3", "badge")
+        "badge", "px-3", "py-2", "mb-2", "me-3", "badge")
     container_bg: str = cls("bg-primary")
 
 
@@ -46,9 +46,9 @@ class Badge(Snippet):
 class IBannerClasses(IClasses):
     """Section html classes."""
 
-    container: str = cls("px-4", "bg-dark", "labs-banner")
+    container: str = cls("px-0", "bg-dark", "labs-banner")
     inner: str = cls(
-        "container", "px-0", "py-3", "border-top", "text-white", "report-title")
+        "container", "px-0", "py-2", "border-top", "text-white", "report-title")
 
 
 class IBannerStyles(IStyles):
@@ -88,7 +88,7 @@ class Banner(Snippet):
                 p(
                     f"Results generated through the {workflow_name} nextflow "
                     "workflow provided by Oxford Nanopore Technologies.",
-                    className="py-3 fs-5")
+                    className="py-2 fs-5")
                 self.badges = div(className="d-flex flex-wrap")
 
     def add_badge(

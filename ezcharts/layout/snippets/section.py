@@ -11,9 +11,9 @@ class ISectionClasses(IClasses):
     """Section html classes."""
 
     container: str = cls(
-        "shadow-sm", "container", "p-4", "mb-5",
+        "container", "p-4", "mb-4",
         "bg-white", "border", "rounded")
-    container_trans: str = cls("container", "py-1", "mb-5")
+    container_trans: str = cls("container", "py-1", "mb-4")
     title: str = cls("h5", "mb-0", "pb-3")
 
 
