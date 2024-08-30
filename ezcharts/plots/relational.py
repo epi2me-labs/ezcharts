@@ -4,7 +4,7 @@ import numbers
 
 from seaborn.relational import _LinePlotter, _ScatterPlotter
 
-from ezcharts.plots import Plot, util
+from ezcharts.plots import BokehPlot, util
 
 
 __all__ = ["relplot", "scatterplot", "lineplot"]
@@ -29,8 +29,9 @@ def relplot(
 class Mixin:
     """Mixin class to define how to plot lines and points."""
 
-    def plot(self, plt: Plot, kws):
+    def plot(self, plt: BokehPlot, kws):
         """Plot the plot."""
+        # Get the potentially normalised data from seaborn
         data = self.plot_data.dropna()
         if data.empty:
             return
@@ -43,67 +44,49 @@ class Mixin:
         x_name = self.variables.get("x", None)
         y_name = self.variables.get("y", None)
 
-        plt.xAxis = dict(
-            name=x_name,
-            type=util.sns_type_to_echarts[str(self.var_types['x'])])
-        plt.yAxis = dict(
-            name=y_name,
-            type=util.sns_type_to_echarts[str(self.var_types['y'])])
+        symbol_size = kws.get('s', 8)
+        if not isinstance(symbol_size, numbers.Number):
+            raise NotImplementedError(
+                "symbol size (s) currently only accepts a constant value")
 
-        plt.add_dataset({
-            'id': 'raw',
-            'dimensions': data.columns,
-            'source': data.values})
+        line_width = kws.get('linewidth', 3)
+        if not isinstance(line_width, numbers.Number):
+            raise NotImplementedError(
+                "linewidth currently only accepts a constant value")
+
+        # Available markers/glyphs can be found here:
+        # https://docs.bokeh.org/en/latest/docs/reference/models/glyphs.html
+        marker = kws.get('marker')
         # TODO: size and style are also grouping "semantic" variables
 
-        for series_index, series_name in enumerate(
-                data['hue'].unique(), start=1):
-            # `series_name` (i.e. the value in the hue column) might be a number, which
-            # will trip pydantic validation. We thus convert to `str`.
-            series_name = str(series_name)
-            plt.add_dataset({
-                'id': series_name,
-                'fromDatasetId': 'raw',
-                'transform': [{
-                    'type': 'filter',
-                    'config': {'dimension': 'hue', '=': series_name}}]})
-            series_dict = {
-                'type': self.series_type,
-                'name': series_name,
-                # would be nicer to use datasetId here, but not documented
-                # so not in our API
-                'datasetIndex': series_index,
-                'encode': {
-                    'x': x_name, 'y': y_name,
-                    'itemName': x_name, 'tooltip': [y_name]}}
+        y_min = 0
+        for hue_name, df in data.groupby('hue'):
+
+            y_min = min(y_min, df.y.min())
             color = kws.get("color")
             if self._hue_map.levels:
                 # the hue map is not empty (i.e. it was initialised with a palette); use
                 # this to override the color (in case one was passed)
-                color = self._hue_map(series_name)
-            # if we got a color for this line, add it to the series dict
-            if color is not None:
-                series_dict['lineStyle'] = {'color': color}
-                series_dict['itemStyle'] = {'color': color}
-            # add the series to the plot
-            plt.add_series(series_dict)
+                color = self._hue_map(hue_name)
 
-        plt.tooltip = {"trigger": "axis"}
+            if self.series_type == 'line':
+                plt._fig.line(df.x, df.y, line_color=color, line_width=line_width)
 
-        # They keyword parameters are optionally set here so as not to override
-        # theme defaults.
-        symbol_size = kws.get('s')
-        if symbol_size is not None and not isinstance(symbol_size, numbers.Number):
-            raise NotImplementedError(
-                "symbol size (s) currently only accepts a constant value")
-        else:
-            for series in plt.series:
-                series.symbolSize = symbol_size
+            elif self.series_type == 'scatter':
+                plt._fig.scatter(df.x, df.y, color=color)
 
-            # marker/symbol options are:
-            # circle, rect, roundRect, triangle, diamond, pin, arrow, none
-            if kws.get('marker'):
-                series.symbol = kws['marker']
+            if marker is not False:
+                if marker is None or marker is True:
+                    marker = 'circle'
+                # Use scatter to add the markers
+                plt._fig.scatter(
+                    df.x, df.y, size=symbol_size, marker=marker, color=color)
+
+            plt._fig.xaxis.axis_label = x_name
+            plt._fig.yaxis.axis_label = y_name
+
+        # Default the y_range start to zero unless y contains negative values.
+        plt._fig.y_range.start = y_min
 
         # TODO: add legend
         return plt
@@ -138,7 +121,7 @@ def scatterplot(
     p.map_size(sizes=sizes, order=size_order, norm=size_norm)
     p.map_style(markers=markers, order=style_order)
 
-    plt = Plot()
+    plt = BokehPlot(title=kwargs.get('title', ""))
     p.plot(plt, kwargs)
 
     return plt
@@ -178,6 +161,7 @@ def lineplot(
     p.map_size(sizes=sizes, order=size_order, norm=size_norm)
     p.map_style(markers=markers, dashes=dashes, order=style_order)
 
-    plt = Plot()
+    plt = BokehPlot(title=kwargs.get('title', ""))
+
     p.plot(plt, kwargs)
     return plt

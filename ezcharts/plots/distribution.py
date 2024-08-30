@@ -1,10 +1,10 @@
 """Distributional plots."""
+from itertools import cycle
 
-import numpy as np
 import pandas as pd
 from seaborn._statistics import Histogram
 
-from ezcharts.plots import _HistogramPlot, util
+from ezcharts.plots import BokehPlot, util
 
 
 __all__ = ["displot", "histplot", "kdeplot", "ecdfplot", "rugplot", "distplot"]
@@ -13,67 +13,6 @@ __all__ = ["displot", "histplot", "kdeplot", "ecdfplot", "rugplot", "distplot"]
 def displot(*args, **kwargs):
     """Figure-level interface for distribution plots in a grid."""
     raise NotImplementedError
-
-
-class MakeRectangles(util.JSCode):
-    """
-    Make JSCode rectangles.
-
-    Use Instance as an argument to series.renderItem.
-    Series.encode should list two x dimensions for bar start and end
-    and one y dimension for bar height.
-    """
-
-    def __init__(self):
-        """Instantiate the class with some jscode.
-
-        Each call to this function creates JS code to make a single echarts
-        rectangle.
-
-        First get the x-start, x-end and height of the rectangle in raw data
-        coords. eg: var data_x_start = api.value(0);
-
-        Convert the raw data coords to canvas coords.
-        Note in canvas coords (x=0, y=0) is in the top left.
-        eg: var start = api.coord([data_start, 0]);
-
-        start[1] is y=0 in canvas coords. Subtract the height from this to get
-        the canvas coords for the top of the rectangle.
-        """
-        jscode = """function renderItem(params, api) {
-            var data_x_start = api.value(0);
-            var data_x_end = api.value(1);
-            var data_height = api.value(2);
-
-            var start = api.coord([data_x_start, 0]);
-            var end = api.coord([data_x_end, 0]);
-            var height = api.size([0, data_height])[1];
-
-            var rectShape = echarts.graphic.clipRectByRect(
-                {
-                    x: start[0],
-                    y: start[1] - height,
-                    width: end[0] - start[0],
-                    height: height
-                },
-                {
-                    x: params.coordSys.x,
-                    y: params.coordSys.y,
-                    width: params.coordSys.width,
-                    height: params.coordSys.height
-                }
-            );
-            return (
-                rectShape && {
-                    type: 'rect',
-                    transition: ['shape'],
-                    shape: rectShape,
-                    style: api.style()
-
-                }
-            );}"""
-
-        super().__init__(jscode)
 
 
 def histplot(
@@ -87,9 +26,7 @@ def histplot(
     hue_order=None, hue_norm=None, color=None, log_scale=None,
         legend=True, ax=None, **kwargs):
     """Plot univariate or multivariate histograms."""
-    plt = _HistogramPlot()
-    plt.xAxis = dict()
-    plt.yAxis = dict()
+    plt = BokehPlot()
 
     estimate_kws = dict(
         stat=stat,
@@ -99,50 +36,34 @@ def histplot(
         discrete=discrete,
         cumulative=cumulative,
     )
-
     data = pd.DataFrame(data)
 
-    if data.shape[1] > 1:
+    estimator = Histogram(**estimate_kws)
+
+    if data.ndim > 1 and data.shape[1] > 1:
         # multivariate data
         opacity = 0.5
         if palette is None:
-            palette = util.choose_palette(ncolours=data.shape[1])
+            palette = util.choose_palette()
     else:
         opacity = 1.0
         if color is None:
-            palette = util.choose_palette(ncolours=1)
+            palette = util.choose_palette()
         else:
             palette = [color]
-
     if hue:
         data = data.pivot(columns=hue, values=data.columns[0])
-
-    for dataset_idx, col in enumerate(data.columns):
+    # this just looks over values if data is 1D
+    # for var, color in zip(data, cycle(palette)):
+    for col, color in zip(data.columns, cycle(palette)):
         variable_data = data[col].dropna()
-        estimator = Histogram(**estimate_kws)
         heights, edges = estimator(variable_data, weights=weights)
 
-        x_starts = edges[:-1]
-        x_ends = edges[1:]
-        rect_data = np.stack((x_starts, x_ends, heights), axis=-1)
-
-        plt.add_dataset(dict(
-            source=rect_data,
-            dimensions=['x_start', 'x_end', 'height']))
-
-        plt.add_series(dict(
-            name=str(col),
-            type='custom',
-            renderItem=MakeRectangles(),
-            itemStyle=dict(opacity=opacity, color=palette[dataset_idx]),
-            datasetIndex=dataset_idx,
-            encode={
-                'x': ['x_start', 'x_end'],
-                'y': ['height']
-            },
-            clip=True
-            ))
-        plt.xAxis.type = 'value'
+        plt._fig.quad(
+            top=heights, bottom=0, left=edges[:-1], right=edges[1:],
+            fill_color=color, fill_alpha=opacity, line_color=color
+        )
+    plt._fig.y_range.start = 0
     return plt
 
 

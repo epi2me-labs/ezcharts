@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Changed
+- Now uses Bokeh as plotting backend for `histplot()`, `lineplot()` and `scatterplot()`.
 - Reduced some padding and margins to make the report more compact.
 ### Fixed
 - Sankey top rank (superkingdom) counts being affected by subrank filtering.
@@ -29,7 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Navigation bar links now replaced with a dropdown list of links to sections on the report.
 
 ## [v0.9.1]
-### Added
+### Added
 - Ability to change height of seq summary plots.
 ### Changed
 - Added argument to skip the plotting of accuracy and coverage histograms (`alignment_stats`) in `SeqSummary` and `SeqCompare`.
