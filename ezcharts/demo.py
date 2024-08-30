@@ -2,6 +2,7 @@
 import argparse
 import json
 
+from bokeh.models.tickers import SingleIntervalTicker
 from dominate.tags import div, h4, p
 import numpy as np
 import pandas as pd
@@ -63,8 +64,13 @@ def main(args):
         """Create example plot."""
         if style == "line":
             plot = ezc.lineplot(data=example_df, x='year', y='sales', hue='product')
+            # Bokeh attempts to plot years in line plots as continuous variables, so
+            # we get xtick labels such as 2005,2005.5. This can be fixed by setting the
+            # interval on the ticker to 1.
+            plot._fig.xaxis.ticker = SingleIntervalTicker(interval=1)
         elif style == "scatter":
             plot = ezc.scatterplot(data=example_df, x='year', y='sales', hue='product')
+            plot._fig.xaxis.ticker = SingleIntervalTicker(interval=1)
         elif style == 'histogram':
             hist_data = pd.DataFrame(
                         [np.random.normal(loc=10.0, size=1000),
@@ -73,8 +79,8 @@ def main(args):
             hist_data.columns = ['sample1', 'sample2', 'sample3']
             plot = ezc.histplot(hist_data, bins=50, stat='proportion')
 
-            plot.xAxis.name = 'Read length'
-            plot.yAxis.name = 'Number of reads'
+            plot._fig.xaxis.axis_label = 'Read length'
+            plot._fig.yaxis.axis_label = 'Number of reads'
         elif style == "bar":
             plot = ezc.barplot(data=example_df, x='year', y='sales', hue='product')
         elif style == "heatmap":

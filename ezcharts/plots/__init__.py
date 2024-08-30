@@ -1,6 +1,5 @@
 """Plotting functionality via echarts."""
 
-
 from bokeh.plotting import figure
 import pandas as pd
 import sigfig
@@ -201,25 +200,12 @@ class Plot(EChartsOption):
         return self
 
 
-class _HistogramPlot(Plot):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-    def _axes_dimensions(self):
-        """Get correct axes for histograms.
-
-        For histograms, the first two dataset columns are start/stop
-        rectangle x coords. The third column contains bar heights.
-        """
-        return [self.xAxis, 1], [self.yAxis, 2]
-
-
 class BokehPlot:
     """Plotting interface for Bokeh."""
 
     _logger = ezutil.get_named_logger("BokehPlotr")
     colors = util.choose_palette()
-    tools = "hover,crosshair,pan,box_zoom,zoom_in,zoom_out,reset,save"
+    tools = "pan,box_zoom,wheel_zoom,save,reset",
 
     def __init__(self, *args, **kwargs):
         """Initialize a bokeh figure."""

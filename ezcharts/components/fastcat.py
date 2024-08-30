@@ -3,6 +3,7 @@ import argparse
 import copy
 import os
 
+from bokeh.models import Title
 import numpy as np
 import pandas as pd
 from pkg_resources import resource_filename
@@ -551,15 +552,14 @@ def base_yield_plot(data, color=None):
         step = len(df) // thinning
         df = pd.concat((df.loc[::step, :], df.iloc[[-1]]), axis=0)
 
-    plt = ezc.lineplot(data=df, x=xlab, y=ylab, hue=None, color=color)
-    plt.series[0].showSymbol = False
-    plt.title = dict(
-        text="Base yield above read length",
-        subtext=(
-            f"Total yield: {sigfig.round(df.iloc[0][ylab], sigfigs=3)} Gb "
-            f"Gb. N50: {sigfig.round(n50, 3)}kb"
-        ),
-    )
+    plt = ezc.lineplot(data=df, x=xlab, y=ylab, hue=None, color=color, marker=False)
+    subtext = (
+        f"Total yield: {sigfig.round(df.iloc[0][ylab], sigfigs=3)} Gb. "
+        f" N50: {sigfig.round(n50, 3)}kb")
+
+    plt._fig.add_layout(Title(text=subtext, text_font_size="0.8em"), 'above')
+    plt._fig.add_layout(
+        Title(text="Base yield above read length", text_font_size="1.5em"), 'above')
     return plt
 
 
@@ -607,13 +607,14 @@ def histogram_plot(
             color=color
         )
 
-    plt.title = dict(
-        text=title, subtext=f"Mean: {mean_val:.1f}. Median: {median_val:.1f}"
-    )
+    subtitle = f"Mean: {mean_val:.1f}. Median: {median_val:.1f}"
+
     if xaxis_label:
-        plt.xAxis.name = xaxis_label
-    plt.xAxis.min, plt.xAxis.max = min_val, max_val
-    plt.yAxis.name = "Number of reads"
+        plt._fig.xaxis.axis_label = xaxis_label
+    plt._fig.add_layout(Title(text=subtitle, text_font_size="0.8em"), 'above')
+    plt._fig.add_layout(Title(text=title, text_font_size="1.5em"), 'above')
+    plt._fig.x_range.start, plt._fig.x_range.end = min_val, max_val
+    plt._fig.yaxis.axis_label = "Number of reads"
     return plt
 
 
@@ -717,11 +718,7 @@ def read_length_plot(
         read_lengths = read_lengths[
             (read_lengths >= min_len) & (read_lengths <= max_len)
         ]
-
-        read_lengths = read_lengths / 1000
-        if binwidth is not None:
-            binwidth /= 1000
-        plt = ezc.histplot(data=read_lengths, bins=bins, binwidth=binwidth, color=color)
+        weights = None
     else:
         # histogram
         if max_len is None:
@@ -737,29 +734,33 @@ def read_length_plot(
         max_ = data.iloc[-1]["start"]
         min_ = data.iloc[0]["start"]
         data = data[(data["start"] >= min_len) & (data["end"] <= max_len)]
-        plt = ezc.histplot(
-            data=data["start"] / 1000,
-            bins=bins,
-            binwidth=binwidth,
-            weights=data["count"],
-            color=color
-        )
+        weights = data["count"]
+        read_lengths = data['start']
 
-    # customize the plot
-    plt.title = dict(
-        text=title,
-        subtext=(
-            f"Mean: {mean_length:.1f}. Median: {median_length:.1f}. "
-            f"Min: {min_:,d}. Max: {max_:,d}"
-        ),
+    if binwidth is not None:
+        binwidth /= 1000
+    read_lengths = read_lengths / 1000
+    plt = ezc.histplot(
+        read_lengths,
+        bins=bins,
+        binwidth=binwidth,
+        weights=weights,
+        color=color
     )
-    plt.xAxis.name = "Read length / kb"
-    plt.yAxis.name = "Number of reads"
+    # customize the plot
+    plt._fig.xaxis.axis_label = "Read length / kb"
+    plt._fig.yaxis.axis_label = "Number of reads"
+    subtext = (
+        f"Mean: {mean_length:.1f}. Median: {median_length:.1f}. "
+        f"Min: {min_:,d}. Max: {max_:,d}"
+    )
+    plt._fig.add_layout(Title(text=subtext, text_font_size="0.8em"), 'above')
+    plt._fig.add_layout(Title(text=title, text_font_size="1.5em"), 'above')
 
     if xlim[0] is not None:
-        plt.xAxis.min = xlim[0] / 1000
+        plt._fig.x_range.start = xlim[0] / 1000
     if xlim[1] is not None:
-        plt.xAxis.max = xlim[1] / 1000
+        plt._fig.x_range.end = xlim[1] / 1000
     return plt
 
 
