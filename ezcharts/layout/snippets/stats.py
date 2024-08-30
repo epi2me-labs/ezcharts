@@ -13,7 +13,7 @@ class IStatsClasses(IClasses):
 
     container: str = cls("container", "px-0", "mb-4")
     item: str = cls(
-        "container", "p-4", "bg-white",
+        "container-flex", "p-4", "bg-white",
         "border", "rounded")
     item_heading: str = cls("h5", "mb-0", "pb-3")
     item_value: str = cls("fs-2", "mb-0")
