@@ -18,6 +18,7 @@ from ezcharts.components.fastcat import SeqSummary
 from ezcharts.components.modkit import load_bedmethyl, load_modkit_summary
 from ezcharts.components.mosdepth import load_mosdepth_regions, load_mosdepth_summary
 from ezcharts.components.nextclade import NextClade, NXTComponent
+from ezcharts.components.plotmetadata import PlotMetaData
 from ezcharts.components.reports.labs import LabsReport
 from ezcharts.components.theme import LAB_head_resources
 from ezcharts.layout.snippets import DataTable
@@ -418,6 +419,10 @@ def main(args):
         )
         plot._fig.title = "Bokeh plot title"
         EZChart(plot)
+
+    with report.add_section('Per Sample Read Counts', 'Read Counts'):
+        PlotMetaData(
+            resource_filename('ezcharts', "data/test/metadata.json"))
 
     logger.info('Reticulating splines')
     report.write(args.output)

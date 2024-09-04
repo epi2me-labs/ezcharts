@@ -5,13 +5,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v.0.10.2]
 ### Changed
 - Now uses Bokeh as plotting backend for `histplot()`, `lineplot()` and `scatterplot()`.
 - Reduced some padding and margins to make the report more compact.
 ### Fixed
 - Sankey top rank (superkingdom) counts being affected by subrank filtering.
 - Sankey samples in dropdown now appear in alphabetical order.
+### Added
+- `PlotMetaData` function to plot barcharts using a JSON file of nextflow workflow metadata.
 
 ## [v0.10.1]
 ### Fixed
