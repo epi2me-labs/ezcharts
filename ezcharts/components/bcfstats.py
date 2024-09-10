@@ -102,6 +102,9 @@ class BcftoolsStats(Snippet):
             it has to be of the same length as the input stats files
         """
         super().__init__(styles=None, classes=None)
+        raise NotImplementedError(
+            "This component is not currently implemented for Bokeh."
+        )
 
         with self:
             # Make table of bcftools stats
@@ -130,8 +133,9 @@ class BcftoolsStats(Snippet):
                                 data=table,
                                 x="length (deletions negative)",
                                 y="number of sites")
-                            plt.xAxis.axisLabel.rotate = 90
-                            plt.xAxis.axisLabel.fontSize = 10
+                            plt._fig.xaxis.major_label_orientation = 90
+                            plt._fig.axis_label_text_font_size = 10
+
                             EZChart(plt, 'epi2melabs')
                         else:
                             # several samples --> use a dropdown menu
@@ -143,8 +147,8 @@ class BcftoolsStats(Snippet):
                                             data=table,
                                             x="length (deletions negative)",
                                             y="number of sites")
-                                        plt.xAxis.axisLabel.rotate = 90
-                                        plt.xAxis.axisLabel.fontSize = 10
+                                        plt._fig.xaxis.major_label_orientation = 90
+                                        plt._fig.axis_label_text_font_size = 10
                                         EZChart(plt, 'epi2melabs')
 
 
