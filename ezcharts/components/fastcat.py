@@ -14,6 +14,7 @@ from ezcharts.components.ezchart import EZChart
 from ezcharts.components.reports.comp import ComponentReport
 from ezcharts.layout.base import Snippet
 from ezcharts.layout.snippets import DataTable, Grid, Tabs
+from ezcharts.plots import BokehPlot
 
 
 FASTCAT_COLS_DTYPES = {
@@ -484,8 +485,15 @@ class SeqCompare(Snippet):
         """Check if the plot is empty."""
         if not plot:
             return True
-        if not plot.dataset:
-            return True
+        if isinstance(plot, BokehPlot):
+            if "_fig" not in dir(plot):
+                return True
+            for renderer in plot._fig.renderers:
+                if not hasattr(renderer, 'glyph'):
+                    return True
+        else:
+            if not plot.dataset:
+                return True
         return False
 
     def _coordinate_plots(self, plots, labels=None):
@@ -493,12 +501,21 @@ class SeqCompare(Snippet):
         max_by_plot = []
         for plot in plots:
             if not self._is_empty_plot(plot):
-                dimensions = np.array(plot.dataset[0].dimensions)
-                if 'y' in dimensions:
-                    y_col = np.where(dimensions == 'y')[0]
+                if isinstance(plot, BokehPlot):
+                    dimensions = plot._fig.renderers[0].data_source.to_df()
+                    if 'top' in dimensions.columns:
+                        col = 'top'
+                    else:
+                        col = 'y'
+                    y_val = dimensions[col].max()
                 else:
-                    y_col = np.where(dimensions == 'height')[0]
-                max_by_plot.append(np.max(plot.dataset[0].source, axis=0)[y_col])
+                    dimensions = np.array(plot.dataset[0].dimensions)
+                    if 'y' in dimensions:
+                        y_col = np.where(dimensions == 'y')[0]
+                    else:
+                        y_col = np.where(dimensions == 'height')[0]
+                    y_val = np.max(plot.dataset[0].source, axis=0)[y_col]
+                max_by_plot.append(y_val)
         # Set new values
         if labels:
             inputs = zip(plots, labels)
@@ -506,9 +523,13 @@ class SeqCompare(Snippet):
             inputs = zip(plots, [None] * len(plots))
         for (plot, label) in inputs:
             if not self._is_empty_plot(plot):
-                plot.yAxis.max = max(max_by_plot)
-            if label:
-                plot.title.text = label
+                plot._fig.y_range.end = max(max_by_plot)
+                if label:
+                    plot._fig.add_layout(
+                        Title(text=label, text_font_size="1.5em"), 'above')
+            else:
+                if label:
+                    plot.title.text = label
 
     def _draw_bamstat_table(self, data):
         if not isinstance(data, pd.DataFrame):

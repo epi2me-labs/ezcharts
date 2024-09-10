@@ -14,7 +14,7 @@ from ezcharts.components.common import fasta_idx, HSA_CHROMOSOME_ORDER
 from ezcharts.components.dss import load_dml, load_dmr
 from ezcharts.components.ezchart import EZChart
 from ezcharts.components.fastcat import load_bamstats_flagstat, load_stats
-from ezcharts.components.fastcat import SeqSummary
+from ezcharts.components.fastcat import SeqCompare, SeqSummary
 from ezcharts.components.modkit import load_bedmethyl, load_modkit_summary
 from ezcharts.components.mosdepth import load_mosdepth_regions, load_mosdepth_summary
 from ezcharts.components.nextclade import NextClade, NXTComponent
@@ -164,6 +164,13 @@ def main(args):
             seq_summary=histogram_stats_dir,
             color="#2a98b7",
             sample_names=tuple(['sample_1', 'sample_2', 'sample_3']))
+    with report.add_section('Compare Summaries', 'Compare'):
+        SeqCompare(
+            histogram_stats_dir,
+            sample_names=tuple(['sample_1', 'sample_2', 'sample_3']),
+            alignment_stats=False,
+            color="#2a98b7",
+        )
 
     # This also adds to main_content, but provides a nice
     # container snippet as a starting context.
