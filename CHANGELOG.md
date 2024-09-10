@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed 
 - Transparent lines/points plotted in relational plots.
 - Add `hover` back to bokeh toolbox.
+- `SeqCompare` not working with histograms and line charts from `BokehPlots`.
 ### Removed
 - BcftoolsStats component until it is updated to use BokehPlot.
 
