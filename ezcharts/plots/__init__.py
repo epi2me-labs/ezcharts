@@ -205,7 +205,7 @@ class BokehPlot:
 
     _logger = ezutil.get_named_logger("BokehPlotr")
     colors = util.choose_palette()
-    tools = "pan,box_zoom,wheel_zoom,save,reset",
+    tools = "hover,pan,box_zoom,wheel_zoom,save,reset",
 
     def __init__(self, *args, **kwargs):
         """Initialize a bokeh figure."""

@@ -111,7 +111,7 @@ def scatterplot(
     if palette is None:
         palette = DEFAULT_PALETTE
 
-    if "color" not in kwargs:
+    if not kwargs.get("color"):
         kwargs["color"] = DEFAULT_COLOR
 
     # TODO: what of this do we actually care for
@@ -148,7 +148,7 @@ def lineplot(
     if palette is None:
         palette = DEFAULT_PALETTE
 
-    if "color" not in kwargs:
+    if not kwargs.get("color"):
         kwargs["color"] = DEFAULT_COLOR
 
     # TODO: what of this do we actually care for
