@@ -1,7 +1,7 @@
 """Categorical plots."""
 from collections import Counter
 
-from bokeh.models import ColumnDataSource, FactorRange, Whisker
+from bokeh.models import ColumnDataSource, FactorRange, HoverTool, Whisker
 import bokeh.transform as bkt
 import numpy as np
 import pandas as pd
@@ -132,6 +132,12 @@ def boxplot(
     p.xgrid.grid_line_color = None
     p.xaxis.axis_label = x.capitalize()
     p.yaxis.axis_label = y.capitalize()
+
+    # Add tooltips
+    hover = plt._fig.select(dict(type=HoverTool))
+    hover.tooltips = [
+        ("Value", "@value"),
+    ]
 
     return plt
 
@@ -345,6 +351,20 @@ def barplot(
         p.xaxis.axis_label = x.capitalize()
         p.yaxis.axis_label = y.capitalize()
 
+    plt_df = plt._fig.renderers[0].data_source.to_df()
+    hover = plt._fig.select(dict(type=HoverTool))
+    if 'top' in plt_df.columns:
+        hover.tooltips = [(y, "@top")]
+    elif not nested_x:
+        hover.tooltips = [
+            (colname, '@{' + colname + '}')
+            for colname in plt_df.columns
+            if colname != 'groups'
+        ]
+    else:
+        hover.tooltips = [
+            (y, '@y')
+        ]
     return plt
 
 

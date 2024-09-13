@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [v0.11.2]
 ### Changed
 - Bokeh plots featuring more than one data series will automatically have a legend.
+### Fixed
+- Tooltips not displaying meaningful values.
 
 ## [v0.11.1]
 ### Changed
