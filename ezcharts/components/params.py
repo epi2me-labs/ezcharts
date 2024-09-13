@@ -22,11 +22,27 @@ class ParamsTable(DataTable):
             raise IOError('`params` should be a JSON file.')
         super().__init__(['Key', 'Value'], **kwargs)
 
+        DISALLOWED_KEYS = {
+            "help",
+            "version",
+            "wf",
+            "aws_image_prefix",
+            "aws_queue",
+            "schema_ignore_params",
+            "show_hidden_params",
+            "monochrome_logs",
+            "validate_params",
+            "disable_ping",
+        }
+
         with open(params_file, encoding='utf-8') as f:
             data = json.load(f)
             with self.body:
                 for k, v in data.items():
-                    self.add_row(title=None, columns=[k, str(v)])
+                    if isinstance(v, str) and v.startswith("s3://"):
+                        v = '/'.join(v.replace("s3://", "").split("/")[2:])
+                    if k not in DISALLOWED_KEYS:
+                        self.add_row(title=None, columns=[k, str(v)])
 
 
 def main(args):

@@ -17,5 +17,9 @@
     "monochrome_logs": false,
     "validate_params": true,
     "show_hidden_params": false,
-    "schema_ignore_params": "show_hidden_params,validate_params,monochrome_logs,aws_queue,aws_image_prefix,wfversion"
+    "schema_ignore_params": "show_hidden_params,validate_params,monochrome_logs,aws_queue,aws_image_prefix,wfversion",
+    "aws_image_prefix": "000",
+    "aws_queue": "000",
+    "s3_path": "s3://long_string/00000000/outputs/out_dir/"
+
 }
