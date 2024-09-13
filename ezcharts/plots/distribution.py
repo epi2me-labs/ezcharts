@@ -1,6 +1,7 @@
 """Distributional plots."""
 from itertools import cycle
 
+from bokeh.models import HoverTool
 import pandas as pd
 from seaborn._statistics import Histogram
 
@@ -67,6 +68,8 @@ def histplot(
             fill_color=color, fill_alpha=opacity, line_color=color, **quad_kwargs
         )
     plt._fig.y_range.start = 0
+    hover = plt._fig.select(dict(type=HoverTool))
+    hover.tooltips = [(stat.capitalize(), "@top")]
     return plt
 
 

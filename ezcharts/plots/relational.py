@@ -2,6 +2,7 @@
 
 import numbers
 
+from bokeh.models import HoverTool
 from seaborn.relational import _LinePlotter, _ScatterPlotter
 
 from ezcharts.plots import BokehPlot, util
@@ -129,6 +130,8 @@ def scatterplot(
     p.map_style(markers=markers, order=style_order)
 
     plt = BokehPlot(title=kwargs.get('title', ""))
+    hover = plt._fig.select(dict(type=HoverTool))
+    hover.tooltips = [(x, "@x"), (y, "@y")]
     p.plot(plt, kwargs)
 
     return plt
@@ -169,6 +172,8 @@ def lineplot(
     p.map_style(markers=markers, dashes=dashes, order=style_order)
 
     plt = BokehPlot(title=kwargs.get('title', ""))
+    hover = plt._fig.select(dict(type=HoverTool))
+    hover.tooltips = [(x, "@x"), (y, "@y")]
 
     p.plot(plt, kwargs)
     return plt
