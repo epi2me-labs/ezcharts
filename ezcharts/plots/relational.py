@@ -61,6 +61,9 @@ class Mixin:
 
         y_min = 0
         for hue_name, df in data.groupby('hue'):
+            relational_kwargs = {}
+            if data['hue'].nunique() > 1:
+                relational_kwargs["legend_label"] = hue_name
 
             y_min = min(y_min, df.y.min())
             color = kws.get("color")
@@ -70,17 +73,21 @@ class Mixin:
                 color = self._hue_map(hue_name)
 
             if self.series_type == 'line':
-                plt._fig.line(df.x, df.y, line_color=color, line_width=line_width)
+                plt._fig.line(
+                    df.x, df.y, line_color=color,
+                    line_width=line_width, **relational_kwargs)
 
             elif self.series_type == 'scatter':
-                plt._fig.scatter(df.x, df.y, color=color)
+                plt._fig.scatter(
+                    df.x, df.y, color=color, **relational_kwargs)
 
             if marker is not False:
                 if marker is None or marker is True:
                     marker = 'circle'
                 # Use scatter to add the markers
                 plt._fig.scatter(
-                    df.x, df.y, size=symbol_size, marker=marker, color=color)
+                    df.x, df.y, size=symbol_size, marker=marker,
+                    color=color, **relational_kwargs)
 
             plt._fig.xaxis.axis_label = x_name
             plt._fig.yaxis.axis_label = y_name

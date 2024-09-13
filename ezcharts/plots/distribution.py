@@ -24,7 +24,7 @@ def histplot(
     line_kws=None, thresh=0, pthresh=None, pmax=None,
     cbar=False, cbar_ax=None, cbar_kws=None, palette=None,
     hue_order=None, hue_norm=None, color=None, log_scale=None,
-        legend=True, ax=None, **kwargs):
+        legend=True, ax=None, **quad_kwargs):
     """Plot univariate or multivariate histograms."""
     plt = BokehPlot()
 
@@ -56,12 +56,15 @@ def histplot(
     # this just looks over values if data is 1D
     # for var, color in zip(data, cycle(palette)):
     for col, color in zip(data.columns, cycle(palette)):
+        quad_kwargs = {}
+        if len(data.columns) > 1:
+            quad_kwargs["legend_label"] = col
         variable_data = data[col].dropna()
         heights, edges = estimator(variable_data, weights=weights)
 
         plt._fig.quad(
             top=heights, bottom=0, left=edges[:-1], right=edges[1:],
-            fill_color=color, fill_alpha=opacity, line_color=color
+            fill_color=color, fill_alpha=opacity, line_color=color, **quad_kwargs
         )
     plt._fig.y_range.start = 0
     return plt
