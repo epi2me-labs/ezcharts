@@ -151,13 +151,14 @@ class SeqSummary(Snippet):
                 and (len(sample_names) != len(flagstat))):
             raise ValueError(
                 "`sample_names` must have the same length as `flagstat`.")
-
         with self:
             if isinstance(seq_summary, tuple):
                 # several samples => use a dropdown
                 tabs = Tabs()
                 with tabs.add_dropdown_menu():
-                    for sample_name, data in zip(sample_names, seq_summary):
+                    for sample_name, data in sorted(
+                        zip(sample_names, seq_summary), key=lambda x: x[0]
+                    ):
                         with tabs.add_dropdown_tab(sample_name):
                             ldata, qdata, adata, cdata = self._load_summary_data(data)
                             self._draw_summary_plots(ldata, qdata, height)
@@ -175,7 +176,9 @@ class SeqSummary(Snippet):
                 if isinstance(flagstat, tuple):
                     tabs = Tabs()
                     with tabs.add_dropdown_menu():
-                        for sample_name, data in zip(sample_names, flagstat):
+                        for sample_name, data in sorted(
+                            zip(sample_names, flagstat), key=lambda x: x[0]
+                        ):
                             with tabs.add_dropdown_tab(sample_name):
                                 self._draw_bamstat_table(data)
                 else:
@@ -378,7 +381,9 @@ class SeqCompare(Snippet):
                 if isinstance(flagstat, tuple):
                     tabs = Tabs()
                     with tabs.add_dropdown_menu():
-                        for sample_name, data in zip(sample_names, flagstat):
+                        for sample_name, data in sorted(
+                            zip(sample_names, flagstat), key=lambda x: x[0]
+                        ):
                             with tabs.add_dropdown_tab(sample_name):
                                 self._draw_bamstat_table(data)
                 else:
@@ -476,7 +481,7 @@ class SeqCompare(Snippet):
                 continue
             with tabs.add_tab(metric):
                 with Grid(columns=min(len(pairs), 3)):
-                    plots, samps = zip(*pairs)
+                    plots, samps = zip(*sorted(pairs, key=lambda x: x[1]))
                     self._coordinate_plots(plots, labels=samps)
                     for plot in plots:
                         EZChart(plot, self.theme, height=height)
