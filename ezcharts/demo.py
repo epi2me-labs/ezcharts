@@ -119,8 +119,8 @@ def main(args):
     nxt_json = resource_filename('ezcharts', "data/test/nextclade.json")
     histogram_stats_dir = tuple(
         [
-            resource_filename("ezcharts", "data/test/histogram_stats/sample_1"),
             resource_filename("ezcharts", "data/test/histogram_stats/sample_2"),
+            resource_filename("ezcharts", "data/test/histogram_stats/sample_1"),
             resource_filename("ezcharts", "data/test/histogram_stats/empty_sample/"),
         ]
     )
@@ -163,11 +163,11 @@ def main(args):
         SeqSummary(
             seq_summary=histogram_stats_dir,
             color="#2a98b7",
-            sample_names=tuple(['sample_1', 'sample_2', 'sample_3']))
+            sample_names=tuple(['sample_2', 'sample_1', 'sample_3']))
     with report.add_section('Compare Summaries', 'Compare'):
         SeqCompare(
             histogram_stats_dir,
-            sample_names=tuple(['sample_1', 'sample_2', 'sample_3']),
+            sample_names=tuple(['sample_2', 'sample_1', 'sample_3']),
             alignment_stats=False,
             color="#2a98b7",
         )
