@@ -1,8 +1,11 @@
-#	bases	C			
-#	total_reads_used	28799			
-#	count_reads_C	28799			
-#	pass_threshold_C	0.7558594			
+#	bases	C,A			
+#	total_reads_used	10042			
+#	count_reads_C	10039
+#	count_reads_A	10042			
+#	pass_threshold_A	0.7441406
+#	pass_threshold_C	0.8339844				
 base	code	pass_count	pass_frac	all_count	all_frac
-C	h	155603	0.049871445	269023	0.07769196
-C	-	1610028	0.5160211	1668715	0.48191318
-C	m	1354451	0.4341075	1524950	0.44039485
+C	-	13915558	0.9499653	15129242	0.93307227
+C	m	732933	0.05003471	1085195	0.0669277
+A	-	19739609	0.9629996	211773311	0.93142664
+A	a	758435	0.037000358	1559115	0.068573385

@@ -157,12 +157,18 @@ def load_modkit_summary(summary_dir):
                 lambda x: MOD_CONVERT.get(x.code, x.base), axis=1)
             df.astype({'mod': CATEGORICAL})
             # Read and add the thresholds value
+            thresholds = {}
             for line in open(f_path):
                 line = line.strip().split()
-                if line[1] == 'pass_threshold_C':
-                    threshold = float(line[2])
+                # Can be different thresholds
+                if 'pass_threshold_' in line[1]:
+                    thresholds[line[1].split('_')[-1]] = float(line[2])
+                # no need to iterate over the whole file
+                elif not line[0].startswith('#'):
                     break
-            df['threshold'] = threshold
+            # Add corresponding threshold depending on the base
+            df['threshold'] = df.apply(
+                lambda x: thresholds[x.base], axis=1)
             # Add file name
             df['filename'] = fname.split('/')[-1]
             # Ensure that the mod-base code is consistent
