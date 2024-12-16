@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - load_modkit_summary function shows the threshold value of any modified base.
 ### Changed
 - SeqSummary dropdown menu shows samples in order.
+- Seqviz plot now displays enzymes in a multi-select box.
 
 ## [v0.11.2]
 ### Changed

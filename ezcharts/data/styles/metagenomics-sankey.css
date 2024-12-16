@@ -119,15 +119,15 @@
     margin: 0 auto;
 }
 
-.metagenomics-sankey #controls {
+.metagenomics-sankey #controls-sankey {
     max-width: 1200px;
 }
 
-.metagenomics-sankey #controls ul {
+.metagenomics-sankey #controls-sankey ul {
     display: flex;
 }
 
-.metagenomics-sankey #controls ul li {
+.metagenomics-sankey #controls-sankey ul li {
     display: flex;
     flex-direction: column;
     margin: 0 15px 0 0;

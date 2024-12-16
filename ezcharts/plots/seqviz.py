@@ -4,7 +4,7 @@ import os
 
 
 from Bio import SeqIO
-from dominate.tags import button, div, h6, input_, label, main, script
+from dominate.tags import button, div, h6, input_, main, option, script, select
 from dominate.util import raw
 
 from ezcharts.layout.resource import VendorResource
@@ -71,7 +71,7 @@ def seqviz(plannotate_json, fasta, alias):
             with div(
                     cls="border p-4 my-3 bg-white",
                     style="display:none;",
-                    id="controls"):
+                    id="controls-seqviz"):
                 h6("Search")
                 input_(
                     placeholder="Search for a sequence...",
@@ -82,28 +82,36 @@ def seqviz(plannotate_json, fasta, alias):
 
                 if len(enzymes) > 1:
                     h6("Restriction enzymes")
-                    for count, enzyme in enumerate(enzymes):
-                        input_(
-                            type="checkbox",
-                            id=f"enzyme{count}",
-                            name="enzyme",
-                            value=enzyme,
-                            cls="",
-                            onclick="seqviz_render()")
 
-                        label(enzyme, cls="form-check-label", for_=f"enzyme{count}")
+                    # add search for multi-select box
+                    input_(
+                        placeholder="Search for an enzyme...",
+                        type="text",
+                        cls="form-control mb-2",
+                        id="enzyme_search",
+                        onkeyup="filterSelect()")
+
+                    # add the multi-select box
+                    with select(
+                        cls="form-select mb-3",
+                        multiple=True,
+                        id="enzyme_select",
+                        onchange="seqviz_render()"
+                    ):
+                        for enzyme in enzymes:
+                            option(enzyme, value=enzyme)
 
                     button(
                         "Select all",
                         type="button",
                         cls="btn btn-primary btn-sm",
-                        onclick="toggle(true)")
+                        onclick="toggleSelectAll(true)")
 
                     button(
                         "Select none",
                         type="button",
                         cls="btn btn-primary btn-sm",
-                        onclick="toggle(false)")
+                        onclick="toggleSelectAll(false)")
 
             div(id="seqviz_container")
 
@@ -117,7 +125,7 @@ def seqviz(plannotate_json, fasta, alias):
 
                         // show our controls div
                         function showDiv() {{
-                            var div = document.getElementById('controls');
+                            var div = document.getElementById('controls-seqviz');
                                 if (div.style.display !== 'none') {{
                                     div.style.display = 'none';
                                 }}
@@ -126,17 +134,44 @@ def seqviz(plannotate_json, fasta, alias):
                                 }}
                         }};
 
-                        // get state of checkboxes
-                        function toggle(state) {{
-                            checkboxes = document.getElementsByName('enzyme');
-                            for(var i=0, n=checkboxes.length;i<n;i++) {{
-                                checkboxes[i].checked = state;
+                        // toggle select all or none for the multi-select
+                        function toggleSelectAll(state) {{
+                            var select = document.getElementById('enzyme_select');
+                            for (var i = 0; i < select.options.length; i++) {{
+                                select.options[i].selected = state;
+                                }}
+                            seqviz_render();
+                        }}
+
+                        // filter the multi-select dropdown
+                        function filterSelect() {{
+                            var input = document.getElementById('enzyme_search');
+                            var filter = input.value.toLowerCase();
+                            var select = document.getElementById('enzyme_select');
+                            var options = select.options;
+
+                            for (var i = 0; i < options.length; i++) {{
+                                var txtValue = options[i].textContent
+                                    || options[i].innerText;
+                                options[i].style.display = (
+                                    txtValue.toLowerCase().indexOf(filter) > -1
+                                    ? ""
+                                    : "none"
+                                );
                             }}
-                            seqviz_render()
                         }}
 
                         function seqviz_render() {{
                             var enzymes = []
+
+                            // check enzyme_select exists
+                            var enzymeSelect = document.getElementById('enzyme_select');
+                            if (enzymeSelect) {{
+                                var selectedOptions = enzymeSelect.selectedOptions;
+                                for (var i = 0; i < selectedOptions.length; i++) {{
+                                enzymes.push(selectedOptions[i].value);
+                                }}
+                            }}
                             var checkboxes = document.querySelectorAll(
                                 'input[name=enzyme]:checked')
                             for (var i = 0; i < checkboxes.length; i++) {{
@@ -161,5 +196,5 @@ def seqviz(plannotate_json, fasta, alias):
                         }}
                     </script>
                     """),
-                id="controls",
+                id="controls-seqviz",
             )
