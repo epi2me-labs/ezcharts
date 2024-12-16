@@ -68,7 +68,7 @@ def metagenomics_sankey(data):
                     </ul>
                     """
                 ),
-                id="controls",
+                id="controls-sankey",
             )
         with div(id="visualisation"):
             # the two divs below will be populated by the script
