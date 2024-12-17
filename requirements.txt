@@ -14,3 +14,5 @@ natsort==8.4.0
 pysam
 pymsaviz==0.4.2
 biopython
+# required for runtime use of pkg_resources
+setuptools
