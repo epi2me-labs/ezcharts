@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.11.4]
+This version fixes our conda package distribution and has no functional change from v0.11.3.
+### Fixed
+- Added setuptools to conda requirements.
+
 ## [v0.11.3]
 ### Fixed
 - load_modkit_summary function shows the threshold value of any modified base.
