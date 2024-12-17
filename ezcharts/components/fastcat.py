@@ -103,6 +103,14 @@ class SeqSummary(Snippet):
         color=None,
         height="500px",
         alignment_stats=True,
+        # [CW-5211]
+        # When users are sequencing small molecules they sometimes find
+        # spurious "long" reads which are either real concatemers or artefacts
+        # these have the effect of causing aggressive binning in the read length
+        # plot such that any detail is lost from the main distribution.
+        # This arg allows the binwidth of the length plot to be customised to
+        # customer requirements.
+        read_length_plot_binwidth=None
     ):
         """Create sequence summary component.
 
@@ -121,6 +129,7 @@ class SeqSummary(Snippet):
         super().__init__(styles=None, classes=None)
         self.theme = theme
         self.color = color
+        self.read_length_plot_binwidth = read_length_plot_binwidth
 
         # we need at least seq_summary or histograms
         if seq_summary is None:
@@ -250,7 +259,9 @@ class SeqSummary(Snippet):
             EZChart(
                 read_quality_plot(qdata, color=self.color), self.theme, height=height)
             EZChart(
-                read_length_plot(ldata, color=self.color), self.theme, height=height)
+                read_length_plot(
+                    ldata, color=self.color, binwidth=self.read_length_plot_binwidth),
+                self.theme, height=height)
             EZChart(
                 base_yield_plot(ldata, color=self.color), self.theme, height=height)
 
@@ -654,7 +665,7 @@ def read_quality_plot(data, binwidth=0.2, min_qual=4, max_qual=30, color=None):
     :param max_qual: the maximum quality value to plot.
     """
     plt = histogram_plot(
-        data, col='mean_quality', binwidth=0.2, min_val=min_qual,
+        data, col='mean_quality', binwidth=binwidth, min_val=min_qual,
         max_val=max_qual, title="Read quality",
         xaxis_label="Quality", color=color
     )
@@ -704,7 +715,7 @@ def read_coverage_plot(
 @ezc.plots.util.plot_wrapper
 def read_length_plot(
     data, xlim=(0, None), quantile_limits=False,
-    bins=100, binwidth=None, title="Read Length", color=None
+    bins=100, binwidth=None, title="Read length", color=None
 ):
     """Create a read length plot.
 

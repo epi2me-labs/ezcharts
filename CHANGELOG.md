@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - SeqSummary dropdown menu shows samples in order.
 - Seqviz plot now displays enzymes in a multi-select box.
+- SeqSummary read_length_plot binwidth can be overridden from default.
 
 ## [v0.11.2]
 ### Changed
