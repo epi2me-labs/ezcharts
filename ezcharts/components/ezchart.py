@@ -15,12 +15,17 @@ def EZChart(
     theme: str = 'epi2melabs',
     width: str = '100%',
     height: str = '500px',
+    additional_styles: dict = None
 ):
     """Wrap an ECharts or Bokeh plot in a div."""
     if isinstance(plot, BokehPlot):
-        return _BokehChart(plot, theme=theme, width=width, height=height)
+        return _BokehChart(
+            plot, theme=theme, width=width, height=height,
+            additional_styles=additional_styles)
     elif isinstance(plot, Plot):
-        return _EChart(plot, theme=theme, width=width, height=height)
+        return _EChart(
+            plot, theme=theme, width=width, height=height,
+            additional_styles=additional_styles)
     else:
         raise ValueError(f"`EZChart()` called with argument of unexpected type: {plot}")
 
@@ -31,14 +36,23 @@ class _ReportChart(ABC, Snippet):
     TAG = 'div'
 
     @abstractmethod
-    def __init__(self, width, height, class_name):
+    def __init__(self, width, height, class_name, additional_styles=None):
         """Set width and height of plot."""
+        style_dict = {
+            "width": width,
+            "height": height,
+            **(additional_styles or {})
+        }
+
+        style_str = "; ".join(
+            f"{key}:{value}" for key, value in style_dict.items())
+
         Snippet.__init__(
             self,
             styles=None,
             classes=None,
             className=class_name,
-            style=f"width:{width}; height:{height};")
+            style=style_str)
 
 
 class _BokehChart(_ReportChart):
@@ -50,13 +64,16 @@ class _BokehChart(_ReportChart):
         theme: str = 'epi2melabs',
         width: str = '100%',
         height: str = '500px',
+        additional_styles=None
     ) -> None:
         """Add placeholder div for BokehChart.
 
         The JS for all Bokeh plots will be added at report generation; no need to do
         anything besides keeping a ref to the plot at this point.
         """
-        super().__init__(width, height, class_name="bokeh-chart-container")
+        super().__init__(
+            width, height, class_name="bokeh-chart-container",
+            additional_styles=additional_styles)
         self.plot = plot
 
 
@@ -69,12 +86,15 @@ class _EChart(_ReportChart):
         theme: str = 'epi2melabs',
         width: str = '100%',
         height: str = '500px',
+        additional_styles=None
     ) -> None:
         """Create a div and script tag for initialising the plot."""
         # `class_name="echarts-chart-container"` here is required for resizing the chart
         # when a different tab is selected (c.f. `update_charts_on_tab_change()` in
         # `data/scripts/epi2melabs.js`)
-        super().__init__(width, height, class_name="echarts-chart-container")
+        super().__init__(
+            width, height, class_name="echarts-chart-container",
+            additional_styles=additional_styles)
 
         with self:
             script(raw(render_template(

@@ -276,6 +276,14 @@ def main(args):
                     data=example_df, x='year', y='sales', color='grey'
                 )
                 EZChart(plot)
+            with tabs.add_dropdown_tab('Simple - additional styles'):
+                # set margin to auto for horizontally centre plot
+                plot = ezc.barplot(
+                    data=example_df, x='year', y='sales'
+                )
+                EZChart(
+                    plot, height="500px", width="500px",
+                    additional_styles={"margin": "0 auto"})
             with tabs.add_dropdown_tab('Simple - single colour, ignore stacking'):
                 # set color=grey for a uniform colouring
                 # try setting also dodge=False, to check it doesn't break
