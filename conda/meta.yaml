@@ -33,6 +33,7 @@ requirements:
     - pysam
     - pymsaviz==0.4.2
     - biopython
+    - setuptools # required for runtime use of pkg_resources
 
 test:
   imports:
