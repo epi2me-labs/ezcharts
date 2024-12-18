@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [v0.11.5]
 ### Fixed
 - ValueError: invalid literal for int() with base 10 in `base_yield_plot`
+### Changed
+- Clarify SeqSummary read alignment title and axis label.
 
 ## [v0.11.4]
 ### Fixed

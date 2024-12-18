@@ -705,8 +705,8 @@ def read_coverage_plot(
     """
     plt = histogram_plot(
         data, col='coverage', binwidth=0.2, min_val=min_cov,
-        max_val=max_cov, title="Coverage",
-        xaxis_label="Coverage", color=color
+        max_val=max_cov, title="Read alignment",
+        xaxis_label="Percentage of read aligned", color=color
     )
     return plt
 
