@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 import pkg_resources
 from scipy import stats as sp_stats
+import si_prefix
 
 from ezcharts import plots, util
 
@@ -355,3 +356,12 @@ class Limiter(object):
     def __repr__(self):
         """Return string representation of self."""
         return repr((self.min, self.max))
+
+
+def si_format(n):
+    """Use `si-prefix`, but don't add a decimal when `n` is smaller than 1000.
+
+    `si_prefix.si_format()` always adds the decimals specified by `precision`, even when
+    calling it on a small integer. This wrapper prevents that.
+    """
+    return si_prefix.si_format(n, precision=0 if n < 1000 else 1)

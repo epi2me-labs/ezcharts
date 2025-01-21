@@ -34,6 +34,7 @@ requirements:
     - pymsaviz==0.4.2
     - biopython
     - setuptools # required for runtime use of pkg_resources
+    - si-prefix==1.3.3
 
 test:
   imports:
