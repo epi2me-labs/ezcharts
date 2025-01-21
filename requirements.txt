@@ -16,3 +16,4 @@ pymsaviz==0.4.2
 biopython
 # required for runtime use of pkg_resources
 setuptools
+si-prefix==1.3.3

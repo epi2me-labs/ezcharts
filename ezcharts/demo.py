@@ -32,6 +32,7 @@ from ezcharts.layout.snippets.offcanvas import IOffCanvasClasses, OffCanvas
 from ezcharts.plots import BokehPlot, Plot
 from ezcharts.plots.ideogram import ideogram
 from ezcharts.plots.karyomap import karyomap
+from ezcharts.plots.util import si_format
 
 
 # Setup simple globals
@@ -438,6 +439,15 @@ def main(args):
     with report.add_section('Per Sample Read Counts', 'Read Counts'):
         PlotMetaData(
             resource_filename('ezcharts', "data/test/metadata.json"))
+
+    with report.add_section('Number formatting', 'Number formatting'):
+        p(
+            "Numbers can be formatted with SI prefixes.")
+        numbers = np.random.default_rng().uniform(0.1, 1, 3) \
+            * [1000000, 10000000, 100000000000]
+        df_si_format = pd.DataFrame({"number": numbers.astype(int)})
+        df_si_format["formatted"] = df_si_format["number"].map(si_format)
+        DataTable.from_pandas(df_si_format)
 
     logger.info('Reticulating splines')
     report.write(args.output)
