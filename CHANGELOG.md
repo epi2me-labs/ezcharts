@@ -7,8 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Added
 - `si_format` function for formatting numbers.
-
-## [Unreleased]
+### Changed
+- Reports have a maximum width.
 ### Fixed
 - Regression squishing ECharts plots when a different tab is selected.
 

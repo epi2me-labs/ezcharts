@@ -224,7 +224,8 @@ $body-bg: #f9f9f9 !default;
 }
 
 .container {
-    max-width: 95% !important;
+    width: 95% !important;
+    max-width: 1600px !important;
 }
 
 * {
