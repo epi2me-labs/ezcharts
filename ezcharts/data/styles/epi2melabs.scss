@@ -45,7 +45,8 @@ $enable-negative-margins: true;
 // [CW-4817]
 // Reduce gutters
 .container {
-    max-width: 95% !important;
+    width: 95% !important;
+    max-width: 1600px !important;
 }
 
 // Allow use of an info button
