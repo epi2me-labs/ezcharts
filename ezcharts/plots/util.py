@@ -46,13 +46,13 @@ class JSCode():
         return jscode
 
 
-def read_files(summaries, sep="\t"):
+def read_files(summaries, sep="\t", dtype={}):
     """Read a set of files and join to single dataframe."""
     dfs = list()
     if not isinstance(summaries, (list, tuple)):
         summaries = [summaries]
     for fname in sorted(summaries):
-        dfs.append(pd.read_csv(fname, sep=sep))
+        dfs.append(pd.read_csv(fname, sep=sep, dtype=dtype))
     return pd.concat(dfs)
 
 
