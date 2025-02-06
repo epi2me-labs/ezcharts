@@ -15,6 +15,7 @@ from ezcharts.components.reports.comp import ComponentReport
 from ezcharts.layout.base import Snippet
 from ezcharts.layout.snippets import DataTable, Grid, Tabs
 from ezcharts.plots import BokehPlot
+from ezcharts.plots.util import empty_plot
 
 
 FASTCAT_COLS_DTYPES = {
@@ -256,14 +257,27 @@ class SeqSummary(Snippet):
         :param height: height of the plot
         """
         with Grid(columns=3):
-            EZChart(
-                read_quality_plot(qdata, color=self.color), self.theme, height=height)
-            EZChart(
-                read_length_plot(
-                    ldata, color=self.color, binwidth=self.read_length_plot_binwidth),
-                self.theme, height=height)
-            EZChart(
-                base_yield_plot(ldata, color=self.color), self.theme, height=height)
+            if not qdata.empty:
+                EZChart(
+                    read_quality_plot(qdata, color=self.color),
+                    self.theme,
+                    height=height,
+                )
+            else:
+                EZChart(empty_plot())
+            if not ldata.empty:
+                EZChart(
+                    read_length_plot(
+                        ldata, color=self.color, binwidth=self.read_length_plot_binwidth
+                    ),
+                    self.theme,
+                    height=height,
+                )
+                EZChart(
+                    base_yield_plot(ldata, color=self.color), self.theme, height=height)
+            else:
+                EZChart(empty_plot())
+                EZChart(empty_plot())
 
     def _draw_alignment_plots(
         self,
@@ -460,9 +474,20 @@ class SeqCompare(Snippet):
                         ))
                     except Exception:
                         qdata, ldata
-                    all_plots['length'] += [read_length_plot(ldata, color=self.color)]
-                    all_plots['yield'] += [base_yield_plot(ldata, color=self.color)]
-                    all_plots['quality'] += [read_quality_plot(qdata, color=self.color)]
+                    if not ldata.empty:
+                        all_plots["length"] += [
+                            read_length_plot(ldata, color=self.color)
+                        ]
+                        all_plots["yield"] += [base_yield_plot(ldata, color=self.color)]
+                    else:
+                        all_plots["length"] += [empty_plot()]
+                        all_plots["yield"] += [empty_plot()]
+                    if not qdata.empty:
+                        all_plots["quality"] += [
+                            read_quality_plot(qdata, color=self.color)
+                        ]
+                    else:
+                        all_plots["quality"] += [empty_plot()]
                     # Try loading BAMstats-specific hists and add their plots, if needed
                     if self.alignment_stats:
                         try:
