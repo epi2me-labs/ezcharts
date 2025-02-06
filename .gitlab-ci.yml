@@ -9,6 +9,7 @@ include:
 image: ${UBUNTUIMAGE}:20.04
 variables:
     PYENV_VERSION: 3.8.12
+    EZCHARTS_DEBUG: 1
 
 .prep-image: &prep-image |
     export DEBIAN_FRONTEND=noninteractive

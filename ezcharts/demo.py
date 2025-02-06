@@ -32,7 +32,7 @@ from ezcharts.layout.snippets.offcanvas import IOffCanvasClasses, OffCanvas
 from ezcharts.plots import BokehPlot, Plot
 from ezcharts.plots.ideogram import ideogram
 from ezcharts.plots.karyomap import karyomap
-from ezcharts.plots.util import si_format
+from ezcharts.plots.util import empty_plot, si_format
 
 
 # Setup simple globals
@@ -310,9 +310,9 @@ def main(args):
                     data=example_df, x='year', y='sales', hue='product', nested_x=True
                 )
                 EZChart(plot)
-        with tabs.add_tab('Plotting Failed'):
+        with tabs.add_tab('Empty plot'):
             # Force fail in plotting
-            EZChart(ezc.sunburst([], label_rotate="tangential", label_minAngle=100))
+            EZChart(empty_plot())
 
     with report.add_section('Nextclade results', 'Nextclade', True):
         NextClade(nxt_json)
