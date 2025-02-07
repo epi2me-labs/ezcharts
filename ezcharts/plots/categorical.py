@@ -1,5 +1,6 @@
 """Categorical plots."""
 from collections import Counter
+from itertools import cycle
 
 from bokeh.models import ColumnDataSource, FactorRange, HoverTool, Whisker
 import bokeh.transform as bkt
@@ -50,6 +51,20 @@ def boxplot(
     if palette is None and color is None:
         palette = BokehPlot.colors
 
+    # If data is list-like make it into a dataframe
+    if not isinstance(data, pd.DataFrame):
+        if x is None:
+            x = "variable"
+        if y is None:
+            y = "value"
+        # Use dummy column x for grouping variable
+        data = pd.DataFrame({x: "0", y: data})
+
+    if x is None:
+        x = data.columns[0]
+    if y is None:
+        y = data.columns[1]
+
     # we are going to group by our x
     groups = data[x].unique()
 
@@ -58,6 +73,17 @@ def boxplot(
     qs = qs.unstack().reset_index()
     qs.columns = [x, "q1", "q2", "q3"]
     df = pd.merge(data, qs, on=x, how="left")
+
+    # compute mean, min and max for hover
+    mean_val = df.groupby(x)[y].mean().reset_index()
+    mean_val.columns = [x, "mean"]
+    df = pd.merge(df, mean_val, on=x, how="left")
+    min_val = df.groupby(x)[y].min().reset_index()
+    min_val.columns = [x, "min"]
+    df = pd.merge(df, min_val, on=x, how="left")
+    max_val = df.groupby(x)[y].max().reset_index()
+    max_val.columns = [x, "max"]
+    df = pd.merge(df, max_val, on=x, how="left")
 
     # if the user specifies an order for their categorical variables
     if isinstance(order, list):
@@ -80,10 +106,16 @@ def boxplot(
         raise NotImplementedError(
             f"'whis' must be float, {type(whis)} is not supported or implemented")
 
-    source = ColumnDataSource(df)
+    # Use only grouped stats to make the plot
+    plot_df = df.drop(y, axis=1).drop_duplicates()
+    source = ColumnDataSource(plot_df)
 
     # quantile boxes color
     if not color:
+        if len(palette) < len(groups):
+            # cycle palette to add more colours
+            for c, _ in zip(cycle(palette), range(len(palette), len(groups))):
+                palette.append(c)
         color = bkt.factor_cmap(x, palette, groups)
 
     # use seaborn bits and bobs for color
@@ -136,7 +168,12 @@ def boxplot(
     # Add tooltips
     hover = plt._fig.select(dict(type=HoverTool))
     hover.tooltips = [
-        ("Value", "@value"),
+        ("Q1", "@q1"),
+        ("Median", "@q2"),
+        ("Q3", "@q3"),
+        ("Mean", "@mean"),
+        ("Min", "@min"),
+        ("Max", "@max")
     ]
 
     return plt
