@@ -261,7 +261,7 @@ def choose_palette(name='colorblind', ncolours=None):
     return [c for c in islice(cycler, ncolours)]
 
 
-def empty_plot(**kwargs):
+def empty_plot(text=None, subtext=None, **kwargs):
     """Empty plot for when all else fails.
 
     :param kwargs: kwargs for bokeh figure.
@@ -269,10 +269,14 @@ def empty_plot(**kwargs):
     :returns: an eChart empty plot.
 
     """
+    if not text:
+        text = "Plotting Failed"
+    if not subtext:
+        subtext = "Oops! Something went wrong in plotting your data."
     plt = plots._NoAxisFixPlot()
     plt.title = {
-        "text": "Plotting Failed",
-        "subtext": "Oops! Something went wrong in plotting your data.",
+        "text": text,
+        "subtext": subtext,
         "subtextStyle": {
             "fontStyle": "italic",
             "color": Colors.cerulean,

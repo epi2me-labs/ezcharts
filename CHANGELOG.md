@@ -8,12 +8,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Added
 - `si_format` function for formatting numbers.
+- SeqSummary histograms show a warning when no aligned reads to plot.
 - Added parameter to set data type in `read_files`.
 ### Changed
 - Reports have a maximum width.
 - Boxplot hover shows summary stats.
+- SeqSummary histograms' axis defaults increased to be inclusive of maximum values. 
 ### Fixed
 - Regression squishing ECharts plots when a different tab is selected.
+- SeqSummary histograms' median value no longer converted to an integer.
+- SeqSummary min axis range works when set to 0.
 - Boxplots can be made with a single array of values.
 - Boxplot colours now cycle through the palette for large datasets.
 

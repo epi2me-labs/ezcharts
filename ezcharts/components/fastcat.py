@@ -14,7 +14,7 @@ from ezcharts.components.ezchart import EZChart
 from ezcharts.components.reports.comp import ComponentReport
 from ezcharts.layout.base import Snippet
 from ezcharts.layout.snippets import DataTable, Grid, Tabs
-from ezcharts.plots import BokehPlot
+from ezcharts.plots import BokehPlot, util
 from ezcharts.plots.util import empty_plot
 
 
@@ -640,21 +640,23 @@ def histogram_plot(
     """
     plt, mean_val, median_val = None, None, None
     if "read_length" in data.columns:
-        if not min_val:
+        # When min_val==0, "if not min_val" evaluates to True.
+        # Instead use "if min_val is None"
+        if min_val is None:
             min_val = data[col].min()
-        if not max_val:
-            max_val = data[col].max()
+        if max_val is None:
+            max_val = data[col].max() + binwidth
         # fastcat/bamstats
         mean_val = np.round(data[col].mean(), 1)
-        median_val = int(data[col].median())
+        median_val = data[col].median()
         plt = ezc.histplot(
             data=data[col], binwidth=binwidth, binrange=(min_val, max_val), color=color
         )
     else:
-        if not min_val:
+        if min_val is None:
             min_val = data.end.min()
-        if not max_val:
-            max_val = data.end.max()
+        if max_val is None:
+            max_val = data.end.max() + binwidth
         # histogram
         mean_val = np.round(
             np.average(0.5 * (data["start"] + data["end"]), weights=data["count"]), 1
@@ -708,11 +710,17 @@ def mapping_accuracy_plot(
     :param min_acc: the minimum quality value to plot.
     :param max_acc: the maximum quality value to plot.
     """
-    plt = histogram_plot(
-        data, col='acc', binwidth=0.2, min_val=min_acc,
-        max_val=max_acc, title="Accuracy",
-        xaxis_label="Accuracy", color=color
-    )
+    data = data[data['acc'].notna()]
+    if len(data) == 0:
+        plt = util.empty_plot(
+            text="Accuracy",
+            subtext="No aligned reads to plot.")
+    else:
+        plt = histogram_plot(
+            data, col='acc', binwidth=0.2, min_val=min_acc,
+            max_val=max_acc, title="Accuracy",
+            xaxis_label="Accuracy", color=color
+        )
     return plt
 
 
@@ -728,11 +736,17 @@ def read_coverage_plot(
     :param min_cov: the minimum coverage value to plot.
     :param max_cov: the maximum coverage value to plot.
     """
-    plt = histogram_plot(
-        data, col='coverage', binwidth=0.2, min_val=min_cov,
-        max_val=max_cov, title="Read alignment",
-        xaxis_label="Percentage of read aligned", color=color
-    )
+    data = data[data['coverage'].notna()]
+    if len(data) == 0:
+        plt = util.empty_plot(
+            text="Read alignment",
+            subtext="No aligned reads to plot.")
+    else:
+        plt = histogram_plot(
+            data, col='coverage', binwidth=0.2, min_val=min_cov,
+            max_val=max_cov, title="Read alignment",
+            xaxis_label="Percentage of read aligned", color=color
+        )
     return plt
 
 
