@@ -11,8 +11,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added parameter to set data type in `read_files`.
 ### Changed
 - Reports have a maximum width.
+- Boxplot hover shows summary stats.
 ### Fixed
 - Regression squishing ECharts plots when a different tab is selected.
+- Boxplots can be made with a single array of values.
+- Boxplot colours now cycle through the palette for large datasets.
 
 ## [v0.11.5]
 ### Fixed

@@ -310,6 +310,24 @@ def main(args):
                     data=example_df, x='year', y='sales', hue='product', nested_x=True
                 )
                 EZChart(plot)
+        with tabs.add_dropdown_menu('Boxplots', change_header=False):
+            with tabs.add_dropdown_tab('Single boxplot'):
+                # use a 1D array of values
+                plot = ezc.boxplot(
+                    data=example_df['sales'], y='sales'
+                )
+                EZChart(plot)
+            with tabs.add_dropdown_tab('Cycle colours'):
+                boxplot_df = pd.DataFrame(
+                    np.random.random((10, 15)),
+                    columns=[f"var{i}" for i in range(1, 16)]
+                )
+                boxplot_df = boxplot_df.melt()
+                boxplot_df.columns = ["variable", 'value']
+                plot = ezc.boxplot(
+                    data=boxplot_df, x='variable', y='value'
+                )
+                EZChart(plot)
         with tabs.add_tab('Empty plot'):
             # Force fail in plotting
             EZChart(empty_plot())
