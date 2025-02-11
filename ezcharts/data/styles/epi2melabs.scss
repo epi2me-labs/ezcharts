@@ -83,16 +83,19 @@ $enable-negative-margins: true;
 .badge-fail-solid {
     background-color: $brand-red !important;
     background-image: var(--circle-exclamation-solid-white) !important;
+    background-position: 0.5em !important;
 }
 
 .badge-unknown-solid {
     background-color: $orange-700 !important;
     background-image: var(--circle-minus-solid-white) !important;
+    background-position: 0.5em !important;
 }
 
 .badge-pass-solid {
     background-color: $brand-green !important;
     background-image: var(--circle-check-solid-white) !important;
+    background-position: 0.5em !important;
 }
 
 
