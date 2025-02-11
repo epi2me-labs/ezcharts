@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - SeqSummary min axis range works when set to 0.
 - Boxplots can be made with a single array of values.
 - Boxplot colours now cycle through the palette for large datasets.
+- Icons on pass, fail and unknown badges have a fixed position to prevent overlapping with text.
 
 ## [v0.11.5]
 ### Fixed
