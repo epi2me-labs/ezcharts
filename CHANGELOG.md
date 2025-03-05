@@ -5,6 +5,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [unreleased]
+### Changed
+- ONT style update with re-branding
+
 ## [v0.12.0]
 ### Added
 - `si_format` function for formatting numbers.
@@ -38,6 +42,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - load_modkit_summary function shows the threshold value of any modified base.
 ### Changed
+- ONT reports now have burger style navigation.
 - SeqSummary dropdown menu shows samples in order.
 - Seqviz plot now displays enzymes in a multi-select box.
 ### Added

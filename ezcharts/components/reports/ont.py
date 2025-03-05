@@ -1,15 +1,12 @@
 """Get a default report."""
-from datetime import datetime
-from typing import List, Optional, Type
+from typing import List, Type
 
 from dominate.tags import (
-    a, code, div, h4, html_tag, li, p, section, ul)
+    a, button, code, div, h4, html_tag, p, section)
 
-from ezcharts.components.params import ParamsTable
 from ezcharts.components.reports import Report
 from ezcharts.components.theme import (
     ONT_body_resources, ONT_head_resources, ONTLogo)
-from ezcharts.components.versions import VersionsList
 from ezcharts.layout.base import IClasses, Snippet
 from ezcharts.layout.resource import Resource
 from ezcharts.layout.snippets.banner import Banner
@@ -20,7 +17,7 @@ from ezcharts.layout.util import cls
 class ILabsAddendumClasses(IClasses):
     """Section html classes."""
 
-    container: str = cls("py-5", "px-4", "border-top")
+    container: str = cls("py-5", "px-4")
     inner: str = cls("container", "px-0")
 
 
@@ -51,7 +48,7 @@ class LabsAddendum(Snippet):
                 p(
                     "This report was produced using the ",
                     code(f"epi2me-labs/{workflow_name}"),
-                    f" nextflow workflow ({workflow_version})."
+                    f" workflow ({workflow_version})."
                 )
                 p(
                     "Oxford Nanopore Technologies products are not "
@@ -66,17 +63,15 @@ class ILabsNavigationClasses(IClasses):
     spacer: str = cls("d-flex")
     container: str = cls(
         "fixed-top", "d-flex", "align-items-center", "flex-wrap",
-        "justify-content-center", "bg-dark", "border-bottom",
-        "border-primary", "border-4")
+        "justify-content-center", "bg-dark")
     inner: str = cls(
-        "container", "px-0", "d-flex", "flex-wrap",
-        "justify-content-center", "align-items-center")
+        "container", "px-0", "d-flex", "flex-wrap", "py-2")
     logo: str = cls(
         "d-flex", "align-items-center", "pe-5", "mb-md-0",
         "me-md-auto", "text-decoration-none")
-    nav_list: str = cls("nav", "nav-pills", "flex-row")
-    nav_item: str = cls("nav-item")
-    nav_item_link: str = cls("nav-link", "text-white")
+    dropdown_btn: str = cls("btn", "btn-dark", "dropdown-toggle")
+    dropdown_menu: str = cls("dropdown-menu")
+    dropdown_item_link: str = cls("dropdown-item")
 
 
 class LabsNavigation(Snippet):
@@ -88,8 +83,9 @@ class LabsNavigation(Snippet):
         self,
         logo: Type[html_tag],
         groups: List[str],
-        header_height: int = 60,
-        classes: ILabsNavigationClasses = ILabsNavigationClasses()
+        header_height: int = 75,
+        classes: ILabsNavigationClasses = ILabsNavigationClasses(),
+        to_print: bool = False
     ) -> None:
         """Create tag."""
         spacer = div(
@@ -107,10 +103,25 @@ class LabsNavigation(Snippet):
             with div(className=self.classes.inner):
                 with a(href="/", className=self.classes.logo):
                     logo()
-                for group in groups:
-                    setattr(
-                        self, group,
-                        ul(className=self.classes.nav_list, __pretty=False))
+
+                if not to_print:
+                    button(
+                        "Jump to section... ",
+                        cls=self.classes.dropdown_btn,
+                        type="button",
+                        id="dropdownMenuButton",
+                        data_bs_toggle="dropdown",
+                        aria_haspopup="true",
+                        aria_expanded="false")
+
+                ngroups = len(groups)
+                with div(className=self.classes.dropdown_menu):
+                    for count, group in enumerate(groups):
+                        setattr(
+                            self, group,
+                            div(className='', __pretty=False))
+                        if count != ngroups - 1:
+                            div(cls="dropdown-divider")
 
     def add_link(
         self,
@@ -121,11 +132,10 @@ class LabsNavigation(Snippet):
         """Add a header nav link to the header links list."""
         group_list = getattr(self, group)
         with group_list:
-            with li(className=self.classes.nav_item):
-                a(
-                    link_title,
-                    href=link_href,
-                    className=self.classes.nav_item_link)
+            a(
+                link_title,
+                href=link_href,
+                className=self.classes.dropdown_item_link)
 
 
 class BasicReport(Report):
@@ -136,15 +146,18 @@ class BasicReport(Report):
         report_title,
         logo: Type[html_tag] = ONTLogo,
         head_resources: List[Resource] = ONT_head_resources,
-        body_resources: List[Resource] = ONT_body_resources
+        body_resources: List[Resource] = ONT_body_resources,
+        to_print: bool = False
     ) -> None:
         """Create tag."""
         super().__init__(
             report_title=report_title,
             head_resources=head_resources,
             body_resources=body_resources)
+
         with self.header:
-            self.nav = LabsNavigation(logo=logo, groups=['main', 'meta'])
+            self.nav = LabsNavigation(
+                logo=logo, groups=['main', 'meta'], to_print=to_print)
 
         with self.main:
             self.intro_content = section(id="intro-content", role="region")
@@ -174,55 +187,27 @@ class ONTReport(BasicReport):
         self,
         report_title,
         workflow_name,
-        workflow_params_path: str,
-        workflow_versions_path: str,
         workflow_version: str,
         logo: Type[html_tag] = ONTLogo,
         head_resources: List[Resource] = ONT_head_resources,
         body_resources: List[Resource] = ONT_body_resources,
-        created_date: Optional[str] = None,
-        default_content: bool = True
+        default_content: bool = True,
+        to_print: bool = False
     ) -> None:
         """Create tag."""
         super().__init__(
             report_title=report_title,
             head_resources=head_resources,
-            body_resources=body_resources)
+            body_resources=body_resources,
+            to_print=to_print)
 
         if default_content is True:
             with self.header:
-                self.nav.add_link('meta', 'Versions', '#versions')
-                self.nav.add_link('meta', 'Parameters', '#parameters')
                 self.intro_content = section(id="intro-content", role="region")
                 with self.intro_content:
-                    self.banner = Banner(report_title, workflow_name)
-                    self.banner.add_badge("Research use only", bg_class='bg-danger')
-                    if not created_date:
-                        created_date = datetime.today().strftime('%Y-%m-%d')
-                        self.banner.add_badge(created_date, bg_class="bg-secONTary")
+                    self.banner = Banner(report_title, workflow_name, subtitle=False)
+                    self.banner.add_badge("Research use only", bg_class='bg-secondary')
                     self.banner.add_badge(workflow_version)
-
-            with self.main:
-                self.meta_content = section(id="meta-content", role="region")
-                with self.meta_content:
-                    with Section(
-                        "versions",
-                        'Software versions',
-                        overflow=True
-                    ):
-                        VersionsList(workflow_versions_path)
-
-                    with Section(
-                        "parameters",
-                        'Workflow parameters',
-                        overflow=True
-                    ):
-                        ParamsTable(workflow_params_path)
-
-            with self.footer:
-                self.addendum = LabsAddendum(
-                    workflow_name=workflow_name, workflow_version=workflow_version
-                )
 
     def add_badge(
         self,
