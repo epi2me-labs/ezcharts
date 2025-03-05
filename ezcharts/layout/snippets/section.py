@@ -36,7 +36,7 @@ class Section(Snippet):
         styles: ISectionStyles = ISectionStyles(),
         classes: ISectionClasses = ISectionClasses(),
         overflow: bool = False,
-        transparent: bool = False
+        transparent: bool = False,
     ) -> None:
         """Create styled section."""
         super().__init__(

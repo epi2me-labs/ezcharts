@@ -48,7 +48,7 @@ class IBannerClasses(IClasses):
 
     container: str = cls("px-0", "bg-dark", "labs-banner")
     inner: str = cls(
-        "container", "px-0", "py-2", "border-top", "text-white", "report-title")
+        "container", "px-0", "py-2", "text-white", "report-title")
 
 
 class IBannerStyles(IStyles):
@@ -69,6 +69,7 @@ class Banner(Snippet):
         self,
         report_title: str,
         workflow_name: str,
+        subtitle: bool = True,
         styles: IBannerStyles = IBannerStyles(),
         classes: IBannerClasses = IBannerClasses(),
         default_content: bool = True
@@ -85,10 +86,11 @@ class Banner(Snippet):
                 if not default_content:
                     return
                 h1(report_title)
-                p(
-                    f"Results generated through the {workflow_name} nextflow "
-                    "workflow provided by Oxford Nanopore Technologies.",
-                    className="py-2 fs-5")
+                if subtitle:
+                    p(
+                        f"Results generated through the {workflow_name} "
+                        "workflow provided by Oxford Nanopore Technologies.",
+                        className="py-2 fs-5")
                 self.badges = div(className="d-flex flex-wrap")
 
     def add_badge(

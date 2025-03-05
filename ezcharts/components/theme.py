@@ -81,9 +81,9 @@ class ONTLogo(div):
     def __init__(self) -> None:
         """Create an img with the data URI logo."""
         super().__init__(
-            inline(ImageResource('OND_logo.svg').data_file),
+            inline(ImageResource('ONT_logo_white.svg').data_file),
             tagname='div',
-            style="width: 35px; height: 35px;",
+            style="width: 209px; height:48px;",
             className="d-flex",
             alt="ONT Logo")
 
