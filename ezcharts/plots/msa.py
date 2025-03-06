@@ -38,7 +38,7 @@ def msa(
         show_consensus=False,
         color_scheme="Identity",
         identity=50,
-        start=1,
+        start=0,
         end=None):
     """
     Make a nice multiple sequence alignment with pymsaviz.
@@ -57,6 +57,9 @@ def msa(
         alignment. Defaults to "Identity".
         identity (int, optional): The minimum identity threshold for
         highlighting mismatches. Defaults to 50.
+        start (int): The start position compliant with bed format. Defaults to 0
+        end (int, optional): The end position compliant with bed format.
+        If empty MSA will be start:len(MSA).
 
     Returns:
         str: The HTML code for displaying the generated alignment image.
@@ -83,7 +86,7 @@ def msa(
         show_count=show_count,
         show_consensus=show_consensus,
         color_scheme=color_scheme,
-        start=start,
+        start=start+1,  # Start is bed file 0-based, but MsaViz is 1-based
         end=end)
 
     pos_ident = []
