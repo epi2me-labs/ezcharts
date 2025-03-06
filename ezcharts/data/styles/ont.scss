@@ -220,6 +220,10 @@ $body-bg: #f9f9f9e4 !default;
       width: auto;
       min-width: 768px;
     }
+    .col-xs-12 {
+      width:50%;
+      float:left;
+    }
 }
 
 .container {
