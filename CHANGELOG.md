@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [unreleased]
 ### Changed
 - ONT style update with re-branding
+- MSA start:end now uses bed file format
 
 ## [v0.12.0]
 ### Added
