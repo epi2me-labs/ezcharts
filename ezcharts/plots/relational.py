@@ -112,7 +112,7 @@ def scatterplot(
         palette=None, hue_order=None, hue_norm=None,
         sizes=None, size_order=None, size_norm=None,
         markers=True, style_order=None, legend="auto", ax=None,
-        **kwargs):
+        bokeh_kwargs={}, **kwargs):
     """Draw a scatter plot with possibility of several semantic groupings."""
     # see https://github.com/mwaskom/seaborn/blob/949dec3666ab12a366d2fc05ef18d6e90625b5fa/seaborn/relational.py#L726  # noqa
 
@@ -129,7 +129,7 @@ def scatterplot(
     p.map_size(sizes=sizes, order=size_order, norm=size_norm)
     p.map_style(markers=markers, order=style_order)
 
-    plt = BokehPlot(title=kwargs.get('title', ""))
+    plt = BokehPlot(title=kwargs.get('title', ""), **bokeh_kwargs)
     hover = plt._fig.select(dict(type=HoverTool))
     hover.tooltips = [(x, "@x"), (y, "@y")]
     p.plot(plt, kwargs)
@@ -151,7 +151,7 @@ def lineplot(
         dashes=True, markers=None, style_order=None,
         estimator="mean", errorbar=("ci", 95), n_boot=1000, seed=None,
         orient="x", sort=True, err_style="band", err_kws=None,
-        legend="auto", ci="deprecated", ax=None, **kwargs):
+        legend="auto", ci="deprecated", ax=None, bokeh_kwargs={}, **kwargs):
     """Draw a line plot with possibility of several semantic groupings."""
     # see https://github.com/mwaskom/seaborn/blob/949dec3666ab12a366d2fc05ef18d6e90625b5fa/seaborn/relational.py#L597  # noqa
 
@@ -171,7 +171,7 @@ def lineplot(
     p.map_size(sizes=sizes, order=size_order, norm=size_norm)
     p.map_style(markers=markers, dashes=dashes, order=style_order)
 
-    plt = BokehPlot(title=kwargs.get('title', ""))
+    plt = BokehPlot(title=kwargs.get('title', ""), **bokeh_kwargs)
     hover = plt._fig.select(dict(type=HoverTool))
     hover.tooltips = [(x, "@x"), (y, "@y")]
 
