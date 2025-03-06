@@ -114,8 +114,8 @@ class SeqSummary(Snippet):
         read_length_plot_binwidth=None,
         # [CW-5562]
         # Set an initial quantile x-axis max in the length plot so that long
-        # read outliers are not visible. If 1.0, all data is shown.
-        read_length_quantile_xend=1.0
+        # read outliers are not visible. If None, all data is shown.
+        read_length_quantile_xend=None
     ):
         """Create sequence summary component.
 
@@ -825,12 +825,12 @@ def read_length_plot(
         weights = data["count"]
         read_lengths = data['start']
 
-    if quantile_limits:
+    if quantile_limits and binwidth is None:
         # Set number of bins such that the initial quantile-trimmed view has the desired
         # number of bins.
         bins = int(bins * read_lengths.max() / max_len)
 
-    elif binwidth is not None:
+    if binwidth is not None:
         binwidth /= 1000
 
     read_lengths = read_lengths / 1000
