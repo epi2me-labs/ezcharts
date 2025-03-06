@@ -164,7 +164,8 @@ def main(args):
         SeqSummary(
             seq_summary=histogram_stats_dir,
             color="#2a98b7",
-            sample_names=tuple(['sample_2', 'sample_1', 'sample_3']))
+            sample_names=tuple(['sample_2', 'sample_1', 'sample_3']),
+            read_length_quantile_xend=0.99)
     with report.add_section('Compare Summaries', 'Compare'):
         SeqCompare(
             histogram_stats_dir,
