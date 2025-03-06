@@ -111,7 +111,11 @@ class SeqSummary(Snippet):
         # plot such that any detail is lost from the main distribution.
         # This arg allows the binwidth of the length plot to be customised to
         # customer requirements.
-        read_length_plot_binwidth=None
+        read_length_plot_binwidth=None,
+        # [CW-5562]
+        # Set an initial quantile x-axis max in the length plot so that long
+        # read outliers are not visible. If 1.0, all data is shown.
+        read_length_quantile_xend=1.0
     ):
         """Create sequence summary component.
 
@@ -126,11 +130,16 @@ class SeqSummary(Snippet):
         :param height: String defining the height of the plots.
         :param alignment_stats: Boolean defining whether to display the alignments
          stats.
+        :param read_length_plot_binwidth: int bin widths for read length plot.
+        :param read_length_quantile_xend: float quantile range end for x-axis length
+         plot
+
         """
         super().__init__(styles=None, classes=None)
         self.theme = theme
         self.color = color
         self.read_length_plot_binwidth = read_length_plot_binwidth
+        self.read_length_quantile_xend = read_length_quantile_xend
 
         # we need at least seq_summary or histograms
         if seq_summary is None:
@@ -266,10 +275,14 @@ class SeqSummary(Snippet):
             else:
                 EZChart(empty_plot())
             if not ldata.empty:
+                len_args = {}
+                if self.read_length_quantile_xend:
+                    len_args['quantile_limits'] = True
+                    len_args['xlim'] = (0, self.read_length_quantile_xend)
                 EZChart(
                     read_length_plot(
-                        ldata, color=self.color, binwidth=self.read_length_plot_binwidth
-                    ),
+                        ldata, color=self.color,
+                        binwidth=self.read_length_plot_binwidth, **len_args),
                     self.theme,
                     height=height,
                 )
@@ -789,31 +802,37 @@ def read_length_plot(
             min_len, max_len = np.quantile(read_lengths, [min_len, max_len])
             # set `xlim` so that we can use it to set the x-axis limits below
             xlim = (min_len, max_len)
-
-        read_lengths = read_lengths[
-            (read_lengths >= min_len) & (read_lengths <= max_len)
-        ]
         weights = None
     else:
         # histogram
         if max_len is None:
-            max_len = 1 if quantile_limits else data.iloc[-1]["end"]
+            max_len = data.iloc[-1]["end"]
         if quantile_limits:
-            cs = np.cumsum(data["count"])
-            lower_idx, upper_idx = np.searchsorted(cs, np.quantile(cs, quantile_limits))
-            min_len, max_len = (data["start"][lower_idx], data["end"][upper_idx])
+            cs_counts = np.cumsum(data["count"])
+            total_counts = cs_counts.iloc[-1]
+            top_value = xlim[1] * total_counts
+            top_index = np.searchsorted(cs_counts, top_value)
+            bottom_value = xlim[0] * total_counts
+            bottom_idx = np.searchsorted(cs_counts, bottom_value)
+            min_len = data.iloc[bottom_idx].start
+            max_len = data.iloc[top_index].start
             xlim = (min_len, max_len)
 
         median_length = histogram_median(data)
         mean_length = np.average(data["start"], weights=data["count"])
         max_ = data.iloc[-1]["start"]
         min_ = data.iloc[0]["start"]
-        data = data[(data["start"] >= min_len) & (data["end"] <= max_len)]
         weights = data["count"]
         read_lengths = data['start']
 
-    if binwidth is not None:
+    if quantile_limits:
+        # Set number of bins such that the initial quantile-trimmed view has the desired
+        # number of bins.
+        bins = int(bins * read_lengths.max() / max_len)
+
+    elif binwidth is not None:
         binwidth /= 1000
+
     read_lengths = read_lengths / 1000
     plt = ezc.histplot(
         read_lengths,
