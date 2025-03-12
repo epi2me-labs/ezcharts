@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+### Added
+- DataTables.from_pandas takes `use_headers` kwarg.
+- DataTables `sortable` added to API.
+
 ## [v0.13.1]
 ### Fixed
 - SeqSummary read_length_plot_binwidth override not working in v.13.0.
@@ -24,7 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Reports have a maximum width.
 - Boxplot hover shows summary stats.
-- SeqSummary histograms' axis defaults increased to be inclusive of maximum values. 
+- SeqSummary histograms' axis defaults increased to be inclusive of maximum values.
 ### Fixed
 - Regression squishing ECharts plots when a different tab is selected.
 - SeqSummary histograms' median value no longer converted to an integer.
@@ -69,7 +74,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [v0.11.0]
 ### Changed
 - Bumped minor version as 0.10.2 should have been 0.11.0.
-### Fixed 
+### Fixed
 - Transparent lines/points plotted in relational plots.
 - Add `hover` back to bokeh toolbox.
 - `SeqCompare` not working with histograms and line charts from `BokehPlots`.
