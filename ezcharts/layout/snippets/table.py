@@ -28,6 +28,7 @@ class DataTable(Snippet):
         page_length: Optional[int] = 10,
         paging: Optional[bool] = True,
         searchable: Optional[bool] = True,
+        sortable: Optional[bool] = True,
         file_name: Optional[str] = 'datatable-export',
         export: Optional[bool] = False,
         classes: ITableClasses = ITableClasses(),
@@ -74,6 +75,7 @@ class DataTable(Snippet):
                     '#{{ id }}_inner', { \
                     searchable: {{ searchable }}, \
                     pageLength: {{ page_length }}, \
+                    sortable: {{ sortable }},
                     paging: {{ paging }} \
                 })"""
 
@@ -85,7 +87,8 @@ class DataTable(Snippet):
             script(raw(render_template(
                 datatable_render,
                 id=self.uid, paging=str(paging).lower(),
-                searchable=str(searchable).lower(), page_length=page_length,
+                searchable=str(searchable).lower(), sortable=str(sortable).lower(),
+                page_length=page_length,
                 button_id=exportCSVButton, file_name=file_name)))
 
     def _is_multilevel_header(self, headers: list) -> bool:
@@ -145,6 +148,7 @@ class DataTable(Snippet):
     def from_pandas(
         cls,
         df: pd.DataFrame,
+        use_headers: bool = True,
         use_index: bool = True,
         **kwargs
     ):
@@ -155,28 +159,34 @@ class DataTable(Snippet):
 
         :param df: `pandas.DataFrame`
         :param use_index: Include `DataFrame` index column in table, defaults to `True`
+        :param use_headers: Use `DataFrame` headers in the table.
         :return: `DataTable`
         """
         nlevels = df.columns.nlevels
-        headers = list(df.columns)
 
-        if nlevels > 1:
-            # multiindex columns --> convert into list of tuples
-            headers = []
-            for i in range(nlevels):
-                col_lvl = df.columns.get_level_values(i).to_list()
+        headers = None
+        if use_headers:
+            headers = list(df.columns)
+
+            if nlevels > 1:
+                # multiindex columns --> convert into list of tuples
+                headers = []
+                for i in range(nlevels):
+                    col_lvl = df.columns.get_level_values(i).to_list()
+                    if use_index:
+                        if i == nlevels - 1:
+                            # Set the index name in the bottom level of the table cols.
+                            col_lvl.insert(0, df.index.name or 'index')
+                        else:
+                            col_lvl.insert(0, '')
+                    headers.append(col_lvl)
+
+            else:
                 if use_index:
-                    if i == nlevels - 1:
-                        # Set the index name in the bottom level of the table columns.
-                        col_lvl.insert(0, df.index.name or 'index')
-                    else:
-                        col_lvl.insert(0, '')
-                headers.append(col_lvl)
+                    headers = [df.index.name or "index", *headers]
 
-        else:
-            if use_index:
-                headers = [df.index.name or "index", *headers]
         dtable = cls(headers=headers, **kwargs)
+        kwargs['headers'] = headers
 
         for idx, *row in df.itertuples():
             title = idx if use_index else None
