@@ -83,6 +83,12 @@ def main(args):
 
             plot._fig.xaxis.axis_label = 'Read length'
             plot._fig.yaxis.axis_label = 'Number of reads'
+        elif style == "kdeplot":
+            kde_data = np.random.normal(loc=10.0, size=1000)
+            plot = ezc.kdeplot(kde_data)
+
+            plot._fig.xaxis.axis_label = 'Read length'
+            plot._fig.yaxis.axis_label = 'Density'
         elif style == "bar":
             plot = ezc.barplot(data=example_df, x='year', y='sales', hue='product')
         elif style == "heatmap":
@@ -258,6 +264,8 @@ def main(args):
                 EZChart(example_plot("bar"))
                 EZChart(example_plot("histogram"))
                 EZChart(example_plot("boxplot"))
+                EZChart(example_plot("kdeplot"))
+
         with tabs.add_tab('Accuracy'):
             p("This is a mixed tab!")
             EZChart(example_plot())
