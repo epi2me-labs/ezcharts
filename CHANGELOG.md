@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
+- Download button in sankey plot.
 - DataTables.from_pandas takes `use_headers` kwarg.
 - DataTables `sortable` added to API.
 
