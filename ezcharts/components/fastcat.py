@@ -615,9 +615,9 @@ def base_yield_plot(data, color=None):
             data["start"][::-1].to_numpy() * data["count"][::-1].to_numpy()
         )[::-1]
 
-    mid = cumsum[-1] / 2
-    n50_index = np.searchsorted(cumsum, mid)
-    n50 = int(length[n50_index])
+    mid = cumsum[0] / 2
+    n50_index = np.searchsorted(cumsum[::-1], mid)
+    n50 = int(length[len(length) - n50_index]) / 1000
     # TODO: we needn't create this only to thin it immediately
     df = pd.DataFrame({xlab: length / 1000, ylab: cumsum / 1e9}, copy=False)
 
