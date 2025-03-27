@@ -1,7 +1,7 @@
 """Visualizing matrices of data."""
 import json
 
-from dominate.tags import div, main, script, style
+from dominate.tags import button, div, label, li, main, script, select, style, ul
 from dominate.util import raw
 
 from ezcharts.layout.resource import ScriptResource, StyleResource
@@ -40,38 +40,30 @@ def metagenomics_sankey(data):
         sankey_css()
 
         with main(className="metagenomics-sankey"):
-            div(
-                raw(
-                    """
-                    <ul>
-                        <li>
-                            <label for="sample-select">Select sample</label>
-                            <select id="sample-select"></select>
-                        </li>
-                        <li>
-                            <label for="rank-select">Select rank</label>
-                            <select id="rank-select"></select>
-                        </li>
-                        <li>
-                            <label for="cutoff-select">Select cutoff</label>
-                            <select id="cutoff-select"></select>
-                        </li>
-                        <li>
-                            <button onclick="zoomIn()">[+] Zoom in</button>
-                        </li>
-                        <li>
-                            <button onclick="zoomOut()">[-] Zoom out</button>
-                        </li>
-                        <li>
-                            <button onclick="resetZoom()">[ ] Reset zoom</button>
-                        </li>
-                    </ul>
-                    """
-                ),
-                id="controls-sankey",
-            )
-        with div(id="visualisation"):
-            # the two divs below will be populated by the script
-            div(id="sankey-plot")
-            div(id="tooltip")
-            script(raw(sankey_data))
+            with div(id="controls-sankey"):
+                with ul():
+                    li(
+                        label("Select sample", fr="sample-select"),
+                        select(id="sample-select")
+                    )
+                    li(
+                        label("Select rank", fr="rank-select"),
+                        select(id="rank-select")
+                    )
+                    li(
+                        label("Select cutoff", fr="cutoff-select"),
+                        select(id="cutoff-select")
+                    )
+                    with li():
+                        with div(cls="dropdown"):
+                            button("Options", cls="dropbtn")
+                            with div(cls="dropdown-content"):
+                                button("[+] Zoom in", onclick="zoomIn()")
+                                button("[-] Zoom out", onclick="zoomOut()")
+                                button("[ ] Reset zoom", onclick="resetZoom()")
+                                button("Download", onclick="svgAsXML()")
+            with div(id="visualisation"):
+                # the two divs below will be populated by the script
+                div(id="sankey-plot")
+                div(id="tooltip")
+                script(raw(sankey_data))

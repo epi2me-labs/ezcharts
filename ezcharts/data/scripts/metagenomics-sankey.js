@@ -641,3 +641,19 @@ function resetZoom() {
         .call(zoom.scaleTo, 1);
 }
 
+
+function svgDataURL(d3_sankey) {
+    var svgAsXML = (new XMLSerializer).serializeToString(d3_sankey);
+    return "data:image/svg+xml," + encodeURIComponent(svgAsXML);
+    }
+
+
+function svgAsXML() {
+    var d3_sankey = d3.select('#sankey-plot');
+    var dataURL = svgDataURL(d3_sankey.node());
+    var dl = document.createElement( "a" );
+    document.body.appendChild(dl);
+    dl.setAttribute("href", dataURL);
+    dl.setAttribute("download", "metagenomics-sankey.svg");
+    dl.click();
+}

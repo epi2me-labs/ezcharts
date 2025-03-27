@@ -29,10 +29,8 @@
 .metagenomics-sankey input,
 .metagenomics-sankey select,
 .metagenomics-sankey select.dataTable-selector {
-    min-width: 200px;
+    min-width: 25%;
     cursor: pointer;
-    border: 0;
-    padding: 0;
     margin: 0;
     position: relative;
     margin-top: 5px;
@@ -44,7 +42,6 @@
     text-transform: uppercase;
     font-size: 11px;
     border-radius: 4px;
-    /* font-weight: bold; */
     letter-spacing: 0.05em;
     transition: 0.2s ease-in-out all;
     font-weight: bold;
@@ -77,8 +74,6 @@
 .metagenomics-sankey button {
     white-space: nowrap;
     cursor: pointer;
-    border: 0;
-    padding: 0;
     margin: 0;
     position: relative;
     outline: none;
@@ -114,14 +109,11 @@
 }
 
 .metagenomics-sankey main {
-    max-width: 1200px;
+    width: 100%;
     /* padding: 50px; */
     margin: 0 auto;
 }
 
-.metagenomics-sankey #controls-sankey {
-    max-width: 1200px;
-}
 
 .metagenomics-sankey #controls-sankey ul {
     display: flex;
@@ -132,4 +124,59 @@
     flex-direction: column;
     margin: 0 15px 0 0;
     justify-content: end;
+    width: 100%;
+}
+
+/* Options button */
+.metagenomics-sankey #controls-sankey .dropbtn {
+    background-color: white;
+    min-width: 100%;
+    color: #0079a4;
+    padding: 15px 25px;
+    margin-top: 5px;
+    font-size: 11px;
+    border: 2px solid #0079a4;
+  }
+
+  .metagenomics-sankey #controls-sankey .dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: white;
+    z-index: 1;
+    min-width: 100%;
+  }
+
+/* Options in the dropdown menu */
+.metagenomics-sankey #controls-sankey .dropdown:hover .dropdown-content {
+    display: block;
+    border: 2px solid #0079a4;
+    border-radius: 4px;
+    background-color: white;
+    min-width: 100%;
+}
+
+/* Options in the dropdown menu */
+.metagenomics-sankey #controls-sankey .dropdown-content button {
+    white-space: nowrap;
+    cursor: pointer;
+    position: relative;
+    outline: none;
+    background-color: transparent;
+    color: #0079a4;
+    border: 0px;
+    padding: 0px;
+    padding-left: 5px;
+    border-radius: 0px;
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    font-weight: normal;
+    text-align: left;
+    min-width: 100%;
+}
+
+/* Hover to highlight options in the dropdown menu */
+.metagenomics-sankey #controls-sankey .dropdown-content button:hover {
+    background-color: #0079a4;
+    color: white
 }
