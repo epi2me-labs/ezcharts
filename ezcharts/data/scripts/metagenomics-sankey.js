@@ -3,6 +3,11 @@
 |---------------------------------------------------------------------------- */
 const width = 1200
 const height = 900
+// Lets us see the species names for species less < 30 chars. Get draggy with it after that
+const viewBoxWidth = width + 350
+const viewBox = `0 0 ${viewBoxWidth} ${height}`
+const preserveAspectRatio = "xMidYMid meet"
+const minWidth = 800
 const color = '#333333'
 const cutoffs = [0.5, 1, 3, 5]
 const ranks = ["superkingdom", "kingdom", "phylum", "class", "order", "family", "genus", "species"]
@@ -226,6 +231,7 @@ const setTextStyles = (enter, colour = "#555") => {
 const updateToolTip = (enter, colourScale, parsed, counts) => {
     const toolTip = d3.select("#tooltip")
     enter.on("mouseover", (event, d) => {
+        tooltip.style("visibility", "visible");
         const sample = d3.select("#sample-select").property('value')
         const _total = getTotalCount(parsed[sample])
         const toolTipData = [
@@ -234,18 +240,14 @@ const updateToolTip = (enter, colourScale, parsed, counts) => {
             `Count: ${d.value}`,
             `Percentage: ${(100 / _total * d.value).toFixed(2)}%`
         ]
+        console.log(toolTipData)
         toolTip
             .select("text")
             .remove()
-        const toolTipText = toolTip
-            .style("top", d.y + "px")
-            .style("left", d.x + "px")
-            .style("padding", "5px")
-            .style("border-radius", "4px")
+        // Nice border
+        tooltip.select("rect").attr("stroke", colourScale(d.value));
+        const toolTipText = tooltip.style("border-radius", "4px")
             .style("visibility", "visible")
-            .style("background-color", "#fafafa")
-            .style("border", `2px solid ${colourScale(d.value)}`)
-            .style("box-shadow", "5px 12px 20px rgb(36 37 38 / 13%)")
             .append('text')
             .attr("x", 0)
             .attr("y", 0)
@@ -260,16 +262,43 @@ const updateToolTip = (enter, colourScale, parsed, counts) => {
             .style("display", "block")
             .attr("fill-opacity", 0.7)
             .text(d => d)
+        // Resize tooltip
+        const bbox = toolTipText.node().getBBox();
+        tooltip.select("rect")
+            .attr("x", bbox.x - 8)
+            .attr("y", bbox.y - 6)
+            .attr("width", bbox.width + 16)
+            .attr("height", bbox.height + 12);
+
+        // Place tooltip
+        const [x, y] = d3.pointer(event, svg.node());
+        tooltip.attr("transform", `translate(${x + 25}, ${y - 50})`);
     })
-        .on("mousemove", (event, d) => {
-            toolTip
-                .style("top", event.layerY + 10 + "px")
-                .style("left", event.layerX + 10 + "px")
+        .on("mousemove", (event) => {
+            const [x, y] = d3.pointer(event, svg.node());
+            tooltip.attr("transform", `translate(${x + 25}, ${y - 50})`);
         })
-        .on("mouseout", (d) => {
-            return toolTip.style("visibility", "hidden")
+        .on("mouseout", () => {
+            tooltip.style("visibility", "hidden");
         });
 }
+
+/**
+ * Stupid bug in chrome/macOS draws circles on 
+ * completely flat paths, when the stroke width exceeds
+ * the length of the path (CW5903) - workaround by 
+ * offsetting y1 by 0.001 so no path is completely flat
+ * 
+ * @param {*} linkGen 
+ * @returns 
+ */
+const safeSankeyPathGen = (linkGen = d3.sankeyLinkHorizontal()) => d => {
+    console.log(d)
+    const safeD = { ...d };
+    safeD.y1 = safeD.y1 + 0.001;
+    return linkGen(safeD);
+};
+
 
 /**
     * Updates the sankey plot.
@@ -392,7 +421,7 @@ const updateVisualisation = (svg, graph, depth, colourScale, parsed, counts) => 
 
                 container
                     .append("path")
-                    .attr("d", d3.sankeyLinkHorizontal())
+                    .attr("d", safeSankeyPathGen())
                     .attr("stroke", (d) => `url(#${d.source.name}-${normaliseName(d.target.name)}-grad`)
                     .attr("stroke-opacity", 0.1)
                     .call(enter => enter.transition(t)
@@ -405,7 +434,7 @@ const updateVisualisation = (svg, graph, depth, colourScale, parsed, counts) => 
 
                 update
                     .select("path")
-                    .attr("d", d3.sankeyLinkHorizontal())
+                    .attr("d", safeSankeyPathGen())
                     .call(enter => enter.transition(t)
                         .attr("stroke-width", d => Math.max(1, d.width)))
             },
@@ -456,7 +485,7 @@ const handlePlotSelectChange = (counts, parsed) => {
     const _graph = getSankeyGraph(sample, parsed[sample], generator, cutoff, _total)
     const colourScale = d3.scaleQuantize().domain([0, _total]).range(colours);
     setStateGraph(_graph)
-    updateVisualisation(svg, _graph, ranks.indexOf(rank), colourScale, parsed, counts);
+    updateVisualisation(g, _graph, ranks.indexOf(rank), colourScale, parsed, counts);
 }
 
 /**
@@ -465,10 +494,8 @@ const handlePlotSelectChange = (counts, parsed) => {
     * @param {object} e
     */
 const handleZoom = (e) => {
-    d3.select('#sankey-plot').selectChildren('svg')
-        .selectChildren('g')
-        .attr('transform', e.transform)
-    const fontSize = Math.min(16 / e.transform.k, 12)
+    g.attr('transform', e.transform)
+    const fontSize = Math.min(16 / (e.transform.k / 1.2), 14)
     d3.selectAll('#nodes text')
         .style("font-size", `${fontSize}px`)
 }
@@ -569,10 +596,39 @@ const handleTableSelectChange = (datatable, counts, samples) => {
 |---------------------------------------------------------------------------- */
 
 const svg = d3.select('#sankey-plot')
-    .insert('svg')
-    .attr("width", width)
-    .attr("height", height)
+    .append('svg')
+    .attr("viewBox", viewBox)
+    .attr("preserveAspectRatio", preserveAspectRatio)
     .style("background", "#fff")
+    .style("width", "98%")
+    .style("height", "100%")
+    .style("min-width", `${minWidth}px`)
+
+// Tooltip Shadow
+const defs = svg.append("defs");
+
+defs.append("filter")
+    .attr("id", "tooltip-shadow")
+    .html(`
+      <feDropShadow dx="5" dy="12" stdDeviation="5" flood-color="rgb(36,37,38)" flood-opacity="0.13"/>
+    `);
+
+
+const g = svg.append("g").attr("id", "sankey-group")
+
+const tooltip = svg.append("g")
+    .attr("id", "tooltip")
+    .style("pointer-events", "none")
+    .style("visibility", "hidden");
+
+tooltip.append("rect")
+    .attr("rx", 4)
+    .attr("ry", 4)
+    .attr("fill", "#fafafa")
+    .attr("stroke-width", 2)
+    .attr("filter", "url(#tooltip-shadow)");
+
+
 
 // FYI CONSIDER THIS GLOBAL
 const state = {}
@@ -607,7 +663,7 @@ const total = getTotalCount(sample_data)
 const graph = getSankeyGraph(
     default_sample, sample_data, generator, default_cutoff, total)
 const colourScale = d3.scaleQuantize().domain([0, total]).range(colours);
-renderVisualisation(svg, graph, ranks.indexOf(default_rank), colourScale, parsed, sample_counts)
+renderVisualisation(g, graph, ranks.indexOf(default_rank), colourScale, parsed, sample_counts)
 setStateGraph(graph)
 
 // Initialise select reactivity
@@ -616,7 +672,7 @@ d3.select("#rank-select").on("change", () => handlePlotSelectChange(sample_count
 d3.select("#cutoff-select").on("change", () => handlePlotSelectChange(sample_counts, parsed));
 
 // Initialise zoom reactivity
-const zoom = d3.zoom().on('zoom', handleZoom);
+const zoom = d3.zoom().scaleExtent([0.9, 8]).translateExtent([[0, 0], [viewBoxWidth + viewBoxWidth * 0.1, height]]).on('zoom', handleZoom);
 svg.call(zoom).on("wheel.zoom", null);
 
 // Initialise tooltip interactivity
@@ -624,34 +680,34 @@ const toolTip = renderToolTop()
 
 // Initialise manual zoom interactivity
 function zoomIn() {
-    d3.select('svg')
+    svg
         .transition()
         .call(zoom.scaleBy, 1.2);
 }
 
 function zoomOut() {
-    d3.select('svg')
+    svg
         .transition()
         .call(zoom.scaleBy, 0.7);
 }
 
 function resetZoom() {
-    d3.select('svg')
+    svg
         .transition()
-        .call(zoom.scaleTo, 1);
+        .call(zoom.transform, d3.zoomIdentity);
 }
 
 
 function svgDataURL(d3_sankey) {
     var svgAsXML = (new XMLSerializer).serializeToString(d3_sankey);
     return "data:image/svg+xml," + encodeURIComponent(svgAsXML);
-    }
+}
 
 
 function svgAsXML() {
     var d3_sankey = d3.select('#sankey-plot');
     var dataURL = svgDataURL(d3_sankey.node());
-    var dl = document.createElement( "a" );
+    var dl = document.createElement("a");
     document.body.appendChild(dl);
     dl.setAttribute("href", dataURL);
     dl.setAttribute("download", "metagenomics-sankey.svg");

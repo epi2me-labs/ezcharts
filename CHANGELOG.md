@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - DataTables.from_pandas takes `use_headers` kwarg.
 - DataTables `sortable` added to API.
 
+### Fixed
+- Sankey now scales down until it hits 800px, it then scrolls. This avoids overflowing the right of the screen on narrow viewports.
+
+
 ## [v0.13.1]
 ### Fixed
 - SeqSummary read_length_plot_binwidth override not working in v.13.0.

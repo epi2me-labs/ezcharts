@@ -2,7 +2,6 @@
     position: relative;
 }
 
-
 .metagenomics-sankey h3 {
     font-size: 24px;
     margin: 0;
@@ -117,14 +116,15 @@
 
 .metagenomics-sankey #controls-sankey ul {
     display: flex;
+    flex-wrap: wrap;
 }
 
 .metagenomics-sankey #controls-sankey ul li {
     display: flex;
     flex-direction: column;
+    flex: 1 1 0;
     margin: 0 15px 0 0;
     justify-content: end;
-    width: 100%;
 }
 
 /* Options button */
@@ -136,15 +136,15 @@
     margin-top: 5px;
     font-size: 11px;
     border: 2px solid #0079a4;
-  }
+}
 
-  .metagenomics-sankey #controls-sankey .dropdown-content {
+.metagenomics-sankey #controls-sankey .dropdown-content {
     display: none;
     position: absolute;
     background-color: white;
     z-index: 1;
     min-width: 100%;
-  }
+}
 
 /* Options in the dropdown menu */
 .metagenomics-sankey #controls-sankey .dropdown:hover .dropdown-content {
@@ -179,4 +179,11 @@
 .metagenomics-sankey #controls-sankey .dropdown-content button:hover {
     background-color: #0079a4;
     color: white
+}
+
+/* Add scrollbars when viewport is less than 900px wide */
+@media (max-width: 950px) {
+    #sankey-plot {
+        overflow-x: auto;
+    }
 }
