@@ -369,3 +369,13 @@ def si_format(n):
     calling it on a small integer. This wrapper prevents that.
     """
     return si_prefix.si_format(n, precision=0 if n < 1000 else 1)
+
+
+def finalise(fig):
+    """Limit axes on the Bokeh figure."""
+    for range_attr in ("x_range", "y_range"):
+        # No data, not this functions problem
+        current_range = getattr(fig, range_attr, None)
+        # Only set new bounds if bounds are not already set
+        if current_range is not None and current_range.bounds is None:
+            current_range.bounds = "auto"
