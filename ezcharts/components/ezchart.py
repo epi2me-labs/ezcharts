@@ -8,6 +8,7 @@ from dominate.util import raw
 from ezcharts.layout.base import Snippet
 from ezcharts.layout.util import render_template
 from ezcharts.plots import BokehPlot, Plot
+from ezcharts.plots.util import finalise
 
 
 def EZChart(
@@ -19,6 +20,7 @@ def EZChart(
 ):
     """Wrap an ECharts or Bokeh plot in a div."""
     if isinstance(plot, BokehPlot):
+        finalise(plot._fig)
         return _BokehChart(
             plot, theme=theme, width=width, height=height,
             additional_styles=additional_styles)
