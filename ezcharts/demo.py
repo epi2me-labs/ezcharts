@@ -131,6 +131,11 @@ def main(args):
             resource_filename("ezcharts", "data/test/histogram_stats/empty_sample/"),
         ]
     )
+    bamstats_histogram_stats_dir = tuple(
+        [
+            resource_filename("ezcharts", "data/test/bamstats_hist"),
+        ]
+    )
 
     # Create report
     # Note we need to add nextclade as a resource
@@ -171,6 +176,12 @@ def main(args):
             seq_summary=histogram_stats_dir,
             color="#2a98b7",
             sample_names=tuple(['sample_2', 'sample_1', 'sample_3']),
+            read_length_quantile_xend=0.99)
+    with report.add_section('Sequence summaries alignment', 'Summaries aln'):
+        SeqSummary(
+            seq_summary=bamstats_histogram_stats_dir,
+            color="#2a98b7",
+            sample_names=tuple(['sample_1']),
             read_length_quantile_xend=0.99)
     with report.add_section('Compare Summaries', 'Compare'):
         SeqCompare(

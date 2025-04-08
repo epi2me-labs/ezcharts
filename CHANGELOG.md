@@ -5,6 +5,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+- Percentage of reads aligned histogram x-axis limits are now default 0 to 100.
+- Accuracy histogram x-axis limits are now default 80 to 100.
+
 ### Added
 - Download button in sankey plot.
 - DataTables.from_pandas takes `use_headers` kwarg.
@@ -12,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - Sankey now scales down until it hits 800px, it then scrolls. This avoids overflowing the right of the screen on narrow viewports.
+- Sequence summary component alignment and coverage plots amended to also work with histogram data as input, example added to demo. [CW-5838]
 
 
 ## [v0.13.1]
