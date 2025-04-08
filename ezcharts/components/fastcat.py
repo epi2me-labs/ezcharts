@@ -714,7 +714,7 @@ def read_quality_plot(data, binwidth=0.2, min_qual=4, max_qual=30, color=None):
 @ezc.plots.util.plot_wrapper
 def mapping_accuracy_plot(
     data, binwidth=1.0, min_acc=80,
-    max_acc=101, color=None
+    max_acc=100, color=None
 ):
     """Create read quality summary plot.
 
@@ -723,7 +723,8 @@ def mapping_accuracy_plot(
     :param min_acc: the minimum quality value to plot.
     :param max_acc: the maximum quality value to plot.
     """
-    data = data[data['acc'].notna()]
+    if 'acc' in data.columns:
+        data = data[data['acc'].notna()]
     if len(data) == 0:
         plt = util.empty_plot(
             text="Accuracy",
@@ -740,7 +741,7 @@ def mapping_accuracy_plot(
 @ezc.plots.util.plot_wrapper
 def read_coverage_plot(
     data, binwidth=1.0, min_cov=0,
-    max_cov=None, color=None
+    max_cov=100, color=None
 ):
     """Create read quality summary plot.
 
@@ -749,7 +750,8 @@ def read_coverage_plot(
     :param min_cov: the minimum coverage value to plot.
     :param max_cov: the maximum coverage value to plot.
     """
-    data = data[data['coverage'].notna()]
+    if 'coverage' in data.columns:
+        data = data[data['coverage'].notna()]
     if len(data) == 0:
         plt = util.empty_plot(
             text="Read alignment",
