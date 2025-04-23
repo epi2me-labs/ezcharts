@@ -4,18 +4,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [v0.14.0]
 ### Changed
 - Percentage of reads aligned histogram x-axis limits are now default 0 to 100.
 - Accuracy histogram x-axis limits are now default 80 to 100.
-
 ### Added
 - Download button in sankey plot.
 - DataTables.from_pandas takes `use_headers` kwarg.
 - DataTables `sortable` added to API.
-
+- DetailsTable, LeadSummary, WorkflowQCBanner components for reports.
+- Added `page_number` attribute to the report, which if `True` adds a styled footer to the report containing the page number.
+- Add `make_table` to create QC control checks tables.
 ### Fixed
 - Sankey now scales down until it hits 800px, it then scrolls. This avoids overflowing the right of the screen on narrow viewports.
+- Sequence summary read length N50 incorrectly displayed minimum read length, it now correctly shows the N50.
 - Sequence summary component alignment and coverage plots amended to also work with histogram data as input, example added to demo. [CW-5838]
 
 

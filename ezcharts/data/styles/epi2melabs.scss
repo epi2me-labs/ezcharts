@@ -80,6 +80,14 @@ $enable-negative-margins: true;
     background-size: 1.2em !important;
 }
 
+.badge-icon {
+    background-position: 12% !important;
+    background-color: white !important;
+    background-repeat: no-repeat !important;
+    padding-left: 2em !important;
+    background-size: 1.2em !important;
+}
+
 .badge-fail-solid {
     background-color: $brand-red !important;
     background-image: var(--circle-exclamation-solid-white) !important;
@@ -96,6 +104,21 @@ $enable-negative-margins: true;
     background-color: $brand-green !important;
     background-image: var(--circle-check-solid-white) !important;
     background-position: 0.5em !important;
+}
+
+.badge-fail {
+    color: $brand-red !important;
+    background-image: var(--circle-exclamation-solid-red) !important;
+}
+
+.badge-unknown {
+    color: $orange-700 !important;
+    background-image: var(--circle-minus-solid-neutral-cool) !important;
+}
+
+.badge-pass {
+    color: $brand-green !important;
+    background-image: var(--circle-check-solid-sage) !important;
 }
 
 
