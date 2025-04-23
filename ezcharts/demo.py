@@ -11,10 +11,12 @@ from pkg_resources import resource_filename
 import ezcharts as ezc
 from ezcharts import util
 from ezcharts.components.common import fasta_idx, HSA_CHROMOSOME_ORDER
+from ezcharts.components.details import ConfigurationTable
 from ezcharts.components.dss import load_dml, load_dmr
 from ezcharts.components.ezchart import EZChart
 from ezcharts.components.fastcat import load_bamstats_flagstat, load_stats
 from ezcharts.components.fastcat import SeqCompare, SeqSummary
+from ezcharts.components.lead_summary import LeadSummary, WorkflowQCBanner
 from ezcharts.components.modkit import load_bedmethyl, load_modkit_summary
 from ezcharts.components.mosdepth import load_mosdepth_regions, load_mosdepth_summary
 from ezcharts.components.nextclade import NextClade, NXTComponent
@@ -121,8 +123,9 @@ def main(args):
     logger.info('Building report')
 
     # Example data
+    client_fields_json = resource_filename('ezcharts', "data/test/client_fields.json")
     params = resource_filename('ezcharts', "data/test/params.json")
-    versions = resource_filename('ezcharts', "data/test/versions.txt")
+    versions = resource_filename('ezcharts', "data/test/versions/versions.txt")
     nxt_json = resource_filename('ezcharts', "data/test/nextclade.json")
     histogram_stats_dir = tuple(
         [
@@ -487,6 +490,74 @@ def main(args):
         df_si_format["formatted"] = df_si_format["number"].map(si_format)
         DataTable.from_pandas(df_si_format)
 
+    with report.add_section(
+            "QC Status", 'QC Status'):
+        with open(client_fields_json, encoding='utf-8') as f:
+            client_fields = json.load(f)
+            pretty_client_fields = {}
+            for key, value in client_fields.items():
+                if isinstance(value, list):
+                    value = ', '.join(value)
+                pretty_client_fields[key.capitalize()] = value
+        tabs = Tabs()
+        with tabs.add_tab('Everything is fine'):
+            LeadSummary(
+                workflow_version=WORKFLOW_VERSION,
+                sample_alias="demo_sample",
+                client_fields=pretty_client_fields,
+                reference="path/to/reference",
+                qc_status={"status": True, "scope": "QC status"},
+                qc_criteria=[
+                    {"status": True, "scope": "All acceptance criteria met"},
+                ],
+                other_data={"Basecaller": "basecaller model"},
+            )
+        with tabs.add_tab('or not'):
+            LeadSummary(
+                workflow_version=WORKFLOW_VERSION,
+                sample_alias="demo_sample",
+                client_fields=pretty_client_fields,
+                reference="path/to/reference",
+                qc_status={"status": False, "scope": "QC status"},
+                qc_criteria=[
+                    {
+                        "status": False,
+                        "category": "Non host reads summary",
+                        "scope": "Total reads",
+                    },
+                    {
+                        "status": False,
+                        "category": "Non host reads summary",
+                        "scope": "Min QS",
+                    },
+                ],
+                n_columns=1,
+                other_data={"Basecaller": "basecaller model"},
+            )
+        with tabs.add_tab('no QC'):
+            LeadSummary(
+                workflow_version=WORKFLOW_VERSION,
+                sample_alias="demo_sample",
+                client_fields=pretty_client_fields,
+                reference="path/to/reference",
+                n_columns=3
+            )
+        with tabs.add_tab('No reason to alert'):
+            WorkflowQCBanner(workflow_pass=True, solid=False)
+        with tabs.add_tab('Alert'):
+            WorkflowQCBanner(workflow_pass=False, solid=False)
+
+    with report.add_section('Details', 'Details'):
+        # Software and params table
+        ConfigurationTable(
+            {"minimap2": "2.28-r1122", "fastcat": "0.22.0"},
+            {
+                "wfversion": WORKFLOW_VERSION,
+                "fastq": "/wf-example/test_data/fastq",
+            },
+            WORKFLOW_VERSION,
+            sample_specific=True
+        )
     logger.info('Reticulating splines')
     report.write(args.output)
 

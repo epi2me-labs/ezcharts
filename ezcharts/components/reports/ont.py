@@ -1,5 +1,5 @@
 """Get a default report."""
-from typing import List, Type
+from typing import List, Optional, Type
 
 from dominate.tags import (
     a, button, code, div, h4, html_tag, p, section)
@@ -19,6 +19,11 @@ class ILabsAddendumClasses(IClasses):
 
     container: str = cls("py-5", "px-4")
     inner: str = cls("container", "px-0")
+    page_number: str = cls(
+        "p-4", "w-100", "mb-0",
+        "bg-body", "small", "text-end",
+        "position-absolute bottom-0"
+    )
 
 
 class LabsAddendum(Snippet):
@@ -54,7 +59,29 @@ class LabsAddendum(Snippet):
                     "Oxford Nanopore Technologies products are not "
                     "intended for use for health assessment or to "
                     "diagnose, treat, mitigate, cure or prevent any "
-                    "disease or cONTition.")
+                    "disease or condition.")
+
+
+class PageNumberFooter(Snippet):
+    """A styled footer component for use in a Report."""
+
+    TAG = "div"
+
+    def __init__(
+        self,
+        count: int,
+        total: int,
+        classes: ILabsAddendumClasses = ILabsAddendumClasses(),
+    ) -> None:
+        """Create styled section page number."""
+        super().__init__(
+            styles=None,
+            classes=classes,
+            className=classes.container,
+            overflow=True,
+            transparent=False,
+        )
+        p(f"Page {count} of {total}", cls=self.classes.page_number)
 
 
 class ILabsNavigationClasses(IClasses):
@@ -192,6 +219,7 @@ class ONTReport(BasicReport):
         head_resources: List[Resource] = ONT_head_resources,
         body_resources: List[Resource] = ONT_body_resources,
         default_content: bool = True,
+        page_number: Optional[tuple] = None,
         to_print: bool = False
     ) -> None:
         """Create tag."""
@@ -208,6 +236,12 @@ class ONTReport(BasicReport):
                     self.banner = Banner(report_title, workflow_name, subtitle=False)
                     self.banner.add_badge("Research use only", bg_class='bg-secondary')
                     self.banner.add_badge(workflow_version)
+
+        if page_number:
+            with self.footer:
+                self.page_number = PageNumberFooter(
+                    count=page_number[0], total=page_number[1]
+                )
 
     def add_badge(
         self,
