@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [unreleased]
+### Fixed
+- Reports now include Arial and Sans-serif font options, to improve appearance when Noto Sans is unavailable.
+
 ## [v0.14.0]
 ### Changed
 - Percentage of reads aligned histogram x-axis limits are now default 0 to 100.

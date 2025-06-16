@@ -35,6 +35,7 @@ test:
         paths:
             - dist/*.tar.gz
             - ezcharts_demo_report.html
+            - ezcharts_ont_demo_report.html
 
 deploy-checks:
     stage: prerelease
