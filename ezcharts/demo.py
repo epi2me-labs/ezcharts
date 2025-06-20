@@ -510,7 +510,9 @@ def main(args):
                 qc_criteria=[
                     {"status": True, "scope": "All acceptance criteria met"},
                 ],
-                other_data={"Basecaller": "basecaller model"},
+                other_data={"Basecaller": "basecaller model",
+                            "Missing value 1": None,
+                            "Missing value 2": None}
             )
         with tabs.add_tab('or not'):
             LeadSummary(

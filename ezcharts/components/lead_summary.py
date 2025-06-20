@@ -129,20 +129,21 @@ def lead_section_table(
         _div.add(error)
     # Create one table per column. We calculate in advance the max number
     # of rows per table.
-    n_fields = len(lead_fields)
+    # Only count fields with non-None values [CW-6231]
+    valid_fields = {k: v for k, v in lead_fields.items() if v is not None}
+    n_fields = len(valid_fields)
     # Determine rows per column
     column_row_limit = math.ceil(n_fields / n_columns)
 
     count = 0
 
     for key, value in lead_fields.items():
+        if value is None:
+            continue
         if count == column_row_limit:
             _row.add(_div)
             _div = div(cls="col m-6")
             count = 0
-        # Check for None, too as client fields reformats fields to this
-        if value is None:
-            continue
         _table.add(
             tr(td(strong(key)), td(value))
         )
