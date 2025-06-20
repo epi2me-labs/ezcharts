@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 ### Fixed
+- LeadSummary balances columns aware of `None` values.
 - Reports now include Arial and Sans-serif font options, to improve appearance when Noto Sans is unavailable.
 
 ## [v0.14.0]
