@@ -38,7 +38,8 @@ def cli():
     # all component demos, plus some others
     components = [
         'params', 'nextclade', 'fastcat', 'dss',
-        'modkit', 'mosdepth', 'clinvar', 'bcfstats'
+        'modkit', 'mosdepth', 'clinvar', 'bcfstats',
+        'status'
         ]
     others = ['ezcharts.demo', 'ezcharts.plots.demo', 'ezcharts.plots.ideogram']
 

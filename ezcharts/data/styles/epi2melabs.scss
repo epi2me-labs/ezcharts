@@ -106,6 +106,12 @@ $enable-negative-margins: true;
     background-position: 0.5em !important;
 }
 
+.badge-neutral-solid {
+    background-color: $brand-grey !important;
+    background-image: var(--circle-minus-solid-white) !important;
+    background-position: 0.5em !important;
+}
+
 .badge-fail {
     color: $brand-red !important;
     background-image: var(--circle-exclamation-solid-red) !important;

@@ -22,6 +22,7 @@ from ezcharts.components.mosdepth import load_mosdepth_regions, load_mosdepth_su
 from ezcharts.components.nextclade import NextClade, NXTComponent
 from ezcharts.components.plotmetadata import PlotMetaData
 from ezcharts.components.reports.labs import LabsReport
+from ezcharts.components.status import StatusTable
 from ezcharts.components.theme import LAB_head_resources
 from ezcharts.layout.snippets import DataTable
 from ezcharts.layout.snippets import Grid
@@ -560,6 +561,35 @@ def main(args):
             WORKFLOW_VERSION,
             sample_specific=True
         )
+
+    # Sample status table to track samples
+    sample_status_section = report.add_section("Sample status", "Status")
+
+    sample_status = StatusTable(samples=["sample_1", "sample_2", "sample_3"])
+    sample_status.set_status("sample_1", True, "Success")
+    sample_status.set_status("sample_2", False, "Failed because of a reason")
+    sample_status.add_column(
+        col_name="var1",
+        add_dict={"sample_1": 255, "sample_2": 315},
+    )
+    sample_status.add_badge_column(
+        col_name="var2",
+        statuses={
+            "sample_1": True,
+            "sample_2": False
+        },
+        messages={
+            "sample_1": "Pass",
+            "sample_2": "Fail"
+        }
+    )
+
+    with sample_status_section:
+        p("""
+This table shows the status of each sample.
+""")
+        sample_status.write_table()
+
     logger.info('Reticulating splines')
     report.write(args.output)
 
