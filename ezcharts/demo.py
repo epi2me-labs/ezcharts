@@ -3,7 +3,7 @@ import argparse
 import json
 
 from bokeh.models.tickers import SingleIntervalTicker
-from dominate.tags import div, h4, p
+from dominate.tags import div, h4, p, table, td, th, thead, tr
 import numpy as np
 import pandas as pd
 from pkg_resources import resource_filename
@@ -24,6 +24,7 @@ from ezcharts.components.plotmetadata import PlotMetaData
 from ezcharts.components.reports.labs import LabsReport
 from ezcharts.components.status import StatusTable
 from ezcharts.components.theme import LAB_head_resources
+from ezcharts.components.value_displays import stacked_freq_bar, value_badge
 from ezcharts.layout.snippets import DataTable
 from ezcharts.layout.snippets import Grid
 from ezcharts.layout.snippets import Progress
@@ -218,6 +219,29 @@ def main(args):
             title="Details of Controls",
             body="You can put more details here....")
 
+    # Add value displays
+    with report.add_section('Value Displays', 'Value Displays'):
+        _table = table(
+            cls="table table-sm small table-stripped",
+            style="text-align: center; vertical-align: middle;")
+        _table.add(
+            thead(
+                tr(
+                    th("Column1"),
+                    th("Column2"),
+                    th("Column3"))),
+            tr(
+                td("Sample01"),
+                td(stacked_freq_bar([1, 5, 12]), style="width: 150px"),
+                td(value_badge(0.6, 0.8, 18))),
+            tr(
+                td("Sample02"),
+                td(stacked_freq_bar([10, 5, 3]), style="width: 150px"),
+                td(value_badge(8, 0.8, 18, text='medium'))),
+            tr(
+                td("Sample03"),
+                td(stacked_freq_bar([10, 5, 3]), style="width: 150px"),
+                td(value_badge(28, 0.8, 18))))
     # Add sample QC cards
     with report.add_section('QC', 'QC'):
         body_content = div(

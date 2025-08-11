@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [unreleased]
 ### Added
 - `StatusTable` component to track sample status.
+- `stacked_freq_bar` for visualising stacked_freqs as colours in a bar.
+- `value_badge` for visualising a value, with background colour based on the value and assigned thresholds.
 
 ## [v0.14.1]
 ### Fixed
