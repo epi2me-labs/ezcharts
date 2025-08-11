@@ -372,7 +372,47 @@ hr {
     color: var(--neutral-cool-1000);
 }
 
+// stacked_freq bar
 
+.stacked_freq_bar {
+    display: flex;
+    height: 10px;
+    width: 100%;
+    background: #ffffff;
+    border-radius: 3px;
+    overflow: hidden;
+    margin: 5px;
+}
+
+.bar {
+    height: 100%;
+}
+
+// Value badges
+
+.value-badge-low {
+    @extend .badge;
+    @extend .rounded-pill;
+    @extend .p-2;
+    background-color: #8C959B;
+}
+
+.value-badge-mid {
+    @extend .badge;
+    @extend .rounded-pill;
+    @extend .p-2;
+    background-color: #f39600;
+}
+
+.value-badge-high {
+    @extend .badge;
+    @extend .rounded-pill;
+    @extend .p-2;
+    background-color: #A53F97;
+}
+
+
+  
 // Stats
 
 .stats-neutral {
