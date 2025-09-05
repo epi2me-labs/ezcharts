@@ -539,11 +539,14 @@ def main(args):
                     "Basecaller": "basecaller model",
                     "Missing value 1": None,
                     "Missing value 2": None,
+                    "Zero value": 0,
+                    "False value": False,
                     "long reference path": (
                         "/wf-example/with/a/very/long/path/"
                         "that/should/be/wrapped/for/flake8/compliance/"
                         "and/continues/even/further/just/to/be/sure/"
-                        "this/is/handled/correctly"
+                        "this/is/handled/correctly/even/when/the/table"
+                        "is/very/wide"
                     ),
                 }
             )
@@ -567,7 +570,11 @@ def main(args):
                     },
                 ],
                 n_columns=1,
-                other_data={"Basecaller": "basecaller model"},
+                other_data={"Basecaller": "basecaller model",
+                            "Missing value 1": None,
+                            "Missing value 2": None,
+                            "Zero value": 0,
+                            "False value": False},
             )
         with tabs.add_tab('no QC'):
             LeadSummary(
@@ -595,9 +602,13 @@ def main(args):
                     "and/continues/even/further/just/to/be/sure/"
                     "this/is/handled/correctly"
                 ),
+                "pod5": None,
+                "Zero value": 0,
+                "False value": False
             },
             WORKFLOW_VERSION,
-            sample_specific=True
+            sample_specific=True,
+            fill_none="Not Provided"
         )
 
     # Sample status table to track samples

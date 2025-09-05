@@ -18,6 +18,7 @@ class ConfigurationTable(Snippet):
         params,
         workflow_version,
         width=200,
+        fill_none=None,
         **kwargs,
     ) -> None:
         """Create details component.
@@ -26,6 +27,7 @@ class ConfigurationTable(Snippet):
         :param params: dictionary with params and values.
         :param workflow_version: Workflow version.
         :param width: width of the tables.
+        :param fill_none: optional string to display in place of None values.
 
         """
         super().__init__(styles=None, classes=None)
@@ -46,7 +48,12 @@ class ConfigurationTable(Snippet):
                 with table(cls=table_cls, style=table_style):
                     thead(th("Parameter", style=f"width: {width}px;"), th("Value"))
                     for key, value in params.items():
-                        param_value = value if value else ""
+                        # Handle None [CW-6494]
+                        param_value = (
+                            value
+                            if value is not None
+                            else fill_none
+                        )
                         tr(
                             td(key, width=f"{width}px"),
                             td(
