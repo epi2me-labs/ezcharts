@@ -24,6 +24,7 @@ class LeadSummary(Snippet):
         qc_criteria=None,
         other_data=None,
         margin_bottom=3,
+        fill_none=None,
         **kwargs,
     ) -> None:
         """Create LeadSummary component.
@@ -35,6 +36,7 @@ class LeadSummary(Snippet):
         :param qc_status: Dict of the QC status of the sample.
         :param qc_criteria: List of dict of the QC criteria summary to be reported.
         :param other_data: Dict of tuples to be added to the leadsection table.
+        :param fill_none: optional string to display in place of None values.
 
         """
         super().__init__(styles=None, classes=None)
@@ -53,6 +55,7 @@ class LeadSummary(Snippet):
             lead_fields,
             client_fields=client_fields,
             margin_bottom=margin_bottom,
+            fill_none=fill_none,
             **kwargs
         )
 
@@ -99,6 +102,7 @@ def lead_section_table(
     client_fields=None,
     margin_bottom=3,
     n_columns=2,
+    fill_none=None,
 ):
     """From a dict of key value pairs make a table leading section.
 
@@ -106,6 +110,7 @@ def lead_section_table(
     :param client_fields: Client fields dictionary.
     :param margin_bottom: bottom margin.
     :param n_columns: Number of columns to display.
+    :param fill_none: optional string to display in place of None values.
 
     """
     error = None
@@ -130,23 +135,26 @@ def lead_section_table(
         _div.add(error)
     # Create one table per column. We calculate in advance the max number
     # of rows per table.
-    # Only count fields with non-None values [CW-6231]
-    valid_fields = {k: v for k, v in lead_fields.items() if v is not None}
+    # Only count fields with non-None values [CW-6231] unless fill_none is set [CW-6494]
+    # `fill_none` is a string, so there is no need to filter out falsey values
+    if fill_none:
+        valid_fields = lead_fields
+    else:
+        valid_fields = {k: v for k, v in lead_fields.items() if v is not None}
     n_fields = len(valid_fields)
     # Determine rows per column
     column_row_limit = math.ceil(n_fields / n_columns)
 
     count = 0
 
-    for key, value in lead_fields.items():
-        if value is None:
-            continue
+    for key, value in valid_fields.items():
         if count == column_row_limit:
             _row.add(_div)
             _div = div(cls="col m-6")
             count = 0
+        display_value = value if value is not None else fill_none
         _table.add(
-            tr(td(strong(key)), td(value, style=value_cell_style))
+            tr(td(strong(key)), td(display_value, style=value_cell_style))
         )
 
         count += 1
