@@ -535,9 +535,17 @@ def main(args):
                 qc_criteria=[
                     {"status": True, "scope": "All acceptance criteria met"},
                 ],
-                other_data={"Basecaller": "basecaller model",
-                            "Missing value 1": None,
-                            "Missing value 2": None}
+                other_data={
+                    "Basecaller": "basecaller model",
+                    "Missing value 1": None,
+                    "Missing value 2": None,
+                    "long reference path": (
+                        "/wf-example/with/a/very/long/path/"
+                        "that/should/be/wrapped/for/flake8/compliance/"
+                        "and/continues/even/further/just/to/be/sure/"
+                        "this/is/handled/correctly"
+                    ),
+                }
             )
         with tabs.add_tab('or not'):
             LeadSummary(
@@ -581,6 +589,12 @@ def main(args):
             {
                 "wfversion": WORKFLOW_VERSION,
                 "fastq": "/wf-example/test_data/fastq",
+                "long reference path": (
+                    "/wf-example/test_data/ref.fa/with/a/very/long/path/"
+                    "that/should/be/wrapped/for/flake8/compliance/"
+                    "and/continues/even/further/just/to/be/sure/"
+                    "this/is/handled/correctly"
+                ),
             },
             WORKFLOW_VERSION,
             sample_specific=True
