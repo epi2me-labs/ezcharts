@@ -111,6 +111,7 @@ def lead_section_table(
     error = None
 
     table_cls = f"table table-sm small mb-{margin_bottom}"
+    value_cell_style = "word-wrap: break-word; overflow-wrap: break-word;"
 
     if not client_fields:
         pass  # no additional fields to worry about
@@ -145,7 +146,7 @@ def lead_section_table(
             _div = div(cls="col m-6")
             count = 0
         _table.add(
-            tr(td(strong(key)), td(value))
+            tr(td(strong(key)), td(value, style=value_cell_style))
         )
 
         count += 1

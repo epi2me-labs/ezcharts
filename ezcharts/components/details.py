@@ -32,6 +32,7 @@ class ConfigurationTable(Snippet):
 
         table_cls = "table table-sm table-striped small"
         table_style = "table-layout:fixed;"
+        value_cell_style = "word-wrap: break-word; overflow-wrap: break-word;"
         with div(cls="row"):
             with div(cls="col-xs-12 col-sm-6"):
                 h6("Analysis tool versions", cls="fw-bold")
@@ -39,7 +40,7 @@ class ConfigurationTable(Snippet):
                     thead(th("Software", style=f"width: {width}px;"), th("Version"))
                     tr(td("EPI2ME workflow version"), td(workflow_version))
                     for name, version in versions.items():
-                        tr(td(name), td(version))
+                        tr(td(name), td(version, style=value_cell_style))
             with div(cls="col-xs-12 col-sm-6"):
                 h6("Pertinent parameters", cls="fw-bold")
                 with table(cls=table_cls, style=table_style):
@@ -48,5 +49,8 @@ class ConfigurationTable(Snippet):
                         param_value = value if value else ""
                         tr(
                             td(key, width=f"{width}px"),
-                            td(str(param_value).replace(";", ", ")),
+                            td(
+                                str(param_value).replace(";", ", "),
+                                style=value_cell_style,
+                            ),
                         )
