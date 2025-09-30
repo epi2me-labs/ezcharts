@@ -338,10 +338,10 @@ hr {
     color: white;
 }
 
-.badge-undetermined {
-    background-color: var(--orange-200);
-    color: var(--orange-900);
-    border: 1px solid var(--orange-1000);
+.badge-no_result {
+    background-color: var(--neutral-mono-200);
+    color: var(--neutral-mono-900);
+    border: 1px solid var(--neutral-mono-900);
 }
 
 .badge-no-resistance {
@@ -350,8 +350,8 @@ hr {
 }
 
 .badge-none {
-    background-color: var(--neutral-cool-200);
-    color: var(--neutral-cool-1000);
+    color: var(--neutral-mono-900);
+    font-weight: normal;
 }
 
 // stacked_freq bar
