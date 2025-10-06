@@ -9,11 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `StatusTable` component to track sample status.
 - `stacked_freq_bar` for visualising stacked_freqs as colours in a bar.
 - `value_badge` for visualising a value, with background colour based on the value and assigned thresholds.
+- OND report demo added to tests.
 ### Changed
 - `LeadSummary` and `lead_section_table` can optionally display a custom string for None values when `fill_none` is specified, otherwise preserves existing behavior of hiding them.
 - `ConfigurationTable` now supports a `fill_none` option to display a custom string for `None` or empty values; defaults to original behavior if not set.
 - `ond.scss` colour and name changes for `badges-undertermined` to `badge-no_result` to reflect new categories in workflows.
 - Long values in `ConfigurationTable`, `LeadSummary`, and `lead_section_table` are now automatically wrapped to improve table readability.
+- `ONDReport` no longer requires paths for workflow params and versions, as they can be provided via the workflow model.
 ### Fixed
 - `ConfigurationTable` no longer display `False`, `0`, and other falsy values as an empty string.
 
