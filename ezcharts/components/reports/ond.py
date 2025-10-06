@@ -5,11 +5,9 @@ from typing import List, Optional, Type
 from dominate.tags import (
     a, code, div, h4, html_tag, li, p, section, ul)
 
-from ezcharts.components.params import ParamsTable
 from ezcharts.components.reports import Report
 from ezcharts.components.theme import (
     OND_body_resources, OND_head_resources, ONDLogo)
-from ezcharts.components.versions import VersionsList
 from ezcharts.layout.base import IClasses, Snippet
 from ezcharts.layout.resource import Resource
 from ezcharts.layout.snippets.banner import Banner
@@ -174,8 +172,6 @@ class ONDReport(BasicReport):
         self,
         report_title,
         workflow_name,
-        workflow_params_path: str,
-        workflow_versions_path: str,
         workflow_version: str,
         logo: Type[html_tag] = ONDLogo,
         head_resources: List[Resource] = OND_head_resources,
@@ -191,8 +187,6 @@ class ONDReport(BasicReport):
 
         if default_content is True:
             with self.header:
-                self.nav.add_link('meta', 'Versions', '#versions')
-                self.nav.add_link('meta', 'Parameters', '#parameters')
                 self.intro_content = section(id="intro-content", role="region")
                 with self.intro_content:
                     self.banner = Banner(report_title, workflow_name)
@@ -201,23 +195,6 @@ class ONDReport(BasicReport):
                         created_date = datetime.today().strftime('%Y-%m-%d')
                         self.banner.add_badge(created_date, bg_class="bg-secondary")
                     self.banner.add_badge(workflow_version)
-
-            with self.main:
-                self.meta_content = section(id="meta-content", role="region")
-                with self.meta_content:
-                    with Section(
-                        "versions",
-                        'Software versions',
-                        overflow=True
-                    ):
-                        VersionsList(workflow_versions_path)
-
-                    with Section(
-                        "parameters",
-                        'Workflow parameters',
-                        overflow=True
-                    ):
-                        ParamsTable(workflow_params_path)
 
             with self.footer:
                 self.addendum = LabsAddendum(
