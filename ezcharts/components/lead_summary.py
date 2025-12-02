@@ -167,30 +167,33 @@ def lead_section_table(
     return _row
 
 
-class WorkflowQCBanner(Snippet):
+class QCStatusBanner(Snippet):
     """Display Quality Control banner in PDF report."""
 
     def __init__(
         self,
-        workflow_pass,
+        qc_status,
         fill_background=False,  # switch between 'solid' or ''
         **kwargs,
     ) -> None:
-        """Create LeadSummary component.
+        """Create QCStatusBanner component.
 
-        :param workflow_pass: Boolean with the resulting validation of the workflow.
-        :param fill_background: Boolean for background color (true).
+        :param qc_status: Boolean to indicate this banner's QC status.
+        :param fill_background: Set to true to fill the banner background.
 
         """
         super().__init__(styles=None, classes=None)
 
-        if workflow_pass:
-            alert_class = "success"
+        if qc_status is not None and isinstance(qc_status, bool):
+            if qc_status:
+                alert_class = "success"
+            else:
+                alert_class = "danger"
         else:
-            alert_class = "danger"
+            raise ValueError("qc_status must be a boolean value")
 
         with div("Quality control status", cls=f"alert alert-{alert_class}"):
-            make_badge(workflow_pass, fill_background=fill_background)
+            make_badge(qc_status, fill_background=fill_background)
 
 
 def make_badge(status, fill_background=True):
