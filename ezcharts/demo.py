@@ -16,7 +16,7 @@ from ezcharts.components.dss import load_dml, load_dmr
 from ezcharts.components.ezchart import EZChart
 from ezcharts.components.fastcat import load_bamstats_flagstat, load_stats
 from ezcharts.components.fastcat import SeqCompare, SeqSummary
-from ezcharts.components.lead_summary import LeadSummary, WorkflowQCBanner
+from ezcharts.components.lead_summary import LeadSummary, QCStatusBanner
 from ezcharts.components.modkit import load_bedmethyl, load_modkit_summary
 from ezcharts.components.mosdepth import load_mosdepth_regions, load_mosdepth_summary
 from ezcharts.components.nextclade import NextClade, NXTComponent
@@ -585,9 +585,13 @@ def main(args):
                 n_columns=3
             )
         with tabs.add_tab('No reason to alert'):
-            WorkflowQCBanner(workflow_pass=True, solid=False)
+            QCStatusBanner(qc_status=True, fill_background=False)
         with tabs.add_tab('Alert'):
-            WorkflowQCBanner(workflow_pass=False, solid=False)
+            QCStatusBanner(qc_status=False, fill_background=False)
+        with tabs.add_tab('Solid alert banner'):
+            QCStatusBanner(qc_status=False, fill_background=True)
+        with tabs.add_tab('Solid pass banner'):
+            QCStatusBanner(qc_status=True, fill_background=True)
 
     with report.add_section('Details', 'Details'):
         # Software and params table
