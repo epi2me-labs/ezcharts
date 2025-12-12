@@ -31,8 +31,8 @@ requirements:
     - bokeh~=3.1.0
     - natsort==8.4.0
     - pysam
-    - pymsaviz==0.4.2
-    - biopython
+    - pymsaviz==0.5.0
+    - biopython==1.86
     - setuptools # required for runtime use of pkg_resources
     - si-prefix==1.3.3
 

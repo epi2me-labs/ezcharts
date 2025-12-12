@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.15.2]
+### Fixed
+- Updated pymsaviz to v0.5.0 and pinned biopython to 1.86 to fix biopython incompatibilities.
+
 ## [v0.15.1]
 ### Changed
 - Renamed `WorkflowQCBanner` to `QCStatusBanner` to better reflect its purpose.
