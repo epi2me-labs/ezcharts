@@ -3,7 +3,6 @@ import sys
 import re
 from glob import glob
 from setuptools import setup, find_packages
-import pkg_resources
 
 
 __pkg_name__ = 'ezcharts'
@@ -32,9 +31,7 @@ else:
 
 dir_path = os.path.dirname(__file__)
 with open(os.path.join(dir_path, 'requirements.txt')) as fh:
-    install_requires = [
-        str(requirement) for requirement in
-        pkg_resources.parse_requirements(fh)]
+    install_requires = [req for line in fh if (req := line.strip()) and not req.startswith("#")]
 
 data_files = []
 extra_requires = {}
