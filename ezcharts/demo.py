@@ -10,6 +10,7 @@ from pkg_resources import resource_filename
 
 import ezcharts as ezc
 from ezcharts import util
+from ezcharts.components.base_composition import BaseComposition
 from ezcharts.components.common import fasta_idx, HSA_CHROMOSOME_ORDER
 from ezcharts.components.details import ConfigurationTable
 from ezcharts.components.dss import load_dml, load_dmr
@@ -642,6 +643,46 @@ def main(args):
 This table shows the status of each sample.
 """)
         sample_status.write_table()
+
+    with report.add_section('Base Composition', 'Base Comp'):
+        base_comp_data = pd.read_csv(
+            resource_filename('ezcharts', "data/test/base_composition_test.tsv"),
+            sep='\t'
+        )
+        tabs = Tabs()
+
+        with tabs.add_tab('Full sequence'):
+            comp_full = BaseComposition(
+                data=base_comp_data,
+                qscore='qscore',
+                consensus_base='consensus_base',
+                qscore_threshold=30,
+                color='#007FA9'
+            )
+            EZChart(comp_full, height="600px", width="100%")
+
+        with tabs.add_tab('Region 50-150/ No Q-score'):
+            comp_range = BaseComposition(
+                data=base_comp_data,
+                plotting_range=(50, 150),
+                show_qscore=False,
+                color='#007FA9'
+            )
+            EZChart(comp_range, height="500px", width="100%")
+
+        base_comp_data_2 = pd.read_csv(
+            resource_filename(
+                'ezcharts', "data/test/base_composition_test_no_Q_score.tsv"),
+            sep='\t'
+        )
+
+        with tabs.add_tab('Missing Q-score data'):
+            comp_range = BaseComposition(
+                data=base_comp_data_2,
+                plotting_range=(23, 70),
+                color='#007FA9'
+            )
+            EZChart(comp_range, height="500px", width="100%")
 
     logger.info('Reticulating splines')
     report.write(args.output)
