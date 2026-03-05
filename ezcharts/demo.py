@@ -37,6 +37,7 @@ from ezcharts.layout.snippets.offcanvas import IOffCanvasClasses, OffCanvas
 from ezcharts.plots import BokehPlot, Plot
 from ezcharts.plots.ideogram import ideogram
 from ezcharts.plots.karyomap import karyomap
+from ezcharts.plots.upset import UpSetPlot
 from ezcharts.plots.util import empty_plot, si_format
 
 
@@ -593,6 +594,79 @@ def main(args):
             QCStatusBanner(qc_status=False, fill_background=True)
         with tabs.add_tab('Solid pass banner'):
             QCStatusBanner(qc_status=True, fill_background=True)
+
+    with report.add_section('UpSet Plot', 'UpSet'):
+        tabs = Tabs()
+        with tabs.add_tab('upsetplot 1'):
+            data = pd.DataFrame({
+                "reference1": [True,  True,  True,  True,  False, False, False, False],
+                "reference2": [True,  True,  False, False, True,  True,  False, False],
+                "reference3": [True,  False, True,  False, True,  False, True,  False],
+                "size": [10,  340,   1200,    23,    456,   78,    34,    12],
+            })
+            plot = UpSetPlot(
+                data,
+                sets=["reference1", "reference2", "reference3"],
+                size_col="size",
+            )
+            EZChart(plot, height=f"{plot.total_height}px")
+        with tabs.add_tab('upsetplot 2'):
+            data = pd.DataFrame({
+                "reference1": [True,  True,  True,  False, False, False],
+                "reference2": [True,  True,  False, True,  False, False],
+                "reference3": [True,  False, True, True, True,  False],
+                "size": [10,  340,   12000,    456,   34,    1],
+            })
+            plot = UpSetPlot(
+                data,
+                sets=["reference1", "reference2", "reference3"],
+                size_col="size",
+                sort_by=None,
+                min_subset_size=2,
+                show_totals=False,
+            )
+            EZChart(plot, height=f"{plot.total_height}px")
+        with tabs.add_tab('upsetplot empty'):
+            data = pd.DataFrame({
+                "reference1": [True,  True,  True,  True,  False, False, False, False],
+                "reference2": [True,  True,  False, False, True,  True,  False, False],
+                "reference3": [True,  False, True,  False, True,  False, True,  False],
+                "size": [0,  0,   0,    0,    0,   0,    0,    0],
+            })
+            plot = UpSetPlot(
+                data,
+                sets=["reference1", "reference2", "reference3"],
+                size_col="size",
+            )
+            EZChart(plot, height=f"{plot.total_height}px")
+        with tabs.add_tab('upsetplot 16 references'):
+            np.random.seed(123)
+            n_rows = 32
+            n_refs = 16
+            data = pd.DataFrame(
+                {
+                    **{
+                        f"reference{i}": np.random.choice(
+                            [True, False], size=n_rows
+                        )
+                        for i in range(1, n_refs + 1)
+                    },
+                    "size": np.random.randint(10, 2000, size=n_rows),
+                }
+            )
+            # Ensure each reference appears in at least one row
+            for i in range(1, n_refs + 1):
+                col = f"reference{i}"
+                if not data[col].any():
+                    data.loc[np.random.randint(0, n_rows), col] = True
+            plot = UpSetPlot(
+                data,
+                sets=[f"reference{i}" for i in range(1, n_refs + 1)],
+                size_col="size",
+                height_matrix=(n_refs * 30) + 30,
+                width_matrix=(n_rows * 30) + 30,
+            )
+            EZChart(plot, height=f"{plot.total_height}px")
 
     with report.add_section('Details', 'Details'):
         # Software and params table
