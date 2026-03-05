@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 ### Added
+- `UpSetPlot` function that includes:
+    - Bar chart showing intersection size
+    - Dot matrix showing included sets
+    - Optional per-set totals panel
 - `BaseComposition` component for interactive sequence base composition analysis
     - Multi-panel view: coverage depth, quality scores, and stacked base proportions
     - Synchronized zooming/panning across panels
