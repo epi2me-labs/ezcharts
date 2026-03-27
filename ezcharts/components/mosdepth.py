@@ -1,10 +1,10 @@
 """An ezcharts component for loading mosdepth data."""
 import argparse
+from importlib.resources import files
 import os
 
 import pandas as pd
 from pandas.api import types as pd_types
-from pkg_resources import resource_filename
 
 from ezcharts.components.common import add_missing_windows, fasta_idx
 from ezcharts.components.ezchart import EZChart
@@ -301,15 +301,15 @@ def argparser():
         add_help=False)
     parser.add_argument(
         "--mosdepth_summary",
-        default=resource_filename('ezcharts', "data/test/test_mosdepth_summary.tsv"),
+        default=str(files('ezcharts').joinpath("data/test/test_mosdepth_summary.tsv")),
         help="Resulting summary file from mosdepth.")
     parser.add_argument(
         "--mosdepth_region",
-        default=resource_filename('ezcharts', "data/test/test_mosdepth.bed.gz"),
+        default=str(files('ezcharts').joinpath("data/test/test_mosdepth.bed.gz")),
         help="Resulting region coverage bed file from mosdepth.")
     parser.add_argument(
         "--faidx",
-        default=resource_filename('ezcharts', "data/test/ref.fa.fai"),
+        default=str(files('ezcharts').joinpath("data/test/ref.fa.fai")),
         help="Reference fasta fai file.")
     parser.add_argument(
         "--output",

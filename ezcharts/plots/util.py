@@ -1,10 +1,10 @@
 """Utility functions for aiding plotting."""
+from importlib.resources import files
 from itertools import cycle, islice
 import os
 
 import numpy as np
 import pandas as pd
-import pkg_resources
 from scipy import stats as sp_stats
 import si_prefix
 
@@ -144,8 +144,8 @@ class _ontColors:
     BRAND_GREY = '#666666'
     BRAND_GREY_LIGHT = '#6666661f'
 
-    BRAND_LOGO = pkg_resources.resource_filename(
-        'ezcharts', 'data/images/ONT_logo.txt')
+    BRAND_LOGO = str(files('ezcharts').joinpath(
+        'data/images/ONT_logo.txt'))
     with open(BRAND_LOGO, 'r', encoding="UTF-8") as fh:
         BRAND_LOGO = fh.read()
 
@@ -162,8 +162,8 @@ class _ondColors:
     BRAND_GREY_LIGHT = '#6666661f'
     BRAND_RED = '#f45b69'
 
-    BRAND_LOGO = pkg_resources.resource_filename(
-        'ezcharts', 'data/images/OND_logo.txt')
+    BRAND_LOGO = str(files('ezcharts').joinpath(
+        'data/images/OND_logo.txt'))
     with open(BRAND_LOGO, 'r', encoding="UTF-8") as fh:
         BRAND_LOGO = fh.read()
 

@@ -1,7 +1,6 @@
 """Entrypoint to demo an ezCharts plot."""
 import argparse
-
-from pkg_resources import resource_filename
+from importlib.resources import files
 
 from ezcharts.components.reports.comp import ComponentReport
 from ezcharts.plots import Plot
@@ -21,7 +20,7 @@ def argparser():
         add_help=False)
     parser.add_argument(
         "--plot_spec",
-        default=resource_filename('ezcharts', "data/test/plot-spec.json"),
+        default=str(files('ezcharts').joinpath("data/test/plot-spec.json")),
         help=(
             "A JSON file defining an eCharts plot",
             "key/values."

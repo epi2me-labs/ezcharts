@@ -1,12 +1,12 @@
 """Run ezCharts demo."""
 import argparse
+from importlib.resources import files
 import json
 
 from bokeh.models.tickers import SingleIntervalTicker
 from dominate.tags import div, h4, p, table, td, th, thead, tr
 import numpy as np
 import pandas as pd
-from pkg_resources import resource_filename
 
 import ezcharts as ezc
 from ezcharts import util
@@ -130,20 +130,20 @@ def main(args):
     logger.info('Building report')
 
     # Example data
-    client_fields_json = resource_filename('ezcharts', "data/test/client_fields.json")
-    params = resource_filename('ezcharts', "data/test/params.json")
-    versions = resource_filename('ezcharts', "data/test/versions/versions.txt")
-    nxt_json = resource_filename('ezcharts', "data/test/nextclade.json")
+    client_fields_json = str(files('ezcharts').joinpath("data/test/client_fields.json"))
+    params = str(files('ezcharts').joinpath("data/test/params.json"))
+    versions = str(files('ezcharts').joinpath("data/test/versions/versions.txt"))
+    nxt_json = str(files('ezcharts').joinpath("data/test/nextclade.json"))
     histogram_stats_dir = tuple(
         [
-            resource_filename("ezcharts", "data/test/histogram_stats/sample_2"),
-            resource_filename("ezcharts", "data/test/histogram_stats/sample_1"),
-            resource_filename("ezcharts", "data/test/histogram_stats/empty_sample/"),
+            str(files('ezcharts').joinpath("data/test/histogram_stats/sample_2")),
+            str(files('ezcharts').joinpath("data/test/histogram_stats/sample_1")),
+            str(files('ezcharts').joinpath("data/test/histogram_stats/empty_sample/")),
         ]
     )
     bamstats_histogram_stats_dir = tuple(
         [
-            resource_filename("ezcharts", "data/test/bamstats_hist"),
+            str(files('ezcharts').joinpath("data/test/bamstats_hist")),
         ]
     )
 
@@ -387,7 +387,7 @@ def main(args):
 
     # Add poly(A) metrics - showing modular approach
     with report.add_section('Poly(A)', 'Poly(A)', True):
-        samfile = resource_filename('ezcharts', "data/test/polya/RCS-100A.bam")
+        samfile = str(files('ezcharts').joinpath("data/test/polya/RCS-100A.bam"))
         polya_metrics = load_polya_metrics(
             bam_file_path=samfile,
             lower_bound=88,
@@ -419,8 +419,8 @@ def main(args):
 
     with report.add_section('Human karyotype heatmap', 'Karyomap'):
         vals = pd.read_csv(
-            resource_filename('ezcharts', "data/test/karyomap_vals.tsv.gz"), sep='\t')
-        faidx = fasta_idx(resource_filename('ezcharts', "data/test/ref.fa.fai"))
+            str(files('ezcharts').joinpath("data/test/karyomap_vals.tsv.gz")), sep='\t')
+        faidx = fasta_idx(str(files('ezcharts').joinpath("data/test/ref.fa.fai")))
         EZChart(karyomap(
             vals, 'chr', 'pos', 'values',
             stats='count',
@@ -459,20 +459,20 @@ def main(args):
             DataTable.from_pandas(df_simple, export=True, file_name='samples')
 
     with report.add_section('Sankey plot', 'Sankey'):
-        sankey_json = resource_filename('ezcharts', "data/test/sankey.json")
+        sankey_json = str(files('ezcharts').joinpath("data/test/sankey.json"))
         with open(sankey_json, 'r') as sfh:
             sankey_dict = json.load(sfh)
             ezc.metagenomics_sankey(sankey_dict)
 
     with report.add_section('Plasmid', 'Plasmid'):
-        plannotate_json = resource_filename(
-            'ezcharts', "data/test/seqviz/plannotate.json")
-        fasta = resource_filename(
-            'ezcharts', "data/test/seqviz/barcode01_q10.final.fasta")
+        plannotate_json = str(
+            files('ezcharts').joinpath("data/test/seqviz/plannotate.json"))
+        fasta = str(
+            files('ezcharts').joinpath("data/test/seqviz/barcode01_q10.final.fasta"))
         ezc.seqviz(plannotate_json, fasta, "sample_1")
 
     with report.add_section('Multiple sequence alignment', 'MSA'):
-        msa_file = resource_filename('ezcharts', "data/test/msa/HIGD2A.fa")
+        msa_file = str(files('ezcharts').joinpath("data/test/msa/HIGD2A.fa"))
         tabs = Tabs()
         with tabs.add_tab('Full MSA'):
             ezc.msa(msa_file, color_scheme="Blossom", identity=80)
@@ -480,28 +480,26 @@ def main(args):
             ezc.msa(msa_file, identity=50, start=30, end=80)
 
     dataset_examples = {
-        'fastcat': load_stats(resource_filename(
-            'ezcharts',
-            "data/test/fastcat/f1.tsv.gz")),
-        'bamstats': load_stats(resource_filename(
-            'ezcharts',
-            "data/test/bamstats/bamstats.readstats.tsv.gz")),
-        'flagstat': load_bamstats_flagstat(resource_filename(
-            'ezcharts', "data/test/bamstats.flagstat.tsv")),
-        'modkit summary': load_modkit_summary(resource_filename(
-            'ezcharts', "data/test/test_modkit_summary.tsv")),
-        'modkit bedMethyl': load_bedmethyl(resource_filename(
-            'ezcharts', "data/test/test_modkit.bed.gz")),
-        'DSS DML': load_dml(resource_filename(
-            'ezcharts', "data/test/test_dml.tsv.gz")),
-        'DSS DMR': load_dmr(resource_filename(
-            'ezcharts', "data/test/test_dmr.tsv.gz")),
-        'mosdepth summary': load_mosdepth_summary(resource_filename(
-            'ezcharts', "data/test/test_mosdepth_summary.tsv")),
-        'mosdepth regions': load_mosdepth_regions(resource_filename(
-            'ezcharts', "data/test/test_mosdepth.bed.gz")),
-        'fai index': fasta_idx(resource_filename(
-            'ezcharts', "data/test/ref.fa.fai")),
+        'fastcat': load_stats(str(files('ezcharts').joinpath(
+            "data/test/fastcat/f1.tsv.gz"))),
+        'bamstats': load_stats(str(files('ezcharts').joinpath(
+            "data/test/bamstats/bamstats.readstats.tsv.gz"))),
+        'flagstat': load_bamstats_flagstat(str(files('ezcharts').joinpath(
+            "data/test/bamstats.flagstat.tsv"))),
+        'modkit summary': load_modkit_summary(str(files('ezcharts').joinpath(
+            "data/test/test_modkit_summary.tsv"))),
+        'modkit bedMethyl': load_bedmethyl(str(files('ezcharts').joinpath(
+            "data/test/test_modkit.bed.gz"))),
+        'DSS DML': load_dml(str(files('ezcharts').joinpath(
+            "data/test/test_dml.tsv.gz"))),
+        'DSS DMR': load_dmr(str(files('ezcharts').joinpath(
+            "data/test/test_dmr.tsv.gz"))),
+        'mosdepth summary': load_mosdepth_summary(str(files('ezcharts').joinpath(
+            "data/test/test_mosdepth_summary.tsv"))),
+        'mosdepth regions': load_mosdepth_regions(str(files('ezcharts').joinpath(
+            "data/test/test_mosdepth.bed.gz"))),
+        'fai index': fasta_idx(str(files('ezcharts').joinpath(
+            "data/test/ref.fa.fai"))),
     }
     with report.add_section('Data types', 'Data'):
         p(
@@ -531,7 +529,7 @@ def main(args):
 
     with report.add_section('Per Sample Read Counts', 'Read Counts'):
         PlotMetaData(
-            resource_filename('ezcharts', "data/test/metadata.json"))
+            str(files('ezcharts').joinpath("data/test/metadata.json")))
 
     with report.add_section('Number formatting', 'Number formatting'):
         p(
@@ -745,7 +743,7 @@ This table shows the status of each sample.
 
     with report.add_section('Base Composition', 'Base Comp'):
         base_comp_data = pd.read_csv(
-            resource_filename('ezcharts', "data/test/base_composition_test.tsv"),
+            str(files('ezcharts').joinpath("data/test/base_composition_test.tsv")),
             sep='\t'
         )
         tabs = Tabs()
@@ -770,8 +768,9 @@ This table shows the status of each sample.
             EZChart(comp_range, height="500px", width="100%")
 
         base_comp_data_2 = pd.read_csv(
-            resource_filename(
-                'ezcharts', "data/test/base_composition_test_no_Q_score.tsv"),
+            str(files('ezcharts').joinpath(
+                "data/test/base_composition_test_no_Q_score.tsv"
+            )),
             sep='\t'
         )
 

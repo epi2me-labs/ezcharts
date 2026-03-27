@@ -1,12 +1,12 @@
 """An ezcharts component for plotting sequence summaries."""
 import argparse
 import copy
+from importlib.resources import files
 import os
 
 from bokeh.models import Title
 import numpy as np
 import pandas as pd
-from pkg_resources import resource_filename
 import sigfig
 
 import ezcharts as ezc
@@ -1049,15 +1049,14 @@ def argparser():
     )
     parser.add_argument(
         "--seq_summary",
-        default=resource_filename("ezcharts", "data/test/fastcat"),
+        default=str(files('ezcharts').joinpath("data/test/fastcat")),
         help="Sequence summary TSV from fastcat.",
         nargs='+'
     )
     parser.add_argument(
         "--bam_flagstat",
-        default=resource_filename(
-            "ezcharts", "data/test/bamstats/bamstats.flagstat.tsv"
-        ),
+        default=str(
+            files('ezcharts').joinpath("data/test/bamstats/bamstats.flagstat.tsv")),
         help="Bam flagstats TSV from bamstats.",
         nargs='+'
     )
@@ -1075,7 +1074,7 @@ def argparser():
     )
     parser.add_argument(
         "--bam_readstats",
-        default=resource_filename("ezcharts", "data/test/bamstats/"),
+        default=str(files("ezcharts").joinpath("data/test/bamstats/")),
         help="Read statistics TSV from bamstats.",
         nargs='+'
     )

@@ -1,9 +1,8 @@
 """A reusable workflow params table."""
 import argparse
+from importlib.resources import files
 import json
 import os
-
-from pkg_resources import resource_filename
 
 from ezcharts.components.reports.comp import ComponentReport
 from ezcharts.layout.snippets.table import DataTable
@@ -62,7 +61,7 @@ def argparser():
     )
     parser.add_argument(
         "--params",
-        default=resource_filename('ezcharts', "test/params.json"),
+        default=str(files('ezcharts').joinpath("test/params.json")),
         help=(
             "A JSON file containing the workflow parameter "
             "key/values."

@@ -1,10 +1,10 @@
 """An ezcharts component for loading modkit data."""
 import argparse
+from importlib.resources import files
 import os
 
 import pandas as pd
 from pandas.api import types as pd_types
-from pkg_resources import resource_filename
 
 from ezcharts.components.common import fasta_idx, MOD_CONVERT
 from ezcharts.components.ezchart import EZChart
@@ -316,15 +316,15 @@ def argparser():
         add_help=False)
     parser.add_argument(
         "--modkit_summary",
-        default=resource_filename('ezcharts', "data/test/test_modkit_summary.tsv"),
+        default=str(files('ezcharts').joinpath("data/test/test_modkit_summary.tsv")),
         help="Resulting summary file from modkit summary.")
     parser.add_argument(
         "--bedmethyl",
-        default=resource_filename('ezcharts', "data/test/test_modkit.bed.gz"),
+        default=str(files('ezcharts').joinpath("data/test/test_modkit.bed.gz")),
         help="Resulting bedmethyl file from modkit pileup.")
     parser.add_argument(
         "--faidx", required=False,
-        default=resource_filename('ezcharts', "data/test/ref.fa.fai"),
+        default=str(files('ezcharts').joinpath("data/test/ref.fa.fai")),
         help="Reference fasta fai index.")
     parser.add_argument(
         "--output",

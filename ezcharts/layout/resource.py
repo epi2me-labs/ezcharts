@@ -1,10 +1,10 @@
 """Re-usable external resources."""
+from importlib.resources import files
 from typing import Callable, Optional, Type
 
 from bokeh.resources import INLINE as bk_inline
 from dominate.tags import dom_tag, script, style
 from dominate.util import raw
-from pkg_resources import resource_filename
 
 from ezcharts.layout.util import inline
 
@@ -40,7 +40,7 @@ class Resource:
     def data_file(self):
         """Filepath to resource data file."""
         return (
-            resource_filename("ezcharts", f"data/{self.path}")
+            str(files('ezcharts').joinpath(f"data/{self.path}"))
             if self.path is not None
             else None
         )

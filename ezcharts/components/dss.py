@@ -3,11 +3,11 @@
 [DSS](https://bioconductor.org/packages/release/bioc/vignettes/DSS/inst/doc/DSS.html)
 """
 import argparse
+from importlib.resources import files
 import os
 
 import pandas as pd
 from pandas.api import types as pd_types
-from pkg_resources import resource_filename
 
 from ezcharts.components.common import fasta_idx
 from ezcharts.components.ezchart import EZChart
@@ -326,15 +326,15 @@ def argparser():
         add_help=False)
     parser.add_argument(
         "--dml",
-        default=resource_filename('ezcharts', "data/test/test_dml.tsv.gz"),
+        default=str(files('ezcharts').joinpath("data/test/test_dml.tsv.gz")),
         help="Resulting differentially modified loci from DSS.")
     parser.add_argument(
         "--dmr",
-        default=resource_filename('ezcharts', "data/test/test_dmr.tsv.gz"),
+        default=str(files('ezcharts').joinpath("data/test/test_dmr.tsv.gz")),
         help="Resulting differentially modified regions from DSS.")
     parser.add_argument(
         "--faidx", required=False,
-        default=resource_filename('ezcharts', "data/test/ref.fa.fai"),
+        default=str(files('ezcharts').joinpath("data/test/ref.fa.fai")),
         help="Reference fasta fai index.")
     parser.add_argument(
         "--output",

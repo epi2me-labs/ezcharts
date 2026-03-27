@@ -1,9 +1,9 @@
 """Ideoplots."""
 
 import argparse
+from importlib.resources import files
 
 import pandas as pd
-from pkg_resources import resource_filename
 
 from ezcharts.components.reports.comp import ComponentReport
 from ezcharts.plots import Plot, util
@@ -66,9 +66,7 @@ def load_ucsc_bands(genome="hg38", types=None):
     :param types: a list of (stain) types to include.
     """
     # TODO: clean up package data
-    src = resource_filename(
-        "ezcharts",
-        f"data/reference/{genome}/cytoBand.txt.gz")
+    src = str(files('ezcharts').joinpath(f"data/reference/{genome}/cytoBand.txt.gz"))
     if types is None:
         types = [
             'acen', 'gneg',
@@ -101,9 +99,8 @@ def load_chr_sizes(genome="hg38"):
     :param genome:
     """
     # TODO: clean up package data
-    src = resource_filename(
-        "ezcharts",
-        f"data/reference/{genome}/{genome}.chrom.sizes.gz")
+    src = str(files('ezcharts').joinpath(
+        f"data/reference/{genome}/{genome}.chrom.sizes.gz"))
     sizes = pd.read_csv(src, sep="\t", header=None, names=['chr', 'size'])
     sizes['chr'] = sizes['chr'].str.replace('chr', '')
     return sizes
