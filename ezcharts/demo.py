@@ -17,11 +17,14 @@ from ezcharts.components.dss import load_dml, load_dmr
 from ezcharts.components.ezchart import EZChart
 from ezcharts.components.fastcat import load_bamstats_flagstat, load_stats
 from ezcharts.components.fastcat import SeqCompare, SeqSummary
-from ezcharts.components.lead_summary import LeadSummary, QCStatusBanner
+from ezcharts.components.lead_summary import (
+    lead_section_table, LeadSummary, QCStatusBanner)
 from ezcharts.components.modkit import load_bedmethyl, load_modkit_summary
 from ezcharts.components.mosdepth import load_mosdepth_regions, load_mosdepth_summary
 from ezcharts.components.nextclade import NextClade, NXTComponent
 from ezcharts.components.plotmetadata import PlotMetaData
+from ezcharts.components.polya import (
+    format_polya_summary, load_polya_metrics, polya_histogram_plot)
 from ezcharts.components.reports.labs import LabsReport
 from ezcharts.components.status import StatusTable
 from ezcharts.components.theme import LAB_head_resources
@@ -381,6 +384,28 @@ def main(args):
         with tabs.add_tab('Empty plot'):
             # Force fail in plotting
             EZChart(empty_plot())
+
+    # Add poly(A) metrics - showing modular approach
+    with report.add_section('Poly(A)', 'Poly(A)', True):
+        samfile = resource_filename('ezcharts', "data/test/polya/RCS-100A.bam")
+        polya_metrics = load_polya_metrics(
+            bam_file_path=samfile,
+            lower_bound=88,
+            upper_bound=132,
+            tail_interruption="GCC",
+            polya_reference_length=100,
+            read_length_tolerance_percent=10,
+            filter_primary=True,
+            filter_high_qs=True,
+            filter_forward=True,
+            filter_has_tail=True,
+            filter_len_range=True
+        )
+        with div(cls="row"):
+            with div(cls="col-sm-5"):
+                lead_section_table(format_polya_summary(polya_metrics))
+            with div(cls="col-sm-7"):
+                EZChart(polya_histogram_plot(polya_metrics), height='320px')
 
     with report.add_section('Nextclade results', 'Nextclade', True):
         NextClade(nxt_json)
