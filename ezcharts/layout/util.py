@@ -1,5 +1,6 @@
 """Useful reusable functions."""
 import contextlib
+from importlib.resources import files
 import json
 import os
 from typing import Dict
@@ -8,7 +9,6 @@ import warnings
 from dominate.tags import script, style
 from dominate.util import container, raw, text
 from jinja2 import BaseLoader, Environment
-from pkg_resources import resource_filename
 import sass
 
 warnings.simplefilter("always", DeprecationWarning)
@@ -32,7 +32,7 @@ def inline(
 
 def resolve_import(path):
     """Find resource and return as list."""
-    resolved = resource_filename('ezcharts', path)
+    resolved = str(files('ezcharts').joinpath(path))
     # Temporary measure
     if os.path.exists(resolved) and not os.path.isdir(resolved):
         return [[resolved]]

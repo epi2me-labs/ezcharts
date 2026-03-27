@@ -1,11 +1,11 @@
 """Test functions in utils."""
 
 from contextlib import contextmanager
+from importlib.resources import files
 import os
 import tempfile
 
 import pandas as pd
-from pkg_resources import resource_filename
 import pytest
 
 from ezcharts.components import fastcat
@@ -73,9 +73,9 @@ def _multisamples():
 
 def test_001_read_fastcat():
     """Reading a fastcat file."""
-    fname = resource_filename(
-        "ezcharts", "data/test/real_data_test/fastcat/barcode01/per-read-stats.tsv.gz"
-    )
+    fname = str(files('ezcharts').joinpath(
+        "data/test/real_data_test/fastcat/barcode01/per-read-stats.tsv.gz"
+    ))
     actual = fastcat.load_fastcat(fname)
     expected = _read_pandas(fname, fastcat.FASTCAT_COLS_DTYPES)
     _compare_frames(actual, expected)
@@ -83,9 +83,9 @@ def test_001_read_fastcat():
 
 def test_002_read_fastcat_subset():
     """Reading a fastcat with a subset of columns."""
-    fname = resource_filename(
-        "ezcharts", "data/test/real_data_test/fastcat/barcode01/per-read-stats.tsv.gz"
-    )
+    fname = str(files('ezcharts').joinpath(
+        "data/test/real_data_test/fastcat/barcode01/per-read-stats.tsv.gz"
+    ))
     target_cols = ["sample_name", "read_length", "mean_quality"]
     for i in range(1, 3):
         actual = fastcat.load_bamstats(fname, target_cols=target_cols[:i])
@@ -112,10 +112,9 @@ def test_005_fastcat_empty():
 
 def test_011_read_bamstats():
     """Reading a bamstats file."""
-    fname = resource_filename(
-        "ezcharts",
+    fname = str(files('ezcharts').joinpath(
         "data/test/real_data_test/bamstats/barcode01/bamstats.readstats.tsv.gz",
-    )
+    ))
     actual = fastcat.load_bamstats(fname)
     expected = _read_pandas(fname, fastcat.BAMSTATS_COLS_DTYPES)
     _compare_frames(expected, actual)
@@ -123,10 +122,9 @@ def test_011_read_bamstats():
 
 def test_012_read_bamstats_subset():
     """Reading a bamstats with a subset of columns."""
-    fname = resource_filename(
-        "ezcharts",
+    fname = str(files('ezcharts').joinpath(
         "data/test/real_data_test/bamstats/barcode01/bamstats.readstats.tsv.gz",
-    )
+    ))
     target_cols = ["sample_name", "read_length", "mean_quality"]
     for i in range(1, 3):
         actual = fastcat.load_bamstats(fname, target_cols=target_cols[0:i])
@@ -153,13 +151,12 @@ def test_015_bamstats_empty():
 
 def test_021_read_either():
     """Auto-detect file type and read."""
-    per_read_stats_fastcat = resource_filename(
-        "ezcharts", "data/test/real_data_test/fastcat/barcode01/per-read-stats.tsv.gz"
-    )
-    per_read_stats_bamstats = resource_filename(
-        "ezcharts",
+    per_read_stats_fastcat = str(files('ezcharts').joinpath(
+        "data/test/real_data_test/fastcat/barcode01/per-read-stats.tsv.gz"
+    ))
+    per_read_stats_bamstats = str(files('ezcharts').joinpath(
         "data/test/real_data_test/bamstats/barcode01/bamstats.readstats.tsv.gz",
-    )
+    ))
     target_cols_fastcat = ["sample_name", "read_length", "mean_quality"]
     target_cols_bamstats = [
         "sample_name", "coverage", "read_length", "mean_quality", "acc"]
@@ -175,13 +172,12 @@ def test_021_read_either():
 
 def test_025_equality_of_result():
     """Return a consistent data structure."""
-    per_read_stats_fastcat = resource_filename(
-        "ezcharts", "data/test/real_data_test/fastcat/barcode01/per-read-stats.tsv.gz"
-    )
-    per_read_stats_bamstats = resource_filename(
-        "ezcharts",
+    per_read_stats_fastcat = str(files('ezcharts').joinpath(
+        "data/test/real_data_test/fastcat/barcode01/per-read-stats.tsv.gz"
+    ))
+    per_read_stats_bamstats = str(files('ezcharts').joinpath(
         "data/test/real_data_test/bamstats/barcode01/bamstats.readstats.tsv.gz",
-    )
+    ))
     target_cols = ["sample_name", "read_length", "mean_quality"]
     actual_fastcat = (
         fastcat.load_stats(per_read_stats_fastcat, target_cols=target_cols)
@@ -198,7 +194,7 @@ def test_025_equality_of_result():
 
 def test_031_read_flagstat():
     """Read a flagstats file."""
-    fname = resource_filename("ezcharts", "data/test/bamstats.flagstat.tsv")
+    fname = str(files('ezcharts').joinpath("data/test/bamstats.flagstat.tsv"))
     actual = fastcat.load_bamstats_flagstat(fname)
     expected = _read_pandas(fname, fastcat.BAMSTATS_FLAGSTAT_COLS_DTYPES)
     _compare_frames(actual, expected)
@@ -222,10 +218,9 @@ def test_035_read_flagstat_empty():
 def test_041_load_histogram():
     """Test load histogram."""
     # TODO: test histograms from bamstats
-    hist_dir = resource_filename(
-        "ezcharts",
+    hist_dir = str(files('ezcharts').joinpath(
         "data/test/real_data_test/bamstats/barcode01/",
-    )
+    ))
     variables = {
         "quality",
         "length",
@@ -246,10 +241,9 @@ def test_041_load_histogram():
 
 def test_042_load_unallowed_histogram():
     """Load an unallowed type."""
-    hist_dir = resource_filename(
-        "ezcharts",
+    hist_dir = str(files('ezcharts').joinpath(
         "data/test/real_data_test/fastcat/barcode01/",
-    )
+    ))
     with pytest.raises(ValueError, match=r"^`dtype` must be one of"):
         fastcat.load_histogram(hist_dir, "unallowed")
 
@@ -309,10 +303,10 @@ def test_103_pass_lists():
 def test_104_SeqSummary(input):
     """Create the SeqSummary component with various inputs."""
     if not isinstance(input, list):
-        fastcat.SeqSummary(seq_summary=resource_filename("ezcharts", input))
+        fastcat.SeqSummary(seq_summary=str(files('ezcharts').joinpath(input)))
     else:
         fastcat.SeqSummary(
-            seq_summary=tuple([resource_filename("ezcharts", i) for i in input]),
+            seq_summary=tuple([str(files('ezcharts').joinpath(i)) for i in input]),
             sample_names=tuple(["S" + i for i in input]),
         )
 
@@ -320,14 +314,12 @@ def test_104_SeqSummary(input):
 def test_105_bamstats_inputs():
     """Test if SeqSummary works with bam_flagstat inputs."""
     # Create a couple of samples
-    seq_summary = resource_filename(
-        "ezcharts",
+    seq_summary = str(files('ezcharts').joinpath(
         "data/test/real_data_test/bamstats/barcode01/bamstats.readstats.tsv.gz"
-    )
-    flagstats = resource_filename(
-        "ezcharts",
+    ))
+    flagstats = str(files('ezcharts').joinpath(
         "data/test/real_data_test/bamstats/barcode01/bamstats.flagstat.tsv"
-    )
+    ))
     # pass just first sample
     fastcat.SeqSummary(
         seq_summary=seq_summary,
@@ -358,7 +350,7 @@ def test_107_SeqSummary_empty_file():
 def test_108_SeqSummary_empty_histogram_files():
     """Create the SeqSummary component with an histograms dir with empty files."""
     fastcat.SeqSummary(
-        seq_summary=resource_filename(
-            "ezcharts", "data/test/histogram_stats/empty_sample/"
-        )
+        seq_summary=str(files('ezcharts').joinpath(
+            "data/test/histogram_stats/empty_sample/"
+        ))
     )

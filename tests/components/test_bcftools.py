@@ -1,6 +1,7 @@
 """Test functions in utils."""
 
-from pkg_resources import resource_filename
+from importlib.resources import files
+
 import pytest
 
 from ezcharts.components import bcfstats
@@ -13,7 +14,7 @@ from ezcharts.components import bcfstats
     ])
 def test_001_read_bcfstats(fname, expected_idd_empty):
     """Reading a bcfstats file and checking contents."""
-    fpath = resource_filename("ezcharts", fname)
+    fpath = str(files("ezcharts").joinpath(fname))
     parsed_data = bcfstats.parse_bcftools_stats(fpath)
 
     # Check that 'IDD' key exists in parsed_data

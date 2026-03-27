@@ -1,8 +1,8 @@
 """Test functions in polya module."""
+from importlib.resources import files
 
 import numpy as np
 import pandas as pd
-from pkg_resources import resource_filename
 
 from ezcharts.components.polya import (
     _calculate_polya_statistics, _generate_histogram_data,
@@ -137,7 +137,7 @@ def test_interpret_kurtosis_value():
 
 def test_load_polya_metrics():
     """Test load_polya_metrics function."""
-    bamfile = resource_filename('ezcharts', "data/test/polya/RCS-100A.bam")
+    bamfile = str(files('ezcharts').joinpath("data/test/polya/RCS-100A.bam"))
     polya_metrics_all_filtered_at_mask = load_polya_metrics(
         bam_file_path=bamfile,
         lower_bound=5,
