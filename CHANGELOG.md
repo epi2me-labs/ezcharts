@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `BaseComposition` component for interactive sequence base composition analysis
     - Multi-panel view: coverage depth, quality scores, and stacked base proportions
     - Synchronized zooming/panning across panels
+- `polya` components for poly(A) tail length analysis and visualisation: `load_polya_metrics()`, `format_polya_summary()`, and `polya_histogram_plot`.
 ### Removed
 - Unrequired pkg_resources import from setup.py.
 
